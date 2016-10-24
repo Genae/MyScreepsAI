@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|AnyCPU">
@@ -37,6 +37,52 @@
       <UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="ScreepsAutocomplete\.gitignore" />
+    <Content Include="ScreepsAutocomplete\Config\SublimeCodeIntel.json" />
+    <Content Include="ScreepsAutocomplete\ConstructionSite.js" />
+    <Content Include="ScreepsAutocomplete\Creep.js" />
+    <Content Include="ScreepsAutocomplete\Flag.js" />
+    <Content Include="ScreepsAutocomplete\Game.js" />
+    <Content Include="ScreepsAutocomplete\Global\Constants.js" />
+    <Content Include="ScreepsAutocomplete\Memory.js" />
+    <Content Include="ScreepsAutocomplete\Mineral.js" />
+    <Content Include="ScreepsAutocomplete\Nuke.js" />
+    <Content Include="ScreepsAutocomplete\OwnedStructure.js" />
+    <Content Include="ScreepsAutocomplete\package.json" />
+    <Content Include="ScreepsAutocomplete\PathFinder.js" />
+    <Content Include="ScreepsAutocomplete\RawMemory.js" />
+    <Content Include="ScreepsAutocomplete\Readme.md" />
+    <Content Include="ScreepsAutocomplete\Resource.js" />
+    <Content Include="ScreepsAutocomplete\Room.js" />
+    <Content Include="ScreepsAutocomplete\RoomObject.js" />
+    <Content Include="ScreepsAutocomplete\RoomPosition.js" />
+    <Content Include="ScreepsAutocomplete\Source.js" />
+    <Content Include="ScreepsAutocomplete\Structure.js" />
+    <Content Include="ScreepsAutocomplete\Structures\StructureContainer.js" />
+    <Content Include="ScreepsAutocomplete\Structures\StructureController.js" />
+    <Content Include="ScreepsAutocomplete\Structures\StructureExtension.js" />
+    <Content Include="ScreepsAutocomplete\Structures\StructureExtractor.js" />
+    <Content Include="ScreepsAutocomplete\Structures\StructureKeeperLair.js" />
+    <Content Include="ScreepsAutocomplete\Structures\StructureLab.js" />
+    <Content Include="ScreepsAutocomplete\Structures\StructureLink.js" />
+    <Content Include="ScreepsAutocomplete\Structures\StructureNuker.js" />
+    <Content Include="ScreepsAutocomplete\Structures\StructureObserver.js" />
+    <Content Include="ScreepsAutocomplete\Structures\StructurePortal.js" />
+    <Content Include="ScreepsAutocomplete\Structures\StructurePowerBank.js" />
+    <Content Include="ScreepsAutocomplete\Structures\StructurePowerSpawn.js" />
+    <Content Include="ScreepsAutocomplete\Structures\StructureRampart.js" />
+    <Content Include="ScreepsAutocomplete\Structures\StructureRoad.js" />
+    <Content Include="ScreepsAutocomplete\Structures\StructureSpawn.js" />
+    <Content Include="ScreepsAutocomplete\Structures\StructureStorage.js" />
+    <Content Include="ScreepsAutocomplete\Structures\StructureTerminal.js" />
+    <Content Include="ScreepsAutocomplete\Structures\StructureTower.js" />
+    <Content Include="ScreepsAutocomplete\Structures\StructureWall.js" />
+    <Content Include="scripts\role.builder.js" />
+    <Content Include="scripts\role.harvester.js" />
+    <Content Include="scripts\main.js" />
+    <Content Include="_references.js" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>9298d793-f374-4218-894d-37b398739ddb</ProjectGuid>
   </PropertyGroup>
@@ -52,34 +98,8 @@
     <TargetPlatformMinVersion>10.0.0.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>$(VersionNumberMajor).$(VersionNumberMinor)</MinimumVisualStudioVersion>
     <DefaultLanguage>en-US</DefaultLanguage>
-    
     <PackageCertificateKeyFile>ScreepsAI_TemporaryKey.pfx</PackageCertificateKeyFile>
-    
   </PropertyGroup>
-  <ItemGroup>
-    <AppxManifest Include="package.appxmanifest">
-      <SubType>Designer</SubType>
-    </AppxManifest>
-    <Content Include="default.html" />
-    <Content Include="images\LockScreenLogo.scale-200.png" />
-    <Content Include="images\SplashScreen.scale-200.png" />
-    <Content Include="images\Square150x150Logo.scale-200.png" />
-    <Content Include="images\Square44x44Logo.scale-200.png" />
-    <Content Include="images\Square44x44Logo.targetsize-24_altform-unplated.png" />
-    <Content Include="images\StoreLogo.png" />
-    <Content Include="images\Wide310x150Logo.scale-200.png" />
-    <Content Include="js\default.js" />
-    <Content Include="css\default.css" />
-    <Content Include="WinJS\css\ui-dark.css" />
-    <Content Include="WinJS\css\ui-light.css" />
-    <Content Include="WinJS\fonts\Symbols.ttf" />
-    <Content Include="WinJS\js\en-US\ui.strings.js" />
-    <Content Include="WinJS\js\base.js" />
-    <Content Include="WinJS\js\ui.js" />
-    
-    <None Include="ScreepsAI_TemporaryKey.pfx" />
-    
-  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\$(WMSJSProjectDirectory)\Microsoft.VisualStudio.$(WMSJSProject).targets" />
   <!-- To modify your build process, add your task inside one of the targets below then uncomment
        that target and the DisableFastUpToDateCheck PropertyGroup. 
