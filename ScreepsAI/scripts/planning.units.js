@@ -36,14 +36,18 @@ var targets = [
         { role: 'harvester', amount: 3, body: [WORK, CARRY, MOVE] },
         { role: 'upgrader', amount: 1, body: [WORK, WORK, CARRY, MOVE] },
         { role: 'builder', amount: 1, body: [WORK, CARRY, MOVE] },
-        { role: 'harvester', amount: 3, body: [WORK, CARRY, MOVE] }
+        { role: 'harvester', amount: 3, body: [WORK, CARRY, MOVE] },
+        { role: 'builder', amount: 1, body: [WORK, CARRY, MOVE] },
+        { role: 'harvester', amount: 1, body: [WORK, CARRY, MOVE] }
     ],
     //lv 2
     [
         { role: 'harvester', amount: 3, body: [WORK, CARRY, MOVE] },
         { role: 'upgrader', amount: 1, body: [WORK, WORK, CARRY, MOVE] },
         { role: 'builder', amount: 1, body: [WORK, CARRY, MOVE] },
-        { role: 'harvester', amount: 3, body: [WORK, CARRY, MOVE] }
+        { role: 'harvester', amount: 3, body: [WORK, CARRY, MOVE] },
+        { role: 'builder', amount: 1, body: [WORK, CARRY, MOVE] },
+        { role: 'harvester', amount: 1, body: [WORK, CARRY, MOVE] }
     ]
 ];
 

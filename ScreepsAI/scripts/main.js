@@ -16,6 +16,9 @@ module.exports.loop = function () {
         }
         planningUnits.buildUnits(room);
         planningInfrastructure.planRoomConstruction(room);
+        //reset jobs
+        room.memory.lastJobs = room.memory.thisJobs;
+        room.memory.thisJobs = [];
     }
     //creepAI
     for (var name in Game.creeps) {

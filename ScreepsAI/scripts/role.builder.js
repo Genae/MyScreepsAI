@@ -19,12 +19,8 @@ var roleBuilder = {
         }
 
         if (creep.memory.building) {
-            var target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
-                filter: (structure) => {
-                    return structure.hits < structure.hitsMax/2;
-                }
-            });
-            if (target !== null) {
+            if (creep.room.memory.repair.length > 0) {
+                var target = Game.getObjectById(creep.room.memory.repair[0]);
                 if (creep.repair(target) == ERR_NOT_IN_RANGE) {
                     actionMove.moveTo(creep, target);
                 }

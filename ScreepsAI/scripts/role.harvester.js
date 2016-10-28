@@ -8,6 +8,11 @@ var roleHarvester = {
         if (creep.memory.job === undefined) {
             planningJobs.findJob(creep, creep.room);
         }
+        if (creep.room.memory.thisJobs[creep.memory.job.mineIndex] === undefined) {
+            creep.room.memory.thisJobs[creep.memory.job.mineIndex] = 1;
+        } else {
+            creep.room.memory.thisJobs[creep.memory.job.mineIndex]++;
+        }
         if (creep.memory.moving) {
             if (!actionMove.continueMove(creep)) {
                 return;
