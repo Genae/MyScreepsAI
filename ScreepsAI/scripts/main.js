@@ -3,7 +3,6 @@ var roleBuilder = require('role.builder');
 var roleUpgrader = require('role.upgrader');
 var planningUnits = require('planning.units');
 var planningInfrastructure = require('planning.infrastructure');
-var constructionMine = require('construction.mine');
 
 module.exports.loop = function () {
 
@@ -16,15 +15,7 @@ module.exports.loop = function () {
             room.memory.energy.canBuild = true;
         }
         planningUnits.buildUnits(room);
-        if (room.memory.mines === undefined) {
-            room.memory.mines = [];
-            var sources = room.find(FIND_SOURCES);
-            for (var i = 0; i < sources.length; i++) {
-                constructionMine.scanMine(sources[i], room);
-            }
-            room.memory.mines.sort(function (a, b) { return a.pathToMine.cost - b.pathToMine.cost });
-        }
-        planningInfrastructure.improveMine(room);
+        planningInfrastructure.planRoomConstruction(room);
     }
     //creepAI
     for (var name in Game.creeps) {
@@ -39,5 +30,5 @@ module.exports.loop = function () {
             roleUpgrader.run(creep);
         }
     }
-    console.log("cpu: " + Game.cpu.getUsed());
+    //console.log("cpu: " + Game.cpu.getUsed());
 }

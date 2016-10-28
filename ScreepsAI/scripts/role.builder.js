@@ -21,7 +21,7 @@ var roleBuilder = {
         if (creep.memory.building) {
             var target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
                 filter: (structure) => {
-                    return structure.hits < structure.hitsMax;
+                    return structure.hits < structure.hitsMax/2;
                 }
             });
             if (target !== null) {

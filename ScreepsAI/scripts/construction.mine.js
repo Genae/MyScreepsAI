@@ -19,7 +19,7 @@ var scanMine = function (source, room) {
         resource: { id: source.id, pos: source.pos },
         workingPlaces: positionsAround,
         pathToMine: pathToMine,
-        pathImproved: false
+        improvedTo: 0
     });
 }
 

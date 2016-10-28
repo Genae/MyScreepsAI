@@ -4,7 +4,7 @@ var moveTo = function (creep, x, y) {
     else
         creep.memory.path = creep.pos.findPathTo(x, y);
 
-    console.log("findPath: " + creep.memory.path.length);
+    //console.log("findPath: " + creep.memory.path.length);
 	creep.memory.moving = true;
     return continueMove(creep);
 }

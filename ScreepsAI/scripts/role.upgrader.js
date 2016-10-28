@@ -1,6 +1,6 @@
 var actionMove = require('action.move');
 
-var roleUpgrader = {
+var roleHarvester = {
 
     /** @param {Creep} creep **/
     run: function (creep) {
@@ -9,35 +9,25 @@ var roleUpgrader = {
                 return;
             }
         }
-        if (creep.memory.building && creep.carry.energy == 0) {
-            creep.memory.building = false;
-            creep.say('refilling');
-        }
-        if (!creep.memory.building && creep.carry.energy == creep.carryCapacity) {
-            creep.memory.building = true;
-            creep.say('building');
-        }
 
-        if (creep.memory.building) {
-            var target = creep.room.controller;
-            if (target !== null) {
-                if (creep.upgradeController(target) == ERR_NOT_IN_RANGE) {
-                    actionMove.moveTo(creep, target);
+        var contrConstr = creep.room.memory.controller;
+        if (creep.carry.energy > 0) {
+            var controller = creep.room.controller;
+            if (creep.upgradeController(controller) == ERR_NOT_IN_RANGE) {
+                if (creep.pos.getRangeTo(controller.pos.x, controller.pos.y) < 3) {
+                    actionMove.moveTo(creep, controller.pos);
+                } else {
+                    actionMove.followPath(creep, contrConstr.pathTo.path);
                 }
             }
         }
         else {
-            var sources = creep.room.find(FIND_STRUCTURES, {
-                filter: (structure) => {
-                    return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
-                        structure.energy > 0;
-                }
-            });
-            if (!creep.room.memory.energy.canUpgrade || creep.withdraw(sources[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                actionMove.moveTo(creep, sources[0]);
+            if (!creep.room.memory.energy.canUpgrade || creep.withdraw(creep.room.find(FIND_MY_SPAWNS)[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                actionMove.followPath(creep, contrConstr.pathTo.path.slice(0).reverse());
             }
         }
     }
+
 };
 
-module.exports = roleUpgrader;
+module.exports = roleHarvester;
