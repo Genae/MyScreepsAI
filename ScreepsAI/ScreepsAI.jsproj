@@ -78,6 +78,12 @@
     <Content Include="ScreepsAutocomplete\Structures\StructureTerminal.js" />
     <Content Include="ScreepsAutocomplete\Structures\StructureTower.js" />
     <Content Include="ScreepsAutocomplete\Structures\StructureWall.js" />
+    <Content Include="scripts\action.move.js" />
+    <Content Include="scripts\construction.mine.js" />
+    <Content Include="scripts\planning.infrastructure.js" />
+    <Content Include="scripts\planning.jobs.js" />
+    <Content Include="scripts\planning.units.js" />
+    <Content Include="scripts\role.upgrader.js" />
     <Content Include="scripts\role.builder.js" />
     <Content Include="scripts\role.harvester.js" />
     <Content Include="scripts\main.js" />
