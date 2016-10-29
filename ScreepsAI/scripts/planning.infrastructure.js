@@ -19,11 +19,11 @@ var planRoomConstruction = function (room) {
         room.memory.spawn = constructionSpawn.createSpawn(room.find(FIND_MY_SPAWNS)[0], room);
     }
     checkBrokenStuff(room);
-    if (improveController(room))
-        return;
     if (improveMine(room))
         return;
     if (improveSpawn(room))
+        return;
+    if (improveController(room))
         return;
 }
 
@@ -70,6 +70,10 @@ var improveSpawn = function (room) {
         if (room.find(FIND_MY_STRUCTURES, { filter: (structure) => { return structure.structureType == STRUCTURE_EXTENSION; } }).length < 5) {
             var ext = constructionSpawn.planExtension(room.memory.spawn, room);
             ext.createConstructionSite(STRUCTURE_EXTENSION);
+            new RoomPosition(ext.x, ext.y + 1, room.name).createConstructionSite(STRUCTURE_ROAD);
+            new RoomPosition(ext.x, ext.y - 1, room.name).createConstructionSite(STRUCTURE_ROAD);
+            new RoomPosition(ext.x + 1, ext.y, room.name).createConstructionSite(STRUCTURE_ROAD);
+            new RoomPosition(ext.x - 1, ext.y, room.name).createConstructionSite(STRUCTURE_ROAD);
         } else {
             room.memory.spawn.improvedTo = 2;
         }

@@ -9,6 +9,13 @@ var findJob = function(creep, room){
                 return;
             }
         }
+        for (var i = 0; i < room.memory.mines.length; i++) {
+            if (room.memory.lastJobs[i] < room.memory.mines[i].workingPlaces.length + 1) {
+                creep.memory.job = { mineIndex: i };
+                room.memory.lastJobs[i]++;
+                return;
+            }
+        }
     }
 }
 

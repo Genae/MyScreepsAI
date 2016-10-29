@@ -18,8 +18,7 @@ var roleBuilder = function (creep) {
             creep.memory.state = 'building';
         }
         else {
-            //creep.memory.state = 'upgrading';
-            //creep.say('upgrading');
+            creep.memory.state = 'upgrading';
         }
     }
 
@@ -72,6 +71,18 @@ var roleBuilder = function (creep) {
             creep.memory.moving = false;
         }
         return;
+    }
+    if (creep.memory.state === 'upgrading') {
+        var controller = creep.room.controller;
+        if (creep.upgradeController(controller) == ERR_NOT_IN_RANGE) {
+            if (creep.pos.getRangeTo(controller.pos.x, controller.pos.y) < 3) {
+                actionMove.moveTo(creep, controller.pos);
+            } else {
+                actionMove.followPath(creep, creep.room.memory.controller.pathTo.path);
+            }
+        } else {
+            creep.memory.moving = false;
+        }
     }
 }
 

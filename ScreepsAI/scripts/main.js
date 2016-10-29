@@ -17,9 +17,14 @@ module.exports.loop = function () {
         }
     }
 
+
     //room planning
     for (var roomName in Game.rooms) {
         var room = Game.rooms[roomName];
+        if (room.find(FIND_HOSTILE_CREEPS).length > 0) {
+            room.controller.activateSafeMode();
+            console.log("attack!");
+        }
         if (room.memory.energy === undefined) {
             room.memory.energy = {};
             room.memory.energy.canUpgrade = true;
