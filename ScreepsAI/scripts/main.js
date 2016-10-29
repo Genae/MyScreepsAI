@@ -6,6 +6,16 @@ var planningUnits = require('planning.units');
 var planningInfrastructure = require('planning.infrastructure');
 
 module.exports.loop = function () {
+    //remove dead creeps
+    for (var i in Memory.creeps) {
+        if (!Game.creeps[i]) {
+            if (Memory.creeps[i].rechargeSpot !== undefined) {
+                var cr = Game.rooms[Memory.creeps[i].roomName];
+                cr.memory.spawn.rechargeSpots[Memory.creeps[i].rechargeSpot].reserved = false;
+            }
+            delete Memory.creeps[i];
+        }
+    }
 
     //room planning
     for (var roomName in Game.rooms) {
@@ -24,17 +34,18 @@ module.exports.loop = function () {
     //creepAI
     for (var name in Game.creeps) {
         var creep = Game.creeps[name];
+        creep.memory.roomName = creep.room.name;
         if (creep.memory.role === 'harvester') {
-            roleHarvester.run(creep);
+            roleHarvester.roleHarvester(creep);
         }
         if (creep.memory.role === 'builder') {
-            roleBuilder.run(creep);
+            roleBuilder.roleBuilder(creep);
         }
         if (creep.memory.role === 'upgrader') {
-            roleUpgrader.run(creep);
+            roleUpgrader.roleUpgrader(creep);
         }
         if (creep.memory.role === 'distributor') {
-            roleDistributor.run(creep);
+            roleDistributor.roleDistributor(creep);
         }
     }
     //console.log("cpu: " + Game.cpu.getUsed());

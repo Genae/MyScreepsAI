@@ -14,15 +14,16 @@ var planRoomConstruction = function (room) {
     if (room.memory.controller === undefined) {
         room.memory.controller = constructionController.createController(room.controller, room);
     }
+    //spawn needs to be last (rechargeSpots)!
     if (room.memory.spawn === undefined) {
-        room.memory.spawn = constructionSpawn.createSpawn(room.find(FIND_MY_SPAWNS)[0]);
+        room.memory.spawn = constructionSpawn.createSpawn(room.find(FIND_MY_SPAWNS)[0], room);
     }
     checkBrokenStuff(room);
-    if (improveSpawn(room))
-        return;
     if (improveController(room))
         return;
     if (improveMine(room))
+        return;
+    if (improveSpawn(room))
         return;
 }
 
@@ -66,11 +67,12 @@ var improveSpawn = function (room) {
         return true;
     }
     if (room.memory.spawn.improvedTo < 2 && room.controller.level >= 2) {
-        var ext = constructionSpawn.planExtensions(room.memory.spawn, room, 2);
-        for (var i = 0; i < ext.length; i++) {
-            ext[i].createConstructionSite(STRUCTURE_EXTENSION);
+        if (room.find(FIND_MY_STRUCTURES, { filter: (structure) => { return structure.structureType == STRUCTURE_EXTENSION; } }).length < 5) {
+            var ext = constructionSpawn.planExtension(room.memory.spawn, room);
+            ext.createConstructionSite(STRUCTURE_EXTENSION);
+        } else {
+            room.memory.spawn.improvedTo = 2;
         }
-        //room.memory.spawn.improvedTo = 2;
         return true;
     }
     return false;

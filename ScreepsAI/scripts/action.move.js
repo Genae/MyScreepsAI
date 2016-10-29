@@ -1,6 +1,6 @@
 var moveTo = function (creep, x, y) {
     if(y === undefined)
-        creep.memory.path = creep.pos.findPathTo(x);
+        creep.memory.path = creep.pos.findPathTo(x.x, x.y);
     else
         creep.memory.path = creep.pos.findPathTo(x, y);
 
@@ -37,8 +37,8 @@ var continueMove = function (creep) {
         return false;
     }
     var posnew = new RoomPosition(creep.memory.path[index].x, creep.memory.path[index].y, creep.room.name);
-    var blocked = false;
-    /*var stuff = posnew.look();
+    /*var blocked = false;
+    var stuff = posnew.look();
     for (var i = 0; i < stuff.length; i++) {
         if (stuff[i].type === "creep") {
             console.log("blocked by " + stuff[i].type);
