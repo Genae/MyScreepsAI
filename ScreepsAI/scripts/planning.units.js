@@ -1,4 +1,5 @@
 var buildUnits = function (room) {
+    room.memory.energy.canBuild = false; // block building if not enough energy
     var spawn = room.find(FIND_MY_STRUCTURES, {
         filter: { structureType: STRUCTURE_SPAWN }
     })[0];
@@ -23,6 +24,7 @@ var buildUnits = function (room) {
             return;
         }
     }
+    room.memory.energy.canBuild = true; // every unit built, build again.
 }
 
 module.exports = { buildUnits: buildUnits };
@@ -35,19 +37,20 @@ var targets = [
     [
         { role: 'harvester', amount: 3, body: [WORK, CARRY, MOVE] },
         { role: 'upgrader', amount: 1, body: [WORK, WORK, CARRY, MOVE] },
-        { role: 'builder', amount: 1, body: [WORK, CARRY, MOVE] },
         { role: 'harvester', amount: 3, body: [WORK, CARRY, MOVE] },
         { role: 'builder', amount: 1, body: [WORK, CARRY, MOVE] },
-        { role: 'harvester', amount: 1, body: [WORK, CARRY, MOVE] }
+        { role: 'harvester', amount: 1, body: [WORK, CARRY, MOVE] },
+        { role: 'builder', amount: 1, body: [WORK, CARRY, MOVE] }
     ],
     //lv 2
     [
         { role: 'harvester', amount: 3, body: [WORK, CARRY, MOVE] },
         { role: 'upgrader', amount: 1, body: [WORK, WORK, CARRY, MOVE] },
-        { role: 'builder', amount: 1, body: [WORK, CARRY, MOVE] },
+        { role: 'distributor', amount: 1, body: [CARRY, MOVE, CARRY, MOVE] },
         { role: 'harvester', amount: 3, body: [WORK, CARRY, MOVE] },
         { role: 'builder', amount: 1, body: [WORK, CARRY, MOVE] },
-        { role: 'harvester', amount: 1, body: [WORK, CARRY, MOVE] }
+        { role: 'harvester', amount: 1, body: [WORK, CARRY, MOVE] },
+        { role: 'builder', amount: 1, body: [WORK, CARRY, MOVE] }
     ]
 ];
 

@@ -1,6 +1,7 @@
 var roleHarvester = require('role.harvester');
 var roleBuilder = require('role.builder');
 var roleUpgrader = require('role.upgrader');
+var roleDistributor = require('role.distributor');
 var planningUnits = require('planning.units');
 var planningInfrastructure = require('planning.infrastructure');
 
@@ -31,6 +32,9 @@ module.exports.loop = function () {
         }
         if (creep.memory.role === 'upgrader') {
             roleUpgrader.run(creep);
+        }
+        if (creep.memory.role === 'distributor') {
+            roleDistributor.run(creep);
         }
     }
     //console.log("cpu: " + Game.cpu.getUsed());

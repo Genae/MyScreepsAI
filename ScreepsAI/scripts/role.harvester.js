@@ -7,6 +7,8 @@ var roleHarvester = {
     run: function (creep) {
         if (creep.memory.job === undefined) {
             planningJobs.findJob(creep, creep.room);
+            if (creep.memory.job === undefined)
+                return;
         }
         if (creep.room.memory.thisJobs[creep.memory.job.mineIndex] === undefined) {
             creep.room.memory.thisJobs[creep.memory.job.mineIndex] = 1;

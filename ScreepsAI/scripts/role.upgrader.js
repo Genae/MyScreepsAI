@@ -1,6 +1,6 @@
 var actionMove = require('action.move');
 
-var roleHarvester = {
+var roleUpgrader = {
 
     /** @param {Creep} creep **/
     run: function (creep) {
@@ -30,4 +30,4 @@ var roleHarvester = {
 
 };
 
-module.exports = roleHarvester;
+module.exports = roleUpgrader;
