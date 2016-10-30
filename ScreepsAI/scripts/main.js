@@ -21,10 +21,6 @@ module.exports.loop = function () {
     //room planning
     for (var roomName in Game.rooms) {
         var room = Game.rooms[roomName];
-        if (room.find(FIND_HOSTILE_CREEPS).length > 0) {
-            room.controller.activateSafeMode();
-            console.log("attack!");
-        }
         if (room.memory.energy === undefined) {
             room.memory.energy = {};
             room.memory.energy.canUpgrade = true;
@@ -35,7 +31,11 @@ module.exports.loop = function () {
         //reset jobs
         room.memory.lastJobs = room.memory.thisJobs;
         room.memory.thisJobs = [];
+
+        //DEFENCE
+        defendRoom(room);
     }
+
     //creepAI
     for (var name in Game.creeps) {
         var creep = Game.creeps[name];
@@ -54,4 +54,22 @@ module.exports.loop = function () {
         }
     }
     //console.log("cpu: " + Game.cpu.getUsed());
+}
+
+var defendRoom = function(room) {
+    if (room.find(FIND_HOSTILE_CREEPS).length > 0) {
+        room.controller.activateSafeMode();
+        console.log("attack!");
+        var towers = room.find(FIND_MY_STRUCTURES, {
+            filter: function (structure) {
+                return structure.type == STRUCTURE_TOWER;
+            }
+        });
+        for (var t = 0; t < towers.length; t++) {
+            var closestHostile = towers[t].pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+            if (closestHostile) {
+                towers[t].attack(closestHostile);
+            }
+        }
+    }
 }
