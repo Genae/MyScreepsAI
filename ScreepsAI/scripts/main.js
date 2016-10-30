@@ -39,7 +39,9 @@ module.exports.loop = function () {
     //creepAI
     for (var name in Game.creeps) {
         var creep = Game.creeps[name];
-        creep.memory.roomName = creep.room.name;
+        if(creep.memory.roomName === undefined)
+            creep.memory.roomName = creep.room.name;
+
         if (creep.memory.role === 'harvester') {
             roleHarvester.roleHarvester(creep);
         }
@@ -58,8 +60,6 @@ module.exports.loop = function () {
 
 var defendRoom = function(room) {
     if (room.find(FIND_HOSTILE_CREEPS).length > 0) {
-        room.controller.activateSafeMode();
-        console.log("attack!");
         var towers = room.find(FIND_MY_STRUCTURES, {
             filter: function (structure) {
                 return structure.type == STRUCTURE_TOWER;
@@ -69,6 +69,25 @@ var defendRoom = function(room) {
             var closestHostile = towers[t].pos.findClosestByRange(FIND_HOSTILE_CREEPS);
             if (closestHostile) {
                 towers[t].attack(closestHostile);
+            }
+        }
+        for (var name in Game.creeps) {
+            var creep = Game.creeps[name];
+            if (room.name === creep.room.name) {
+                if (creep.memory.role === 'fighter') {
+                    //fight
+                } else {
+                    var targets = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 6);
+                    for (var t = 0; t < targets.length; t++) {
+                        if (creep.pos.getRangeTo(targets[t].pos) <= 4) {
+                            console.log("save me!");
+                            room.controller.activateSafeMode();
+                        }
+                    }
+                    if (targets.length > 0) {
+                        //flee
+                    }
+                }
             }
         }
     }

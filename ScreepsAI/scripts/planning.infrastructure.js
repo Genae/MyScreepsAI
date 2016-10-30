@@ -32,33 +32,58 @@ var planRoomConstruction = function (room) {
         room.memory.improveTo++;
 }
 
+///
+/// MINE
+///
 var improveMine = function (room) {
     if (room.find(FIND_CONSTRUCTION_SITES).length > 0)
         return true;
     for (var i = 0; i < room.memory.mines.length; i++) {
+        //Tier 1
         if (room.memory.mines[i].improvedTo < 1 && room.memory.improveTo >= 1) {
             improvePath(room.memory.mines[i].pathToMine.path);
             room.memory.mines[i].improvedTo = 1;
+            return true;
+        }
+        //Tier 2
+        if (room.memory.mines[i].improvedTo < 2 && room.memory.improveTo >= 2) {
+            for (var wp = 0; wp < room.memory.mines[i].workingPlaces.length; wp++) {
+                var workingPlace = room.memory.mines[i].workingPlaces[wp];
+                for (var dx = -1; dx <= 1; dx++) {
+                    for (var dy = -1; dy <= 1; dy++) {
+                        new RoomPosition(workingPlace.x + dx, workingPlace.y + dy, room.name).createConstructionSite(STRUCTURE_ROAD);
+                    }
+                }
+            }
+            room.memory.mines[i].improvedTo = 2;
             return true;
         }
     }
     return false;
 }
 
+///
+/// Controller
+///
 var improveController = function (room) {
     if (room.find(FIND_CONSTRUCTION_SITES).length > 0)
         return true;
-    if (room.memory.controller.improvedTo < 2 && room.memory.improveTo >= 2) {
+    //Tier 1
+    if (room.memory.controller.improvedTo < 1 && room.memory.improveTo >= 1) {
         improvePath(room.memory.controller.pathTo.path);
-        room.memory.controller.improvedTo = 2;
+        room.memory.controller.improvedTo = 1;
         return true;
     }
     return false;
 }
 
+///
+/// SPAWN
+///
 var improveSpawn = function (room) {
     if (room.find(FIND_CONSTRUCTION_SITES).length > 0)
         return true;
+    //Tier 1
     if (room.memory.spawn.improvedTo < 1 && room.memory.improveTo >= 1) {
         var spawn = Game.getObjectById(room.memory.spawn.resource.id);
         for (var dx = -1; dx <= 1; dx++) {
@@ -71,8 +96,9 @@ var improveSpawn = function (room) {
         room.memory.spawn.improvedTo = 1;
         return true;
     }
+    //Tier 2 - 8
     if (room.memory.spawn.improvedTo < room.memory.improveTo) {
-        if (room.find(FIND_MY_STRUCTURES, { filter: (structure) => { return structure.structureType == STRUCTURE_EXTENSION; } }).length < CONTROLLER_STRUCTURES.extension[room.memory.improveTo + 1]) {
+        if (room.find(FIND_MY_STRUCTURES, { filter: (structure) => { return structure.structureType == STRUCTURE_EXTENSION; } }).length < CONTROLLER_STRUCTURES.extension[room.memory.improveTo]) {
             var ext = constructionSpawn.planExtension(room.memory.spawn, room);
             ext.createConstructionSite(STRUCTURE_EXTENSION);
             new RoomPosition(ext.x, ext.y + 1, room.name).createConstructionSite(STRUCTURE_ROAD);
@@ -80,7 +106,7 @@ var improveSpawn = function (room) {
             new RoomPosition(ext.x + 1, ext.y, room.name).createConstructionSite(STRUCTURE_ROAD);
             new RoomPosition(ext.x - 1, ext.y, room.name).createConstructionSite(STRUCTURE_ROAD);
         } else {
-            room.memory.spawn.improvedTo = room.memory.improveTo + 1;
+            room.memory.spawn.improvedTo = room.memory.improveTo;
         }
         return true;
     }

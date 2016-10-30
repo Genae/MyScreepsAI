@@ -61,19 +61,7 @@ var roleDistributor = function (creep) {
         }
         return;
     }
-    else if (creep.memory.rechargeSpot !== undefined) {
-        rechargeSpots[creep.memory.rechargeSpot].reserved = false;
-        creep.memory.rechargeSpot = undefined;
-    }
-
-    if (creep.memory.state === 'injecting') {
-        if (creep.transfer(extensions[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-            actionMove.moveTo(creep, extensions[0].pos);
-        }
-        return;
-    }
-
-    if (creep.memory.state === 'emptying') {
+    else if (creep.memory.state === 'emptying') {
         //find spot
         if (creep.memory.rechargeSpot === undefined) {
             for (var i = 0; i < rechargeSpots.length; i++) {
@@ -93,6 +81,19 @@ var roleDistributor = function (creep) {
         }
         return;
     }
+    else if (creep.memory.rechargeSpot !== undefined) {
+        rechargeSpots[creep.memory.rechargeSpot].reserved = false;
+        creep.memory.rechargeSpot = undefined;
+    }
+
+    if (creep.memory.state === 'injecting') {
+        if (creep.transfer(extensions[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+            actionMove.moveTo(creep, extensions[0].pos);
+        }
+        return;
+    }
+
+    
 
     if (creep.memory.state === 'collecting') {
         if (creep.pickup(droppedEnergy[0]) == ERR_NOT_IN_RANGE) {
