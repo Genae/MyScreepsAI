@@ -28,6 +28,10 @@ var buildUnits = function (room) {
         if (myUnits[myTargets[t].role] >= myTargets[t].amount) {
             myUnits[myTargets[t].role] -= myTargets[t].amount;
         } else {
+            if (myTargets[t].role === 'builder') { // builders shouldn't block building.
+                room.memory.energy.canBuild = true;
+                room.memory.energy.canUpgrade = true; 
+            }
             spawn.createCreep(myTargets[t].body, undefined, { role: myTargets[t].role });
             return;
         }
@@ -56,7 +60,7 @@ var targets = [
         { role: 'harvester', amount: 2, body: [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE] },
         { role: 'upgrader', amount: 1, body: [WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE] },
         { role: 'harvester', amount: 1, body: [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE] },
-        { role: 'builder', amount: 1, body: [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE] },
+        { role: 'builder', amount: 4, body: [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE] },
     ]
 ];
 
