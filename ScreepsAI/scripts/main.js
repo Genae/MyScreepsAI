@@ -1,6 +1,7 @@
 var roleHarvester = require('role.harvester');
 var roleBuilder = require('role.builder');
 var roleUpgrader = require('role.upgrader');
+var roleAttacker = require('role.attacker');
 var roleDistributor = require('role.distributor');
 var planningUnits = require('planning.units');
 var planningInfrastructure = require('planning.infrastructure');
@@ -19,8 +20,45 @@ module.exports.loop = function () {
 
 
     //room planning
+    roomPlanning();
+
+    var builders = [];
+    //creepAI
+    for (var name in Game.creeps) {
+        var creep = Game.creeps[name];
+        if (creep.memory.roomName === undefined)
+            creep.memory.roomName = creep.room.name;
+
+        if (creep.memory.role === 'harvester') {
+            roleHarvester.roleHarvester(creep);
+        }
+        if (creep.memory.role === 'builder') {
+            builders.push(creep);
+        }
+        if (creep.memory.role === 'upgrader') {
+            roleUpgrader.roleUpgrader(creep);
+        }
+        if (creep.memory.role === 'attacker') {
+            roleAttacker.roleAttacker(creep);
+        }
+        if (creep.memory.role === 'distributor') {
+            roleDistributor.roleDistributor(creep);
+        }
+    }
+    for (var b = 0; b < builders.length; b++) {
+        roleBuilder.roleBuilder(builders[b]);
+    }
+    //console.log("cpu: " + Game.cpu.getUsed());
+}
+
+var roomPlanning = function() {
     for (var roomName in Game.rooms) {
         var room = Game.rooms[roomName];
+        var spawn = room.find(FIND_MY_STRUCTURES, {
+            filter: { structureType: STRUCTURE_SPAWN }
+        })[0];
+        if (spawn === undefined || spawn === null)
+            continue;
         if (room.memory.energy === undefined) {
             room.memory.energy = {};
             room.memory.energy.canUpgrade = true;
@@ -35,27 +73,6 @@ module.exports.loop = function () {
         //DEFENCE
         defendRoom(room);
     }
-
-    //creepAI
-    for (var name in Game.creeps) {
-        var creep = Game.creeps[name];
-        if (creep.memory.roomName === undefined)
-            creep.memory.roomName = creep.room.name;
-
-        if (creep.memory.role === 'harvester') {
-            roleHarvester.roleHarvester(creep);
-        }
-        if (creep.memory.role === 'builder') {
-            roleBuilder.roleBuilder(creep);
-        }
-        if (creep.memory.role === 'upgrader') {
-            roleUpgrader.roleUpgrader(creep);
-        }
-        if (creep.memory.role === 'distributor') {
-            roleDistributor.roleDistributor(creep);
-        }
-    }
-    //console.log("cpu: " + Game.cpu.getUsed());
 }
 
 var defendRoom = function (room) {

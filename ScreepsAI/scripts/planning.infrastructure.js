@@ -99,7 +99,14 @@ var improveSpawn = function (room) {
     }
     //Tier 2 - 8
     if (room.memory.spawn.improvedTo < room.memory.improveTo) {
-        if (room.find(FIND_MY_STRUCTURES, { filter: (structure) => { return structure.structureType == STRUCTURE_EXTENSION; } }).length < CONTROLLER_STRUCTURES.extension[room.memory.improveTo]) {
+        if (room.find(FIND_MY_STRUCTURES, { filter: (structure) => { return structure.structureType == STRUCTURE_TOWER; } }).length < CONTROLLER_STRUCTURES.tower[room.memory.improveTo]) {
+            var ext = constructionSpawn.planExtension(room.memory.spawn, room);
+            ext.createConstructionSite(STRUCTURE_TOWER);
+            new RoomPosition(ext.x, ext.y + 1, room.name).createConstructionSite(STRUCTURE_ROAD);
+            new RoomPosition(ext.x, ext.y - 1, room.name).createConstructionSite(STRUCTURE_ROAD);
+            new RoomPosition(ext.x + 1, ext.y, room.name).createConstructionSite(STRUCTURE_ROAD);
+            new RoomPosition(ext.x - 1, ext.y, room.name).createConstructionSite(STRUCTURE_ROAD);
+        } else if (room.find(FIND_MY_STRUCTURES, { filter: (structure) => { return structure.structureType == STRUCTURE_EXTENSION; } }).length < CONTROLLER_STRUCTURES.extension[room.memory.improveTo]) {
             var ext = constructionSpawn.planExtension(room.memory.spawn, room);
             ext.createConstructionSite(STRUCTURE_EXTENSION);
             new RoomPosition(ext.x, ext.y + 1, room.name).createConstructionSite(STRUCTURE_ROAD);

@@ -9,9 +9,12 @@ var roleDistributor = function (creep) {
     var extensions = creep.room.find(FIND_MY_STRUCTURES, {
         filter: (structure) => {
             return (structure.structureType == STRUCTURE_EXTENSION && structure.energy < structure.energyCapacity) ||
+                   (structure.structureType == STRUCTURE_CONTAINER && structure.energy < structure.energyCapacity && creep.room.memory.energy.canBuild
+                                && creep.room.energyCapacityAvailable <= creep.room.energyAvailable) ||
                    (structure.structureType == STRUCTURE_TOWER && structure.energy < structure.energyCapacity && creep.room.memory.energy.canBuild);
         }
     });
+    var myExt = creep.pos.findClosestByRange(extensions);
     var droppedEnergy = droppedEnergy = creep.room.find(FIND_DROPPED_ENERGY, {
         filter: (energy) => {
             return (energy.amount > 50);
@@ -25,7 +28,7 @@ var roleDistributor = function (creep) {
     if (creep.carry.energy < creep.carryCapacity && (creep.memory.state !== 'collecting' || droppedEnergy.length === 0) && extensions.length > 0) {
         creep.memory.state = 'refilling';
     }
-    if (creep.memory.state !== 'injecting' && creep.memory.state !== 'collecting' && extensions.length > 0 && (creep.carry.energy >= extensions[0].energyCapacity - extensions[0].energy || creep.carry.energy === creep.carryCapacity)) {
+    if (creep.memory.state !== 'injecting' && creep.memory.state !== 'collecting' && extensions.length > 0 && (creep.carry.energy >= myExt.energyCapacity - myExt.energy || creep.carry.energy === creep.carryCapacity)) {
         if (extensions.length > 0) {
             creep.memory.state = 'injecting';
         }
@@ -87,8 +90,8 @@ var roleDistributor = function (creep) {
     }
 
     if (creep.memory.state === 'injecting') {
-        if (creep.transfer(extensions[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-            actionMove.moveTo(creep, extensions[0].pos);
+        if (creep.transfer(myExt, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+            actionMove.moveTo(creep, myExt.pos);
         }
         return;
     }

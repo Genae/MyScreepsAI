@@ -16,6 +16,8 @@ var buildUnits = function (room) {
     var spawn = room.find(FIND_MY_STRUCTURES, {
         filter: { structureType: STRUCTURE_SPAWN }
     })[0];
+    if (spawn === undefined || spawn === null)
+        return;
     if (spawn.canCreateCreep([MOVE]) < 0) {
         return; //can't do anything
     }
@@ -29,6 +31,7 @@ var buildUnits = function (room) {
             myUnits[role]++;
         }
     }
+
     for (var t = 0; t < myTargets.length; t++) {
         if (myUnits[myTargets[t].role] === undefined)
             myUnits[myTargets[t].role] = 0;
@@ -37,7 +40,8 @@ var buildUnits = function (room) {
                 room.memory.energy.canBuild = true;
                 room.memory.energy.canUpgrade = true;
             }
-            spawn.createCreep(myTargets[t].body, undefined, { role: myTargets[t].role });
+            if (myTargets[t].role !== 'builder' || room.energyCapacityAvailable <= room.energyAvailable)
+                spawn.createCreep(myTargets[t].body, undefined, { role: myTargets[t].role });
             return;
         }
     }
@@ -54,7 +58,12 @@ var getTargets = function (room) {
         return [];
     }
     var miningJobs = 0;
-
+    var attackFlags = [];
+    for (var flag in Game.flags) {
+        if (Game.flags[flag].color === COLOR_RED) {
+            attackFlags.push(Game.flags[flag]);
+        }
+    }
     if (level === 1) {
         for (var i = 0; i < room.memory.mines.length; i++) {
             miningJobs += room.memory.mines[i].workingPlaces.length + 1;
@@ -86,8 +95,8 @@ var getTargets = function (room) {
             { role: 'harvester', amount: 2, body: [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE] },
             { role: 'upgrader', amount: 1, body: [WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE] },
             { role: 'harvester', amount: room.memory.mines.length * 2, body: [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE] },
+            { role: 'attacker', amount: attackFlags.length * 5, body: [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE, MOVE, ATTACK] },
             { role: 'builder', amount: room.memory.spawn.rechargeSpots.length - 1, body: [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE] }
         ];
     }
 }
-
