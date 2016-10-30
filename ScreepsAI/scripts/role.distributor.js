@@ -9,7 +9,7 @@ var roleDistributor = function (creep) {
     var extensions = creep.room.find(FIND_MY_STRUCTURES, {
         filter: (structure) => {
             return (structure.structureType == STRUCTURE_EXTENSION && structure.energy < structure.energyCapacity) ||
-                   (structure.structureType == STRUCTURE_TOWER && structure.energy < structure.energyCapacity && creep.room.memory.canBuild);
+                   (structure.structureType == STRUCTURE_TOWER && structure.energy < structure.energyCapacity && creep.room.memory.energy.canBuild);
         }
     });
     var droppedEnergy = droppedEnergy = creep.room.find(FIND_DROPPED_ENERGY, {
@@ -25,12 +25,12 @@ var roleDistributor = function (creep) {
     if (creep.carry.energy < creep.carryCapacity && (creep.memory.state !== 'collecting' || droppedEnergy.length === 0) && extensions.length > 0) {
         creep.memory.state = 'refilling';
     }
-    if (creep.memory.state !== 'injecting' && creep.memory.state !== 'collecting' && extensions.length > 0 && creep.carry.energy >= extensions[0].energyCapacity - extensions[0].energy) {
+    if (creep.memory.state !== 'injecting' && creep.memory.state !== 'collecting' && extensions.length > 0 && (creep.carry.energy >= extensions[0].energyCapacity - extensions[0].energy || creep.carry.energy === creep.carryCapacity)) {
         if (extensions.length > 0) {
             creep.memory.state = 'injecting';
         }
     }
-    else if (extensions.length === 0 && creep.carry.energy > 0) {
+    else if (creep.carry.energy > 0 && (extensions.length === 0 || creep.memory.state === 'collecting')) {
         creep.memory.state = 'emptying';
     }
     else if (extensions.length === 0) {
@@ -93,7 +93,7 @@ var roleDistributor = function (creep) {
         return;
     }
 
-    
+
 
     if (creep.memory.state === 'collecting') {
         if (creep.pickup(droppedEnergy[0]) == ERR_NOT_IN_RANGE) {
@@ -103,4 +103,4 @@ var roleDistributor = function (creep) {
     }
 }
 
-module.exports = {roleDistributor: roleDistributor}
+module.exports = { roleDistributor: roleDistributor }

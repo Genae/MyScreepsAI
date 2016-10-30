@@ -39,7 +39,7 @@ module.exports.loop = function () {
     //creepAI
     for (var name in Game.creeps) {
         var creep = Game.creeps[name];
-        if(creep.memory.roomName === undefined)
+        if (creep.memory.roomName === undefined)
             creep.memory.roomName = creep.room.name;
 
         if (creep.memory.role === 'harvester') {
@@ -58,14 +58,15 @@ module.exports.loop = function () {
     //console.log("cpu: " + Game.cpu.getUsed());
 }
 
-var defendRoom = function(room) {
+var defendRoom = function (room) {
+    var towers = room.find(FIND_MY_STRUCTURES, {
+        filter: function (structure) {
+            return structure.structureType === STRUCTURE_TOWER;
+        }
+    });
+    var t;
     if (room.find(FIND_HOSTILE_CREEPS).length > 0) {
-        var towers = room.find(FIND_MY_STRUCTURES, {
-            filter: function (structure) {
-                return structure.type == STRUCTURE_TOWER;
-            }
-        });
-        for (var t = 0; t < towers.length; t++) {
+        for (t = 0; t < towers.length; t++) {
             var closestHostile = towers[t].pos.findClosestByRange(FIND_HOSTILE_CREEPS);
             if (closestHostile) {
                 towers[t].attack(closestHostile);
@@ -78,7 +79,7 @@ var defendRoom = function(room) {
                     //fight
                 } else {
                     var targets = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 6);
-                    for (var t = 0; t < targets.length; t++) {
+                    for (t = 0; t < targets.length; t++) {
                         if (creep.pos.getRangeTo(targets[t].pos) <= 4) {
                             console.log("save me!");
                             room.controller.activateSafeMode();
@@ -88,6 +89,19 @@ var defendRoom = function(room) {
                         //flee
                     }
                 }
+            }
+        }
+    } else {
+        for (t = 0; t < towers.length; t++) {
+            if (towers[t].energy <= 500)
+                continue;
+            var repairs = towers[t].pos.findInRange(FIND_STRUCTURES, 5, {
+                filter: function (structure) {
+                    return structure.hits <= structure.hitsMax - 800;
+                }
+            });
+            if (repairs.length > 0) {
+                towers[t].repair(repairs[0]);
             }
         }
     }

@@ -51,7 +51,8 @@ var improveMine = function (room) {
                 var workingPlace = room.memory.mines[i].workingPlaces[wp];
                 for (var dx = -1; dx <= 1; dx++) {
                     for (var dy = -1; dy <= 1; dy++) {
-                        new RoomPosition(workingPlace.x + dx, workingPlace.y + dy, room.name).createConstructionSite(STRUCTURE_ROAD);
+                        if (dy === 0 || dx === 0)
+                            new RoomPosition(workingPlace.x + dx, workingPlace.y + dy, room.name).createConstructionSite(STRUCTURE_ROAD);
                     }
                 }
             }
