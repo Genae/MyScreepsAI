@@ -24,6 +24,8 @@ var buildUnits = function (room) {
     var myTargets = getTargets(room);
     var myUnits = {};
     for (var name in Game.creeps) {
+        if (Game.creeps[name].ticksToLive < 100)
+            continue;
         var role = Game.creeps[name].memory.role;
         if (myUnits[role] === undefined) {
             myUnits[role] = 1;

@@ -7,11 +7,14 @@ var roleHarvester = function (creep) {
         if (creep.memory.job === undefined)
             return;
     }
-    if (creep.room.memory.thisJobs[creep.memory.job.mineIndex] === undefined) {
-        creep.room.memory.thisJobs[creep.memory.job.mineIndex] = 1;
-    } else {
-        creep.room.memory.thisJobs[creep.memory.job.mineIndex]++;
+    if (creep.ticksToLive > 100) {
+        if (creep.room.memory.thisJobs[creep.memory.job.mineIndex] === undefined) {
+            creep.room.memory.thisJobs[creep.memory.job.mineIndex] = 1;
+        } else {
+            creep.room.memory.thisJobs[creep.memory.job.mineIndex]++;
+        }
     }
+    
     if (creep.memory.moving) {
         if (!actionMove.continueMove(creep)) {
             return;
