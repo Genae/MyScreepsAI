@@ -75,6 +75,9 @@ var roomPlanning = function() {
         //reset jobs
         room.memory.lastJobs = room.memory.thisJobs;
         room.memory.thisJobs = [];
+        if (room.memory.lastJobs === undefined) {
+            room.memory.lastJobs = [];
+        }
 
         //DEFENCE
         defendRoom(room);

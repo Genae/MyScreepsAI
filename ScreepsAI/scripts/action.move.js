@@ -45,6 +45,7 @@ var moveToAny = function (creep, pos, range) {
     return continueMove(creep);
 }
 var followPath = function (creep, path) {
+    creep.memory.pathBlocked = 0;
     creep.memory.pathTargets = undefined;
     var res = {};
     var closestDist = Math.min.apply(Math, path.map(function(o) {
