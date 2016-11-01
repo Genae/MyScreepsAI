@@ -70,8 +70,8 @@ var roomPlanning = function() {
             room.memory.energy.canUpgrade = true;
             room.memory.energy.canBuild = true;
         }
-        planningUnits.buildUnits(room);
         planningInfrastructure.planRoomConstruction(room);
+        planningUnits.buildUnits(room);
         //reset jobs
         room.memory.lastJobs = room.memory.thisJobs;
         room.memory.thisJobs = [];
@@ -104,7 +104,7 @@ var defendRoom = function (room) {
                     var targets = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 6);
                     for (t = 0; t < targets.length; t++) {
                         if (creep.pos.getRangeTo(targets[t].pos) <= 4) {
-                            console.log("save me!");
+                            //console.log("save me!");
                             room.controller.activateSafeMode();
                         }
                     }

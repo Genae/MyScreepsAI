@@ -2,7 +2,7 @@ var actionMove = require('action.move');
 
 var roleUpgrader = function (creep) {
     if (creep.memory.moving) {
-        if (!actionMove.continueMove(creep)) {
+        if (actionMove.continueMove(creep)) {
             return;
         }
     }
@@ -25,7 +25,7 @@ var roleUpgrader = function (creep) {
         var controller = creep.room.controller;
         if (creep.upgradeController(controller) == ERR_NOT_IN_RANGE) {
             if (creep.pos.getRangeTo(controller.pos.x, controller.pos.y) < 4) {
-                actionMove.moveTo(creep, controller.pos);
+                actionMove.moveTo(creep, controller.pos, 3);
             } else {
                 actionMove.followPath(creep, contrConstr.pathTo.path);
             }

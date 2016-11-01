@@ -16,13 +16,7 @@ var roleHarvester = function (creep) {
     }
     
     if (creep.memory.moving) {
-        if (!actionMove.continueMove(creep)) {
-            return;
-        }
-    }
-
-    if (creep.memory.moving) {
-        if (!actionMove.continueMove(creep)) {
+        if (actionMove.continueMove(creep)) {
             return;
         }
     }
@@ -43,7 +37,7 @@ var roleHarvester = function (creep) {
         var mysource = Game.getObjectById(mymine.resource.id);
         if (creep.harvest(mysource) == ERR_NOT_IN_RANGE) {
             if (creep.pos.getRangeTo(mymine.resource.pos.x, mymine.resource.pos.y) < 3) {
-                actionMove.moveTo(creep, mysource.pos);
+                actionMove.moveTo(creep, mysource.pos, 1);
             } else {
                 actionMove.followPath(creep, mymine.pathToMine.path);
             }

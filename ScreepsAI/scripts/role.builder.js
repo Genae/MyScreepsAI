@@ -2,7 +2,7 @@ var actionMove = require('action.move');
 
 var roleBuilder = function (creep) {
     if (creep.memory.moving) {
-        if (!actionMove.continueMove(creep)) {
+        if (actionMove.continueMove(creep)) {
             return;
         }
     }
@@ -25,25 +25,14 @@ var roleBuilder = function (creep) {
     var rechargeSpots = creep.room.memory.spawn.rechargeSpots;
     //run states
     if (creep.memory.state === 'refilling') {
-        //find spot
-        if (creep.memory.rechargeSpot === undefined) {
-            for (var i = 0; i < rechargeSpots.length; i++) {
-                if (!rechargeSpots[i].reserved) {
-                    rechargeSpots[i].reserved = true;
-                    creep.memory.rechargeSpot = i;
-                    break;
-                }
-            }
-        }
-        if (creep.memory.rechargeSpot === undefined)
-            return;
-        if (rechargeSpots[creep.memory.rechargeSpot].pos.x === creep.pos.x && rechargeSpots[creep.memory.rechargeSpot].pos.y === creep.pos.y) {
-            if (creep.room.memory.energy.canBuild) {
+        //is this spot ok?
+        for (var rs = 0; rs < rechargeSpots.length; rs++) {
+            if (rechargeSpots[rs].pos.x === creep.pos.x && rechargeSpots[rs].pos.y === creep.pos.y) {
                 creep.withdraw(Game.getObjectById(creep.room.memory.spawn.resource.id), RESOURCE_ENERGY);
+                return;
             }
-        } else {
-            actionMove.moveTo(creep, rechargeSpots[creep.memory.rechargeSpot].pos);
         }
+        actionMove.moveToAny(creep, rechargeSpots.map(function (a) { return a.pos; }));
         return;
     }
     else if (creep.memory.rechargeSpot !== undefined) {
@@ -56,7 +45,7 @@ var roleBuilder = function (creep) {
         target = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
         if (target !== null) {
             if (creep.build(target) == ERR_NOT_IN_RANGE) {
-                actionMove.moveTo(creep, target.pos);
+                actionMove.moveTo(creep, target.pos, 2);
             } else {
                 creep.memory.moving = false;
             }
@@ -68,7 +57,7 @@ var roleBuilder = function (creep) {
     if (creep.memory.state === 'repairing') {
         target = Game.getObjectById(creep.room.memory.repair[0]);
         if (creep.repair(target) == ERR_NOT_IN_RANGE) {
-            actionMove.moveTo(creep, target.pos);
+            actionMove.moveTo(creep, target.pos, 2);
         } else {
             creep.memory.moving = false;
         }
@@ -78,7 +67,7 @@ var roleBuilder = function (creep) {
         var controller = creep.room.controller;
         if (creep.pos.getRangeTo(controller.pos.x, controller.pos.y) > 2) {
             if (creep.pos.getRangeTo(controller.pos.x, controller.pos.y) < 4) {
-                actionMove.moveTo(creep, controller.pos);
+                actionMove.moveTo(creep, controller.pos, 2);
             } else {
                 actionMove.followPath(creep, creep.room.memory.controller.pathTo.path);
             }

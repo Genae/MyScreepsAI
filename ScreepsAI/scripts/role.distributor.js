@@ -36,7 +36,7 @@ var changeToInjecting = function (creep, myExt) {
 
 var changeToCollecting = function (creep, myExt, droppedEnergy) {
     //if there is no extension to fill -> check if there is energy to collect
-    if (myExt === undefined && creep.carry.energy === 0 && droppedEnergy.length > 0) {
+    if ((myExt === undefined || myExt === null) && creep.carry.energy === 0 && droppedEnergy.length > 0) {
         creep.memory.state = STATE_COLLECTING;
         console.log(creep.memory.state);
         return true;
@@ -46,8 +46,8 @@ var changeToCollecting = function (creep, myExt, droppedEnergy) {
 
 var changeToEmptying = function (creep, myExt) {
     //if there is no extension to fill -> empty creep
-    if (myExt === undefined) {
-        creep.memory.state = STATE_COLLECTING;
+    if (myExt === undefined || myExt === null) {
+        creep.memory.state = STATE_EMPTYING;
         console.log(creep.memory.state);
         return true;
     }
@@ -60,7 +60,7 @@ var changeToEmptying = function (creep, myExt) {
 var roleDistributor = function (creep, room, extensions, droppedEnergy) {
     
     if (creep.memory.moving) {
-        if (!actionMove.continueMove(creep)) {
+        if (actionMove.continueMove(creep)) {
             return true;
         }
     }
@@ -108,7 +108,7 @@ var roleDistributor = function (creep, room, extensions, droppedEnergy) {
         //I did not change state, so do whatever I have to do here
         return doInjecting(creep, myExt);
     }
-    //+++++++++++ STATE INJECTING +++++++++++++++
+    //+++++++++++ STATE COLLECTING +++++++++++++++
     else if (creep.memory.state === STATE_COLLECTING) {
         if (creep.carry.energy > 0 || droppedEnergy.length === 0) { //done collecting
             if (changeToInjecting(creep, myExt)) {
@@ -133,64 +133,39 @@ var roleDistributor = function (creep, room, extensions, droppedEnergy) {
 
 var doEmptying = function (creep) {
     var rechargeSpots = creep.room.memory.spawn.rechargeSpots;
-    findRechargeSpot(creep);
-    if (creep.memory.rechargeSpot === undefined)
-        return;
-    if (rechargeSpots[creep.memory.rechargeSpot].pos.x === creep.pos.x && rechargeSpots[creep.memory.rechargeSpot].pos.y === creep.pos.y) {
-        creep.transfer(Game.getObjectById(creep.room.memory.spawn.resource.id), RESOURCE_ENERGY);
-    } else {
-        actionMove.moveTo(creep, rechargeSpots[creep.memory.rechargeSpot].pos);
+    for (var rs = 0; rs < rechargeSpots.length; rs++) {
+        if (rechargeSpots[rs].pos.x === creep.pos.x && rechargeSpots[rs].pos.y === creep.pos.y) {
+            creep.transfer(Game.getObjectById(creep.room.memory.spawn.resource.id), RESOURCE_ENERGY);
+            return;
+        }
     }
-    return;
+    actionMove.moveToAny(creep, rechargeSpots.map(function (a) { return a.pos; }));
 }
 
 var doRefilling = function (creep) {
     var rechargeSpots = creep.room.memory.spawn.rechargeSpots;
-    findRechargeSpot(creep);
-    if (creep.memory.rechargeSpot === undefined)
-        return;
-    if (rechargeSpots[creep.memory.rechargeSpot].pos.x === creep.pos.x && rechargeSpots[creep.memory.rechargeSpot].pos.y === creep.pos.y) {
-        creep.withdraw(Game.getObjectById(creep.room.memory.spawn.resource.id), RESOURCE_ENERGY);
-    } else {
-        actionMove.moveTo(creep, rechargeSpots[creep.memory.rechargeSpot].pos);
+    for (var rs = 0; rs < rechargeSpots.length; rs++) {
+        if (rechargeSpots[rs].pos.x === creep.pos.x && rechargeSpots[rs].pos.y === creep.pos.y) {
+            creep.withdraw(Game.getObjectById(creep.room.memory.spawn.resource.id), RESOURCE_ENERGY);
+            return;
+        }
     }
+    actionMove.moveToAny(creep, rechargeSpots.map(function (a) { return a.pos; }));
     return;
 }
 
 var doInjecting = function (creep, myExt) {
-    unblockSlot(creep);
     if (creep.transfer(myExt, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-        actionMove.moveTo(creep, myExt.pos);
+        actionMove.moveTo(creep, myExt.pos, 1);
     }
     return;
 }
 
 var doCollecting = function (creep, droppedEnergy) {
-    unblockSlot(creep);
     if (creep.pickup(droppedEnergy[0]) === ERR_NOT_IN_RANGE) {
-        actionMove.moveTo(creep, droppedEnergy[0].pos);
+        actionMove.moveTo(creep, droppedEnergy[0].pos, 1);
     }
     return;
 }
 
-//Recharge Slots
-var findRechargeSpot = function (creep) {
-    var rechargeSpots = creep.room.memory.spawn.rechargeSpots;
-    if (creep.memory.rechargeSpot === undefined) {
-        for (var i = 0; i < rechargeSpots.length; i++) {
-            if (!rechargeSpots[i].reserved) {
-                rechargeSpots[i].reserved = true;
-                creep.memory.rechargeSpot = i;
-                break;
-            }
-        }
-    }
-}
-
-var unblockSlot = function(creep) {
-    if (creep.memory.rechargeSpot !== undefined) {
-        creep.room.memory.spawn.rechargeSpots[creep.memory.rechargeSpot].reserved = false;
-        creep.memory.rechargeSpot = undefined;
-    }
-}
 module.exports = { roleDistributor: roleDistributor }

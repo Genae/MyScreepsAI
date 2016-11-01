@@ -1,11 +1,47 @@
-var moveTo = function (creep, x, y) {
-    if(y === undefined)
-        creep.memory.path = creep.pos.findPathTo(x.x, x.y);
-    else
-        creep.memory.path = creep.pos.findPathTo(x, y);
+var moveTo = function (creep, pos, range) {
+    return moveToAny(creep, [pos], range);
+}
+var moveToAny = function (creep, pos, range) {
+    creep.memory.pathBlocked = 0;
+    if (range === undefined) {
+        range = 0;
+    }
+    creep.memory.pathTargets = { pos: pos, range: range };
+    var i;
+    var unblockedPos = [];
+    var myrange = range;
+    while (unblockedPos.length === 0) {
+        for (i = 0; i < pos.length; i++) {
+            for (var dx = -myrange; dx <= myrange; dx++) {
+                for (var dy = -myrange; dy <= myrange; dy++) {
+                    var posi = new RoomPosition(pos[i].x + dx, pos[i].y + dy, pos[i].roomName);
+                    if (!isBlocked(posi)) {
+                        unblockedPos.push(posi);
+                    }
+                }
+            }
+        }
+        myrange++;
+        if (myrange - range > 3) {
+            creep.say("no path");
+            return false;
+        }
+    }
+    
+    if (unblockedPos.length === 0) {
+    }
+    var closest = creep.pos.findClosestByRange(unblockedPos);
+    if (creep.pos.getRangeTo(closest) > 10) {
+        creep.memory.path = creep.pos.findPathTo(closest, {
+            ignoreCreeps: true
+        });
 
-    //console.log("findPath: " + creep.memory.path.length);
-	creep.memory.moving = true;
+    } else {
+        creep.memory.path = creep.pos.findPathTo(closest, {
+            ignoreCreeps: false
+        });
+    }
+    creep.memory.moving = true;
     return continueMove(creep);
 }
 var followPath = function (creep, path) {
@@ -16,11 +52,11 @@ var followPath = function (creep, path) {
         return dist;
     }));
     if (closestDist === 0) {
-        creep.memory.path = path;
+        creep.memory.path= path ;
         creep.memory.moving = true;
         return continueMove(creep);
     }
-    return moveTo(creep, res[closestDist].x, res[closestDist].y);
+    return moveTo(creep, res[closestDist]);
 }
 var continueMove = function (creep) {
     if (creep.fatigue > 0)
@@ -37,22 +73,42 @@ var continueMove = function (creep) {
         return false;
     }
     var posnew = new RoomPosition(creep.memory.path[index].x, creep.memory.path[index].y, creep.room.name);
-    /*var blocked = false;
     var stuff = posnew.look();
+    var blocked = false;
     for (var i = 0; i < stuff.length; i++) {
-        if (stuff[i].type === "creep") {
-            console.log("blocked by " + stuff[i].type);
+        if (stuff[i].type === 'creep' && stuff[i].creep.fatigue === 0) {
+            creep.memory.pathBlocked++;
             blocked = true;
-            break;
+            if (creep.memory.pathBlocked > 2 && creep.memory.pathTargets !== undefined)
+                return moveToAny(creep, creep.memory.pathTargets.pos, creep.memory.pathTargets.range);
         }
-    }  
-    if (blocked) //blocked
-    {
-        if (index < creep.memory.path.length - 2)
-            moveTo(creep, creep.memory.path[index + 1].x, creep.memory.path[index + 1].y);
-    }*/
+    }
+    if (!blocked) {
+        creep.memory.pathBlocked = 0;
+    }
     creep.move(creep.pos.getDirectionTo(posnew.x, posnew.y));
     return true;
 }
 
-module.exports = { moveTo: moveTo, continueMove: continueMove, followPath: followPath };
+var isBlocked = function(pos) {
+    var stuff = pos.look();
+    for (var i = 0; i < stuff.length; i++) {
+        if (stuff[i].type === 'creep') {
+            return true;
+        }
+        if (stuff[i].type === 'structure') {
+            if (stuff[i].structure.structureType !== STRUCTURE_ROAD) {
+                return true;
+            }
+
+        }
+        if (stuff[i].type === 'terrain') {
+            if (stuff[i].terrain === 'wall') {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+module.exports = { moveTo: moveTo, continueMove: continueMove, followPath: followPath, moveToAny: moveToAny };
