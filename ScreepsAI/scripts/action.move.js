@@ -2,7 +2,6 @@ var moveTo = function (creep, pos, range) {
     return moveToAny(creep, [pos], range);
 }
 var moveToAny = function (creep, pos, range) {
-    creep.memory.pathBlocked = 0;
     if (range === undefined) {
         range = 0;
     }
@@ -33,7 +32,7 @@ var moveToAny = function (creep, pos, range) {
     var closest = creep.pos.findClosestByRange(unblockedPos);
     if (creep.pos.getRangeTo(closest) > 10) {
         creep.memory.path = creep.pos.findPathTo(closest, {
-            ignoreCreeps: true
+            ignoreCreeps: creep.memory.pathBlocked < 2
         });
 
     } else {
@@ -42,9 +41,11 @@ var moveToAny = function (creep, pos, range) {
         });
     }
     creep.memory.moving = true;
+    creep.memory.pathBlocked = 0;
     return continueMove(creep);
 }
 var followPath = function (creep, path) {
+    creep.memory.pathTargets = undefined;
     var res = {};
     var closestDist = Math.min.apply(Math, path.map(function(o) {
         var dist = creep.pos.getRangeTo(o.x, o.y);

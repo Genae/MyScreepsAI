@@ -3,7 +3,9 @@ var actionMove = require('action.move');
 var roleBuilder = function (creep) {
     if (creep.memory.moving) {
         if (actionMove.continueMove(creep)) {
-            return;
+            if (!(creep.memory.state === 'upgrading' && creep.pos.getRangeTo(creep.room.controller.pos.x, creep.room.controller.pos.y) < 4)) {
+                return;
+            }
         }
     }
     //state machine
@@ -67,7 +69,7 @@ var roleBuilder = function (creep) {
         var controller = creep.room.controller;
         if (creep.pos.getRangeTo(controller.pos.x, controller.pos.y) > 2) {
             if (creep.pos.getRangeTo(controller.pos.x, controller.pos.y) < 4) {
-                actionMove.moveTo(creep, controller.pos, 2);
+                actionMove.moveTo(creep, controller.pos, 1);
             } else {
                 actionMove.followPath(creep, creep.room.memory.controller.pathTo.path);
             }
