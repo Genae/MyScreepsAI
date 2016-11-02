@@ -12,12 +12,25 @@ var roleBuilder = function (creep) {
     if (creep.carry.energy === 0 && creep.memory.state !== 'refilling' || (creep.room.memory.repair.length === 0 && creep.memory.state === 'repairing')) {
         creep.memory.state = 'refilling';
     }
+    let construnctionSite = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
+        filter: function(str){ return str.structureType === STRUCTURE_RAMPART && str.hits < 10000}
+    });
+    if(construnctionSite === null)
+        construnctionSite = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
+    let wall = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+        filter: function(s) {
+            return s.structureType === STRUCTURE_WALL && s.hits < creep.room.memory.defenseHitpoints;
+        }
+    });
     if (creep.memory.state === 'refilling' && creep.carry.energy === creep.carryCapacity) {
         if (creep.room.memory.repair.length > 0) {
             creep.memory.state = 'repairing';
         }
-        else if (creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES) !== null) {
+        else if (construnctionSite !== null) {
             creep.memory.state = 'building';
+        }
+        else if (wall !== null) {
+            creep.memory.state = 'upgradeWalls';
         }
         else {
             creep.memory.state = 'upgrading';
@@ -44,9 +57,15 @@ var roleBuilder = function (creep) {
 
     var target;
     if (creep.memory.state === 'building') {
-        target = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
+        target = construnctionSite;
         if (target !== null) {
-            if (creep.build(target) == ERR_NOT_IN_RANGE) {
+            var res = 0;
+            if (construnctionSite.hits !== undefined) {
+                res = creep.repair(target);
+            } else {
+                res = creep.build(target);
+            }
+            if (res == ERR_NOT_IN_RANGE) {
                 actionMove.moveTo(creep, target.pos, 2);
             } else {
                 creep.memory.moving = false;
@@ -58,6 +77,15 @@ var roleBuilder = function (creep) {
     }
     if (creep.memory.state === 'repairing') {
         target = Game.getObjectById(creep.room.memory.repair[0]);
+        if (creep.repair(target) == ERR_NOT_IN_RANGE) {
+            actionMove.moveTo(creep, target.pos, 2);
+        } else {
+            creep.memory.moving = false;
+        }
+        return;
+    }
+    if (creep.memory.state === 'upgradeWalls') {
+        target = wall;
         if (creep.repair(target) == ERR_NOT_IN_RANGE) {
             actionMove.moveTo(creep, target.pos, 2);
         } else {

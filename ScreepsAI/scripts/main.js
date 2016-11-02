@@ -70,6 +70,10 @@ var roomPlanning = function() {
             room.memory.energy.canUpgrade = true;
             room.memory.energy.canBuild = true;
         }
+        if (room.memory.wallHitpoints === undefined) {
+            room.memory.wallHitpoints = 100000;
+        }
+        
         planningInfrastructure.planRoomConstruction(room);
         planningUnits.buildUnits(room);
         //reset jobs
@@ -123,7 +127,8 @@ var defendRoom = function (room) {
                 continue;
             var repairs = towers[t].pos.findInRange(FIND_STRUCTURES, 5, {
                 filter: function (structure) {
-                    return structure.hits <= structure.hitsMax - 800;
+                    return (structure.hits <= structure.hitsMax - 800 && structure.structureType !== STRUCTURE_RAMPART) ||
+                           (structure.hits <= room.memory.defenseHitpoints - 800 && structure.structureType === STRUCTURE_RAMPART);
                 }
             });
             if (repairs.length > 0) {

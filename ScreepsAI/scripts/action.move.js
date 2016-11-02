@@ -75,6 +75,9 @@ var continueMove = function (creep) {
         return false;
     }
     var posnew = new RoomPosition(creep.memory.path[index].x, creep.memory.path[index].y, creep.room.name);
+    if (creep.pos.getRangeTo(posnew) > 1) {
+        return moveTo(creep, posnew, 0);
+    }
     var stuff = posnew.look();
     var blocked = false;
     for (var i = 0; i < stuff.length; i++) {
