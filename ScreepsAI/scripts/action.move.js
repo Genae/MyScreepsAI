@@ -61,8 +61,10 @@ var followPath = function (creep, path) {
     return moveTo(creep, res[closestDist]);
 }
 var continueMove = function (creep) {
-    if (creep.fatigue > 0)
-        return true;
+    if (creep.fatigue > 0) {
+        if (creep.pos.x !== creep.memory.path[creep.memory.path.length - 1].x || creep.pos.y !== creep.memory.path[creep.memory.path.length - 1].y)
+            return true;
+    }
     var index = 0;
     for (var i = 0; i < creep.memory.path.length; i++) {
         if (creep.memory.path[i].x === creep.pos.x && creep.memory.path[i].y === creep.pos.y) {
@@ -73,6 +75,9 @@ var continueMove = function (creep) {
     if (index >= creep.memory.path.length) {
         creep.memory.moving = false;
         return false;
+    }
+    if (creep.memory.path.length > 20 && creep.memory.path.length - index <= 5 && creep.memory.pathTargets !== undefined) { //reevaluate path
+        return moveToAny(creep, creep.memory.pathTargets.pos, creep.memory.pathTargets.range);
     }
     var posnew = new RoomPosition(creep.memory.path[index].x, creep.memory.path[index].y, creep.room.name);
     if (creep.pos.getRangeTo(posnew) > 1) {

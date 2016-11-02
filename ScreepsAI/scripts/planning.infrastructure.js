@@ -37,8 +37,16 @@ var planRoomConstruction = function (room) {
         return;
     if (improveDefense(room))
         return;
-    if (room.memory.improveTo < room.controller.level)
+    if (room.memory.improveTo < room.controller.level) {
         room.memory.improveTo++;
+        return;
+    }
+
+    //if there is nothing else to do: improve wallstrength
+    if (room.memory.wallHitpoints < RAMPART_HITS_MAX[room.controller.level]) {
+        var newHits = room.memory.wallHitpoints + 100000;
+        room.memory.wallHitpoints = Math.min(newHits, RAMPART_HITS_MAX[room.controller.level]);
+    }
 }
 
 ///
@@ -143,6 +151,14 @@ var improveDefense = function (room) {
     }
     if (room.find(FIND_CONSTRUCTION_SITES).length > 0)
         return true;
+    let wall = room.find(FIND_STRUCTURES, {
+        filter: function (s) {
+            return s.structureType === STRUCTURE_WALL && s.hits < room.memory.wallHitpoints;
+        }
+    });
+    if (wall.length > 0) {
+        return true;
+    }
 
     if (room.memory.improveTo >= 4) {
         var spawn = Game.getObjectById(room.memory.spawn.resource.id);
@@ -174,7 +190,22 @@ var improveDefense = function (room) {
                 for (let p = 0; p < myWall.walls.length; p++) {
                     for (let dx = -1; dx <= 1; dx++) {
                         for (let dy = -1; dy <= 1; dy++) {
-                            new RoomPosition(myWall.walls[p].pos.x + dx, myWall.walls[p].pos.y + dy, myWall.walls[p].pos.roomName).createConstructionSite(STRUCTURE_WALL);
+                            var hasRampart = false;
+                            var pos = new RoomPosition(myWall.walls[p].pos.x + dx, myWall.walls[p].pos.y + dy, myWall.walls[p].pos.roomName);
+                            var stuff = pos.lookFor(LOOK_STRUCTURES);
+                            for (let i = 0; i < stuff.length; i++) {
+                                if (stuff[i].structureType === STRUCTURE_RAMPART) {
+                                    hasRampart = true;
+                                    break;
+                                }
+                                if (stuff[i].structureType === STRUCTURE_ROAD) {
+                                    pos.createConstructionSite(STRUCTURE_RAMPART);
+                                    hasRampart = true;
+                                    break;
+                                }
+                            }
+                            if(!hasRampart)
+                                pos.createConstructionSite(STRUCTURE_WALL);
                         }
                     }
                     

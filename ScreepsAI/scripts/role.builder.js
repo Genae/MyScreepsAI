@@ -1,13 +1,14 @@
 var actionMove = require('action.move');
 
 var roleBuilder = function (creep) {
-    if (creep.memory.moving) {
+    if (creep.memory.moving && creep.room.name === creep.memory.roomName) {
         if (actionMove.continueMove(creep)) {
             if (!(creep.memory.state === 'upgrading' && creep.pos.getRangeTo(creep.room.controller.pos.x, creep.room.controller.pos.y) < 4)) {
                 return;
             }
         }
-    }
+    } else
+        creep.memory.moving = false;
     //state machine
     if (creep.carry.energy === 0 && creep.memory.state !== 'refilling' || (Game.rooms[creep.memory.roomName].memory.repair.length === 0 && creep.memory.state === 'repairing')) {
         creep.memory.state = 'refilling';
