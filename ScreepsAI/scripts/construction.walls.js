@@ -54,7 +54,7 @@ var createWalls = function (room, direction) {
             for (let s = 0; s < wallSlots[p].walls.length; s++) {
                 wallSlots[p].walls[s].type = STRUCTURE_RAMPART;
             }
-            wallSlots[p].exits.push(wallSlots[p].walls[Math.floor(wallSlots[p].length / 2)].pos);
+            wallSlots[p].exits.push(wallSlots[p].walls[Math.floor(wallSlots[p].walls.length / 2)].pos);
         }
         else if (wallSlots[p].walls.length <= 15) {
             var center = Math.floor(wallSlots[p].walls.length / 2);

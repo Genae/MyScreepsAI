@@ -18,7 +18,6 @@ var changeToRefilling = function (creep, myExt) {
     //if i have extensions to fill and not enough energy -> refill
     if (myExt !== undefined && myExt !== null && creep.carry.energy < creep.carryCapacity) {
         creep.memory.state = STATE_REFILLING;
-        console.log(creep.memory.state);
         return true;
     }
     return false;
@@ -28,7 +27,6 @@ var changeToInjecting = function (creep, myExt) {
     //if i have extensions to fill and enough energy to do so -> inject
     if (myExt !== undefined && myExt !== null && (creep.carry.energy - myExt.energy >= myExt.energyCapacity || creep.carry.energy === creep.carryCapacity)) {
         creep.memory.state = STATE_INJECTING;
-        console.log(creep.memory.state);
         return true;
     }
     return false;
@@ -38,7 +36,6 @@ var changeToCollecting = function (creep, myExt, droppedEnergy) {
     //if there is no extension to fill -> check if there is energy to collect
     if ((myExt === undefined || myExt === null) && creep.carry.energy === 0 && droppedEnergy.length > 0) {
         creep.memory.state = STATE_COLLECTING;
-        console.log(creep.memory.state);
         return true;
     }
     return false;
@@ -48,7 +45,6 @@ var changeToEmptying = function (creep, myExt) {
     //if there is no extension to fill -> empty creep
     if (myExt === undefined || myExt === null) {
         creep.memory.state = STATE_EMPTYING;
-        console.log(creep.memory.state);
         return true;
     }
     return false;

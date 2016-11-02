@@ -14,7 +14,7 @@ var moveToAny = function (creep, pos, range) {
             for (var dx = -myrange; dx <= myrange; dx++) {
                 for (var dy = -myrange; dy <= myrange; dy++) {
                     var posi = new RoomPosition(pos[i].x + dx, pos[i].y + dy, pos[i].roomName);
-                    if (!isBlocked(posi)) {
+                    if (pos[i].x + dx > 0 && pos[i].x + dx < 49 && pos[i].y + dy > 0 && pos[i].y + dy < 49 && !isBlocked(posi)) {
                         unblockedPos.push(posi);
                     }
                 }

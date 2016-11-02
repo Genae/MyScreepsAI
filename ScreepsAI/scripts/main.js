@@ -128,7 +128,7 @@ var defendRoom = function (room) {
             var repairs = towers[t].pos.findInRange(FIND_STRUCTURES, 5, {
                 filter: function (structure) {
                     return (structure.hits <= structure.hitsMax - 800 && structure.structureType !== STRUCTURE_RAMPART) ||
-                           (structure.hits <= room.memory.defenseHitpoints - 800 && structure.structureType === STRUCTURE_RAMPART);
+                           (structure.hits <= room.memory.wallHitpoints - 800 && structure.structureType === STRUCTURE_RAMPART);
                 }
             });
             if (repairs.length > 0) {
