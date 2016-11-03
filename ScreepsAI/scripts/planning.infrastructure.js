@@ -43,9 +43,9 @@ var planRoomConstruction = function (room) {
     }
 
     //if there is nothing else to do: improve wallstrength
-    if (room.memory.wallHitpoints < RAMPART_HITS_MAX[room.controller.level]) {
+    if (room.memory.wallHitpoints < RAMPART_HITS_MAX[room.controller.level] / 10) {
         var newHits = room.memory.wallHitpoints + 100000;
-        room.memory.wallHitpoints = Math.min(newHits, RAMPART_HITS_MAX[room.controller.level]);
+        room.memory.wallHitpoints = Math.min(newHits, RAMPART_HITS_MAX[room.controller.level]/10);
     }
 }
 

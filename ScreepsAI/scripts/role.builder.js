@@ -1,6 +1,6 @@
 var actionMove = require('action.move');
 
-var roleBuilder = function (creep) {
+var roleBuilder = function (creep, storage, droppedEnergy) {
     if (creep.memory.moving && creep.room.name === creep.memory.roomName) {
         if (actionMove.continueMove(creep)) {
             if (!(creep.memory.state === 'upgrading' && creep.pos.getRangeTo(creep.room.controller.pos.x, creep.room.controller.pos.y) < 4)) {
@@ -56,14 +56,26 @@ var roleBuilder = function (creep) {
     var rechargeSpots = Game.rooms[creep.memory.roomName].memory.spawn.rechargeSpots;
     //run states
     if (creep.memory.state === 'refilling') {
-        //is this spot ok?
-        for (var rs = 0; rs < rechargeSpots.length; rs++) {
-            if (rechargeSpots[rs].pos.x === creep.pos.x && rechargeSpots[rs].pos.y === creep.pos.y) {
-                creep.withdraw(Game.getObjectById(Game.rooms[creep.memory.roomName].memory.spawn.resource.id), RESOURCE_ENERGY);
-                return;
+        if (droppedEnergy.length > 0) {
+            var myDrop = creep.pos.findClosestByRange(droppedEnergy);
+            myDrop.room.memory.energy.reservedDrops.push(myDrop);
+            if (creep.pickup(myDrop) === ERR_NOT_IN_RANGE)
+                actionMove.moveTo(creep, myDrop.pos, 1);
+        } else if (storage.length > 0) {
+            var myStor = creep.pos.findClosestByRange(storage);
+            if(creep.withdraw(myStor, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE)
+                actionMove.moveTo(creep, myStor.pos, 1);
+        } else {
+            //is this spot ok?
+            for (var rs = 0; rs < rechargeSpots.length; rs++) {
+                if (rechargeSpots[rs].pos.x === creep.pos.x && rechargeSpots[rs].pos.y === creep.pos.y) {
+                    creep.withdraw(Game.getObjectById(Game.rooms[creep.memory.roomName].memory.spawn.resource.id), RESOURCE_ENERGY);
+                    return;
+                }
             }
+            actionMove.moveToAny(creep, rechargeSpots.map(function (a) { return a.pos; }));
         }
-        actionMove.moveToAny(creep, rechargeSpots.map(function (a) { return a.pos; }));
+        
         return;
     }
     else if (creep.memory.rechargeSpot !== undefined) {

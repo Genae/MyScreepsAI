@@ -3,78 +3,115 @@ var roleBuilder = require('role.builder');
 var roleUpgrader = require('role.upgrader');
 var roleAttacker = require('role.attacker');
 var roleDistributor = require('role.distributor');
+var roleOutharvester = require('role.outharvester');
 var planningUnits = require('planning.units');
 var planningInfrastructure = require('planning.infrastructure');
 
 module.exports.loop = function () {
-
+    var errors = [];
+    var e;
     try {
-        removeDeadCreeps();
-    } catch (e) {
-        console.log("Error while removing dead creeps: " + e);
-    }
+        try {
+            removeDeadCreeps();
+        } catch (e) {
+            console.log("Error while removing dead creeps: " + e);
+            errors.push(e);
+        }
+        
+        try {
+            roomPlanning();
+        } catch (e) {
+            console.log("Error while room planning: " + e);
+            errors.push(e);
+        }
 
-    try {
-        roomPlanning();
-    } catch (e) {
-        console.log("Error while room planning: " + e);
-    }
+        var pois;
+        try {
+            pois = getAllRoomsPOI();
+        } catch (e) {
+            console.log("Error while getting pois: " + e);
+            errors.push(e);
+        }
+        
 
-    var pois;
-    try {
-        pois = getAllRoomsPOI();
+        var builders = [];
+        //creepAI
+        for (var name in Game.creeps) {
+            try {
+                var creep = Game.creeps[name];
+                if (creep.memory.roomName === undefined)
+                    creep.memory.roomName = creep.room.name;
+                let homeRoom = Game.rooms[creep.memory.roomName];
+
+                if (creep.memory.role === 'harvester') {
+                    roleHarvester.roleHarvester(creep);
+                }
+                if (creep.memory.role === 'outharvester') {
+                    roleOutharvester.roleOutHarvester(creep);
+                }
+                if (creep.memory.role === 'builder') {
+                    builders.push(creep);
+                }
+                if (creep.memory.role === 'upgrader') {
+                    roleUpgrader.roleUpgrader(creep, pois[homeRoom.name].storage);
+                }
+                if (creep.memory.role === 'attacker') {
+                    roleAttacker.roleAttacker(creep);
+                }
+                if (creep.memory.role === 'distributor') {
+                    roleDistributor.roleDistributor(creep, homeRoom, pois[homeRoom.name].extensions, pois[homeRoom.name].droppedEnergy, pois[homeRoom.name].storage);
+                }
+            } catch (e) {
+                console.log("creep " + name + " has error: " + e);
+                errors.push(e);
+            }
+
+        }
+        for (var b = 0; b < builders.length; b++) {
+            let homeRoom = Game.rooms[builders[b].memory.roomName];
+            try {
+                roleBuilder.roleBuilder(builders[b], pois[homeRoom.name].storage, pois[homeRoom.name].droppedEnergy);
+            } catch (e) {
+                console.log("error with builder: " + builders[b].name);
+                errors.push(e);
+            }
+        }
     } catch (e) {
-        console.log("Error while getting pois: " + e);
+        errors.push(e);
+
     }
     
-
-    var builders = [];
-    //creepAI
-    for (var name in Game.creeps) {
-        try {
-            var creep = Game.creeps[name];
-            if (creep.memory.roomName === undefined)
-                creep.memory.roomName = creep.room.name;
-            var homeRoom = Game.rooms[creep.memory.roomName];
-
-            if (creep.memory.role === 'harvester') {
-                roleHarvester.roleHarvester(creep);
-            }
-            if (creep.memory.role === 'builder') {
-                builders.push(creep);
-            }
-            if (creep.memory.role === 'upgrader') {
-                roleUpgrader.roleUpgrader(creep);
-            }
-            if (creep.memory.role === 'attacker') {
-                roleAttacker.roleAttacker(creep);
-            }
-            if (creep.memory.role === 'distributor') {
-                roleDistributor.roleDistributor(creep, homeRoom, pois[homeRoom.name].extensions, pois[homeRoom.name].droppedEnergy);
-            }
-        } catch (e) {
-            console.log("creep " + name + " has error: " + e);
-        } 
-        
-    }
-    for (var b = 0; b < builders.length; b++) {
-        try {
-            roleBuilder.roleBuilder(builders[b]);
-        } catch (e) {
-            console.log("error with builder: " + builders[b].name);
-        }
-    }
     //console.log("cpu: " + Game.cpu.getUsed());
+
+    if (errors.length > 0) {
+        console.log(errors.length + " errors");
+        throw errors[0];
+    }
 }
 
 var removeDeadCreeps = function() {
-    for (var i in Memory.creeps) {
+    for (let i in Memory.creeps) {
         if (!Game.creeps[i]) {
             if (Memory.creeps[i].rechargeSpot !== undefined) {
                 var cr = Game.rooms[Memory.creeps[i].roomName];
                 cr.memory.spawn.rechargeSpots[Memory.creeps[i].rechargeSpot].reserved = false;
             }
             delete Memory.creeps[i];
+        }
+    }
+    for (let name in Game.rooms) {
+        var room = Game.rooms[name];
+        if (room.memory.energy !== undefined) {
+            if (room.memory.energy.reservedDrops === undefined) {
+                room.memory.energy.reservedDrops = [];
+            }
+
+            var drops = [];
+            for (let i = 0; i < room.memory.energy.reservedDrops.length; i++) {
+                if (Game.getObjectById(room.memory.energy.reservedDrops[i]) !== null)
+                    drops.push(room.memory.energy.reservedDrops[i]);
+            }
+            room.memory.energy.reservedDrops = drops;
         }
     }
 }
@@ -95,14 +132,16 @@ var roomPlanning = function() {
         if (room.memory.wallHitpoints === undefined) {
             room.memory.wallHitpoints = 100000;
         }
+
+        checkSlaveRooms(room, spawn);
         
         planningInfrastructure.planRoomConstruction(room);
         planningUnits.buildUnits(room);
         //reset jobs
         room.memory.lastJobs = room.memory.thisJobs;
-        room.memory.thisJobs = [];
+        room.memory.thisJobs = {};
         if (room.memory.lastJobs === undefined) {
-            room.memory.lastJobs = [];
+            room.memory.lastJobs = {};
         }
 
         //DEFENCE
@@ -164,25 +203,56 @@ var defendRoom = function (room) {
 
 var getAllRoomsPOI = function () {
     var pois = {};
+    
     for (var roomName in Game.rooms) {
         var room = Game.rooms[roomName];
         var structures = room.find(FIND_MY_STRUCTURES);
         var extensions = [];
+        var storage = [];
         for (let i = 0; i < structures.length; i++) {
             var structure = structures[i];
             if (structure.structureType === STRUCTURE_EXTENSION && structure.energy < structure.energyCapacity) {
                 extensions.push(structure);
             }
-            if (structure.structureType === STRUCTURE_TOWER && structure.energy < structure.energyCapacity && room.memory.energy.canBuild) {
+            if (structure.structureType === STRUCTURE_TOWER && structure.energy < structure.energyCapacity) {
                 extensions.push(structure);
             }
-        }
-        var droppedEnergy = room.find(FIND_DROPPED_ENERGY, {
-            filter: (energy) => {
-                return (energy.amount > 50);
+            if (structure.structureType === STRUCTURE_STORAGE) {
+                storage.push(structure);
             }
-        });
-        pois[roomName] = ({ extensions: extensions, droppedEnergy: droppedEnergy });
+        }
+        var droppedEnergy;
+        if (room.memory.energy !== undefined) {
+            droppedEnergy = room.find(FIND_DROPPED_ENERGY, {
+                filter: (energy) => {
+                    return (energy.amount > 50) && energy.room.memory.energy.reservedDrops.indexOf(energy.id) === -1;
+                }
+            });
+        }
+
+        pois[roomName] = ({ extensions: extensions, droppedEnergy: droppedEnergy, storage: storage });
     }
     return pois;
+}
+
+var checkSlaveRooms = function (room, spawn) {
+    for (let name in Game.flags) {
+        var flag = Game.flags[name];
+        if (flag.color === COLOR_BROWN) {
+            if (Memory.rooms[flag.pos.roomName] === undefined) {
+                Memory.rooms[flag.pos.roomName] = {};
+            }
+            if (Memory.rooms[flag.pos.roomName].masterRoom === undefined) {
+                if (false) {
+                    //TODO
+                } else {
+                    Memory.rooms[flag.pos.roomName].masterRoom = spawn.pos.roomName;
+                    if (Game.rooms[spawn.pos.roomName].memory.slaveRooms === undefined) {
+                        Game.rooms[spawn.pos.roomName].memory.slaveRooms = [];
+                    }
+                    Game.rooms[spawn.pos.roomName].memory.slaveRooms.push(flag.pos.roomName);
+                }
+            }
+        }
+    }
 }

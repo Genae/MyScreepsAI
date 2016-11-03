@@ -1,9 +1,11 @@
 var actionMove = require('action.move');
 
-var roleUpgrader = function (creep) {
+var roleUpgrader = function (creep, storage) {
     if (creep.memory.moving) {
         if (actionMove.continueMove(creep)) {
-            return;
+            if (!(creep.memory.state === 'upgrading' && creep.pos.getRangeTo(creep.room.controller.pos.x, creep.room.controller.pos.y) < 4)) {
+                return;
+            }
         }
     }
     //state machine
@@ -16,20 +18,25 @@ var roleUpgrader = function (creep) {
 
     var contrConstr = creep.room.memory.controller;
     if (creep.memory.state === 'refilling') {
-        if (!creep.room.memory.energy.canUpgrade || creep.withdraw(creep.room.find(FIND_MY_SPAWNS)[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+        if (storage.length > 0) {
+            var myStor = creep.pos.findClosestByRange(storage);
+            if (creep.withdraw(myStor, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE)
+                actionMove.moveTo(creep, myStor.pos, 1);
+        } else if (!creep.room.memory.energy.canUpgrade || creep.withdraw(creep.room.find(FIND_MY_SPAWNS)[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
             actionMove.followPath(creep, contrConstr.pathTo.path.slice(0).reverse());
         }
         return;
     }
     if (creep.memory.state === 'upgrading') {
         var controller = creep.room.controller;
-        if (creep.upgradeController(controller) == ERR_NOT_IN_RANGE) {
+        if (creep.pos.getRangeTo(controller.pos.x, controller.pos.y) > 2) {
             if (creep.pos.getRangeTo(controller.pos.x, controller.pos.y) < 4) {
-                actionMove.moveTo(creep, controller.pos, 3);
+                actionMove.moveTo(creep, controller.pos, 1);
             } else {
-                actionMove.followPath(creep, contrConstr.pathTo.path);
+                actionMove.followPath(creep, creep.room.memory.controller.pathTo.path);
             }
         } else {
+            creep.upgradeController(controller);
             creep.memory.moving = false;
         }
     }
