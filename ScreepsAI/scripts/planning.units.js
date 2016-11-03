@@ -17,7 +17,7 @@ var getLevel = function (room) {
     return 0;
 }
 
-var getStoredEnergy = function(room) {
+var getStoredEnergy = function (room) {
     var storage = room.find(FIND_MY_STRUCTURES, {
         filter: { structureType: STRUCTURE_STORAGE }
     });
@@ -61,21 +61,26 @@ var buildUnits = function (room) {
             myUnits[role]++;
         }
     }
-    
+
     for (var t = 0; t < myTargets.length; t++) {
         if (myUnits[myTargets[t].role] === undefined)
             myUnits[myTargets[t].role] = 0;
         if (myUnits[myTargets[t].role] < myTargets[t].amount) {
-            if (myTargets[t].role === 'builder' && (room.memory.energy.fullSpawn > 5 && getStoredEnergy(room) === -1) || (getLevel(room) < 5 || getStoredEnergy(room) > myUnits[myTargets[t].role] * 10000)) {
-                spawn.createCreep(myTargets[t].body, undefined, { role: myTargets[t].role });
-                continue;
-            }
-            else if (myTargets[t].role === 'upgrader' && (getStoredEnergy(room) > myUnits[myTargets[t].role] * 10000) || myUnits[myTargets[t].role] === 0) {
-                spawn.createCreep(myTargets[t].body, undefined, { role: myTargets[t].role });
-                if (myUnits[myTargets[t].role] > 1) {
+            if (myTargets[t].role === 'builder') {
+                if ((room.memory.energy.fullSpawn > 5 && getStoredEnergy(room) === -1) || (getLevel(room) < 5 || getStoredEnergy(room) > myUnits[myTargets[t].role] * 10000)) {
+                    spawn.createCreep(myTargets[t].body, undefined, { role: myTargets[t].role });
+                }
+                else {
                     continue;
+                }
+            }
+            else if (myTargets[t].role === 'upgrader') {
+                if ((getStoredEnergy(room) > myUnits[myTargets[t].role] * 10000) || myUnits[myTargets[t].role] === 0) {
+                    spawn.createCreep(myTargets[t].body, undefined, { role: myTargets[t].role });
                 } else {
-                    return;
+                    if (myUnits[myTargets[t].role] === 0)
+                        return;
+                    continue;
                 }
             }
             else if (myTargets[t].role !== 'upgrader' && myTargets[t].role !== 'builder') {
@@ -103,7 +108,7 @@ var getTargets = function (room) {
         if (Game.flags[flag].color === COLOR_RED) {
             attackFlags.push(Game.flags[flag]);
         }
-        if (Game.flags[flag].color === COLOR_BROWN && Memory.rooms[Game.flags[flag].pos.roomName].masterRoom !== room.name) {
+        if (Game.flags[flag].color === COLOR_BROWN && Memory.rooms[Game.flags[flag].pos.roomName].masterRoom === room.name) {
             miningFlags.push(Game.flags[flag]);
         }
     }
