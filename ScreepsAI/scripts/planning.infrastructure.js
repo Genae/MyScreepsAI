@@ -165,14 +165,18 @@ var improveDefense = function (room) {
         for (let i = 0; i < room.memory.walls.length; i++) {
             var myWall = room.memory.walls[i];
             if (myWall.improvedTo === 0) {
-                let path = spawn.pos.findPathTo(myWall.exits[0].x, myWall.exits[0].y);
+                let path = spawn.pos.findPathTo(myWall.exits[0].x, myWall.exits[0].y, {
+                    ignoreCreeps: true
+                });
                 improvePath(path, room);
                 myWall.improvedTo = 1;
                 return true;
             }
             else if (myWall.improvedTo === 1) {
                 if (myWall.exits.length === 2) {
-                    let path = spawn.pos.findPathTo(myWall.exits[1].x, myWall.exits[1].y);
+                    let path = spawn.pos.findPathTo(myWall.exits[1].x, myWall.exits[1].y, {
+                        ignoreCreeps: true
+                    });
                     improvePath(path, room);
                 }
                 myWall.improvedTo = 2;
@@ -183,6 +187,7 @@ var improveDefense = function (room) {
                     for (let dx = -1; dx <= 1; dx++) {
                         for (let dy = -1; dy <= 1; dy++) {
                             new RoomPosition(myWall.exits[e].x + dx, myWall.exits[e].y + dy, myWall.exits[e].roomName).createConstructionSite(STRUCTURE_RAMPART);
+                            room.memory.wallHitpoints = 100000;
                         }
                     }
                     
@@ -200,12 +205,15 @@ var improveDefense = function (room) {
                                 }
                                 if (stuff[i].structureType === STRUCTURE_ROAD) {
                                     pos.createConstructionSite(STRUCTURE_RAMPART);
+                                    room.memory.wallHitpoints = 100000;
                                     hasRampart = true;
                                     break;
                                 }
                             }
-                            if(!hasRampart)
+                            if (!hasRampart) {
                                 pos.createConstructionSite(STRUCTURE_WALL);
+                                room.memory.wallHitpoints = 100000;
+                            }
                         }
                     }
                     
@@ -234,7 +242,7 @@ var checkBrokenStuff = function (room) {
     var targets = room.find(FIND_STRUCTURES, {
         filter: (structure) => {
             return (structure.hits < structure.hitsMax / 2 && structure.structureType !== STRUCTURE_WALL && structure.structureType !== STRUCTURE_RAMPART) ||
-                    structure.structureType === STRUCTURE_RAMPART && structure.hits < room.memory.wallHitpoints * 0.7;
+                    structure.structureType === STRUCTURE_RAMPART && structure.hits < room.memory.wallHitpoints * 0.75;
         }
     });
     for (let i = 0; i < targets.length; i++) {

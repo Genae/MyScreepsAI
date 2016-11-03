@@ -8,39 +8,61 @@ var planningInfrastructure = require('planning.infrastructure');
 
 module.exports.loop = function () {
 
-    removeDeadCreeps();
+    try {
+        removeDeadCreeps();
+    } catch (e) {
+        console.log("Error while removing dead creeps: " + e);
+    }
 
-    roomPlanning();
+    try {
+        roomPlanning();
+    } catch (e) {
+        console.log("Error while room planning: " + e);
+    }
 
-    var pois = getAllRoomsPOI();
+    var pois;
+    try {
+        pois = getAllRoomsPOI();
+    } catch (e) {
+        console.log("Error while getting pois: " + e);
+    }
     
 
     var builders = [];
     //creepAI
     for (var name in Game.creeps) {
-        var creep = Game.creeps[name];
-        if (creep.memory.roomName === undefined)
-            creep.memory.roomName = creep.room.name;
-        var homeRoom = Game.rooms[creep.memory.roomName];
+        try {
+            var creep = Game.creeps[name];
+            if (creep.memory.roomName === undefined)
+                creep.memory.roomName = creep.room.name;
+            var homeRoom = Game.rooms[creep.memory.roomName];
 
-        if (creep.memory.role === 'harvester') {
-            roleHarvester.roleHarvester(creep);
-        }
-        if (creep.memory.role === 'builder') {
-            builders.push(creep);
-        }
-        if (creep.memory.role === 'upgrader') {
-            roleUpgrader.roleUpgrader(creep);
-        }
-        if (creep.memory.role === 'attacker') {
-            roleAttacker.roleAttacker(creep);
-        }
-        if (creep.memory.role === 'distributor') {
-            roleDistributor.roleDistributor(creep, homeRoom, pois[homeRoom.name].extensions, pois[homeRoom.name].droppedEnergy);
-        }
+            if (creep.memory.role === 'harvester') {
+                roleHarvester.roleHarvester(creep);
+            }
+            if (creep.memory.role === 'builder') {
+                builders.push(creep);
+            }
+            if (creep.memory.role === 'upgrader') {
+                roleUpgrader.roleUpgrader(creep);
+            }
+            if (creep.memory.role === 'attacker') {
+                roleAttacker.roleAttacker(creep);
+            }
+            if (creep.memory.role === 'distributor') {
+                roleDistributor.roleDistributor(creep, homeRoom, pois[homeRoom.name].extensions, pois[homeRoom.name].droppedEnergy);
+            }
+        } catch (e) {
+            console.log("creep " + name + " has error: " + e);
+        } 
+        
     }
     for (var b = 0; b < builders.length; b++) {
-        roleBuilder.roleBuilder(builders[b]);
+        try {
+            roleBuilder.roleBuilder(builders[b]);
+        } catch (e) {
+            console.log("error with builder: " + builders[b].name);
+        }
     }
     //console.log("cpu: " + Game.cpu.getUsed());
 }
@@ -105,8 +127,10 @@ var defendRoom = function (room) {
         for (var name in Game.creeps) {
             var creep = Game.creeps[name];
             if (room.name === creep.room.name) {
-                if (creep.memory.role === 'fighter') {
+                if (creep.memory.role === 'attacker') {
                     //fight
+                } else if (creep.memory.role === 'builder') {
+                    //dont care
                 } else {
                     var targets = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 6);
                     for (t = 0; t < targets.length; t++) {
@@ -127,8 +151,8 @@ var defendRoom = function (room) {
                 continue;
             var repairs = towers[t].pos.findInRange(FIND_STRUCTURES, 5, {
                 filter: function (structure) {
-                    return (structure.hits <= structure.hitsMax - 800 && structure.structureType !== STRUCTURE_RAMPART) ||
-                           (structure.hits <= room.memory.wallHitpoints - 800 && structure.structureType === STRUCTURE_RAMPART);
+                    return (structure.hits <= structure.hitsMax - 2000 && structure.structureType !== STRUCTURE_RAMPART) ||
+                           (structure.hits <= room.memory.wallHitpoints - 2000 && structure.structureType === STRUCTURE_RAMPART);
                 }
             });
             if (repairs.length > 0) {

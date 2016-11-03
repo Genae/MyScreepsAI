@@ -9,10 +9,7 @@ var roleBuilder = function (creep) {
         }
     } else
         creep.memory.moving = false;
-    //state machine
-    if (creep.carry.energy === 0 && creep.memory.state !== 'refilling' || (Game.rooms[creep.memory.roomName].memory.repair.length === 0 && creep.memory.state === 'repairing')) {
-        creep.memory.state = 'refilling';
-    }
+
     let construnctionSite = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
         filter: function (str) { return str.structureType === STRUCTURE_RAMPART && str.hits < 10000 }
     });
@@ -23,6 +20,24 @@ var roleBuilder = function (creep) {
             return s.structureType === STRUCTURE_WALL && s.hits < creep.room.memory.wallHitpoints;
         }
     });
+    var repairTarget = null;
+    if (creep.memory.state === 'repairing') {
+        if (Game.rooms[creep.memory.roomName].memory.repair.length === 0) {
+            var targets = creep.pos.findInRange(FIND_STRUCTURES, 3, {
+                filter: function(s) { return s.hits < s.hitsMax }
+            });
+            if(targets.length > 0)
+                repairTarget = targets[0];
+        } else {
+            repairTarget = Game.getObjectById(Game.rooms[creep.memory.roomName].memory.repair[0]);
+        }
+    }
+    //state machine
+    if (creep.carry.energy === 0 && creep.memory.state !== 'refilling' || (repairTarget  === null && creep.memory.state === 'repairing') ||
+        (wall === null && creep.memory.state === 'upgradeWalls')) {
+        creep.memory.state = 'refilling';
+    }
+    
     if (creep.memory.state === 'refilling' && creep.carry.energy === creep.carryCapacity) {
         if (creep.room.memory.repair.length > 0) {
             creep.memory.state = 'repairing';
@@ -77,7 +92,7 @@ var roleBuilder = function (creep) {
         return;
     }
     if (creep.memory.state === 'repairing') {
-        target = Game.getObjectById(Game.rooms[creep.memory.roomName].memory.repair[0]);
+        target = repairTarget;
         if (creep.repair(target) == ERR_NOT_IN_RANGE) {
             actionMove.moveTo(creep, target.pos, 2);
         } else {

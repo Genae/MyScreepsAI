@@ -55,7 +55,7 @@ var changeToEmptying = function (creep, myExt) {
 //////////////////
 var roleDistributor = function (creep, room, extensions, droppedEnergy) {
     
-    if (creep.memory.moving) {
+    if (creep.memory.moving && creep.room.name === creep.memory.roomName) {
         if (actionMove.continueMove(creep)) {
             return true;
         }
