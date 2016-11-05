@@ -101,6 +101,7 @@ var improveOuterMines = function (room) {
             }
         }
     }
+    return false;
 }
 
 ///
@@ -265,7 +266,7 @@ var checkBrokenStuff = function (room) {
     var targets = room.find(FIND_STRUCTURES, {
         filter: (structure) => {
             return (structure.hits < structure.hitsMax / 2 && structure.structureType !== STRUCTURE_WALL && structure.structureType !== STRUCTURE_RAMPART) ||
-                    structure.structureType === STRUCTURE_RAMPART && structure.hits < room.memory.wallHitpoints * 0.75;
+                    structure.structureType === STRUCTURE_RAMPART && structure.hits < room.memory.wallHitpoints - 300000;
         }
     });
     for (let i = 0; i < targets.length; i++) {

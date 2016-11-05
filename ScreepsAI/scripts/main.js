@@ -4,6 +4,7 @@ var roleUpgrader = require('role.upgrader');
 var roleAttacker = require('role.attacker');
 var roleDistributor = require('role.distributor');
 var roleOutharvester = require('role.outharvester');
+var roleClaimer = require('role.claimer');
 var planningUnits = require('planning.units');
 var planningInfrastructure = require('planning.infrastructure');
 
@@ -67,6 +68,9 @@ module.exports.loop = function () {
                 if (creep.memory.role === 'distributor') {
                     roleDistributor.roleDistributor(creep, homeRoom, pois[homeRoom.name].extensions, pois[homeRoom.name].droppedEnergy, pois[homeRoom.name].storage);
                 }
+                if (creep.memory.role === 'claimer') {
+                    roleClaimer.roleClaimer(creep);
+                }
                 lastCpu = snapshotCpu(creep.memory.role, lastCpu, cpu);
             } catch (e) {
                 console.log("creep " + name + " has error: " + e);
@@ -97,8 +101,7 @@ module.exports.loop = function () {
     }
 
     for (var cp in cpu) {
-        if (cpu[cp] > 1)
-            console.log(cp + ": " + cpu[cp]);
+        //if (cpu[cp] > 1) console.log(cp + ": " + cpu[cp]);
     }
 }
 
@@ -139,17 +142,26 @@ var roomPlanning = function() {
     for (var roomName in Game.rooms) {
         var room = Game.rooms[roomName];
         var enemys = room.find(FIND_HOSTILE_CREEPS);
-        if (enemys.length > 0) {
+        var spawn = room.find(FIND_MY_STRUCTURES, {
+            filter: { structureType: STRUCTURE_SPAWN }
+        })[0];
+        if (enemys.length > 0 && (Memory.rooms[roomName].masterRoom !== undefined || (spawn !== undefined && spawn !== null))) {
             room.memory.underAttack = true;
         } else {
             room.memory.underAttack = false;
             
         }
-        var spawn = room.find(FIND_MY_STRUCTURES, {
-            filter: { structureType: STRUCTURE_SPAWN }
-        })[0];
         if (spawn === undefined || spawn === null)
             continue;
+
+        if (Memory.rooms[roomName].masterRoom !== undefined) {
+            var index = Memory.rooms[Memory.rooms[roomName].masterRoom].slaveRooms.indexOf(roomName);
+            if (index > -1) {
+                Memory.rooms[Memory.rooms[roomName].masterRoom].slaveRooms.splice(index, 1);
+            }
+        }
+        delete Memory.rooms[roomName].masterRoom;
+
         if (room.memory.energy === undefined) {
             room.memory.energy = {};
             room.memory.energy.canUpgrade = true;
