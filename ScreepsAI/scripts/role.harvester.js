@@ -24,17 +24,18 @@ var roleHarvester = function (creep) {
     if (creep.memory.state === undefined) { // this has no state if energy > 0 && energy < max, so start at mining
         creep.memory.state = 'mining';
     }
-    if (creep.carry.energy === 0) {
+    if (creep.carry.energy < creep.carryCapacity*0.2) {
         creep.memory.state = 'mining';
     }
+    var mymine = creep.room.memory.mines[creep.memory.job.mineIndex];
+    var mysource = Game.getObjectById(mymine.resource.id);
     if (creep.carry.energy === creep.carryCapacity) {
         creep.memory.state = 'emptying';
     }
 
 
-    var mymine = creep.room.memory.mines[creep.memory.job.mineIndex];
     if (creep.memory.state === 'mining') {
-        var mysource = Game.getObjectById(mymine.resource.id);
+        
         var h = creep.harvest(mysource);
         if (h === ERR_NOT_IN_RANGE || h === ERR_NOT_ENOUGH_RESOURCES) {
             if (creep.pos.getRangeTo(mymine.resource.pos.x, mymine.resource.pos.y) < 3 && h === ERR_NOT_ENOUGH_RESOURCES) {

@@ -41,6 +41,15 @@ var buildUnits = function (room) {
     if (spawn.canCreateCreep([MOVE]) < 0) {
         return; //can't do anything
     }
+    var anyUnderAntack;
+    for (var roomName in Memory.rooms) {
+        var myRoom = Memory.rooms[roomName];
+        if (myRoom.underAttack) {
+            anyUnderAntack = true;
+        }
+    }
+
+
     if (room.memory.energy.fullSpawn === undefined) {
         room.memory.energy.fullSpawn = 0;
     }
@@ -49,7 +58,7 @@ var buildUnits = function (room) {
     } else {
         room.memory.energy.fullSpawn = 0;
     }
-    var myTargets = getTargets(room);
+    var myTargets = getTargets(room, anyUnderAntack);
     var myUnits = {};
     for (var name in Game.creeps) {
         if (Game.creeps[name].ticksToLive < 90 || room.name !== Game.creeps[name].memory.roomName)
@@ -67,7 +76,7 @@ var buildUnits = function (room) {
             myUnits[myTargets[t].role] = 0;
         if (myUnits[myTargets[t].role] < myTargets[t].amount) {
             if (myTargets[t].role === 'builder') {
-                if ((room.memory.energy.fullSpawn > 5 && getStoredEnergy(room) === -1) || (getLevel(room) < 5 || getStoredEnergy(room) > myUnits[myTargets[t].role] * 10000)) {
+                if ((room.memory.energy.fullSpawn > 5 && getStoredEnergy(room) === -1) || (getLevel(room) < 5 || getStoredEnergy(room) > myUnits[myTargets[t].role] * 50000)) {
                     spawn.createCreep(myTargets[t].body, undefined, { role: myTargets[t].role });
                 }
                 else {
@@ -75,7 +84,7 @@ var buildUnits = function (room) {
                 }
             }
             else if (myTargets[t].role === 'upgrader') {
-                if ((getStoredEnergy(room) > myUnits[myTargets[t].role] * 10000) || myUnits[myTargets[t].role] === 0) {
+                if ((getStoredEnergy(room) > myUnits[myTargets[t].role] * 50000) || myUnits[myTargets[t].role] === 0) {
                     spawn.createCreep(myTargets[t].body, undefined, { role: myTargets[t].role });
                 } else {
                     if (myUnits[myTargets[t].role] === 0)
@@ -96,11 +105,55 @@ var buildUnits = function (room) {
 module.exports = { buildUnits: buildUnits };
 
 //Target Units
-var getTargets = function (room) {
+var getTargets = function (room, anyUnderAttack) {
     var level = getLevel(room);
     if (level === 0) {
         return [];
     }
+
+    if (anyUnderAttack) {
+        if (level === 1) {
+            for (var i = 0; i < room.memory.mines.length; i++) {
+                miningJobs += room.memory.mines[i].workingPlaces.length + 1;
+            }
+            return [
+                { role: 'harvester', amount: 2, body: [WORK, CARRY, MOVE] },
+                { role: 'upgrader', amount: 1, body: [WORK, CARRY, MOVE, CARRY, MOVE] }
+            ];
+        }
+        if (level === 2) {
+            for (var i = 0; i < room.memory.mines.length; i++) {
+                miningJobs += room.memory.mines[i].workingPlaces.length + 1;
+            }
+            return [
+                { role: 'harvester', amount: 2, body: [WORK, CARRY, MOVE] },
+                { role: 'distributor', amount: 1, body: [CARRY, MOVE, CARRY, MOVE] },
+            ];
+        }
+        if (level === 3) {
+            for (var i = 0; i < room.memory.mines.length; i++) {
+                miningJobs += room.memory.mines[i].workingPlaces.length + 1;
+            }
+            return [
+                { role: 'harvester', amount: 1, body: [WORK, CARRY, MOVE] },
+                { role: 'distributor', amount: 1, body: [CARRY, MOVE, CARRY, MOVE] }
+            ];
+        }
+        if (level === 4) {
+            return [
+                { role: 'harvester', amount: 1, body: [WORK, CARRY, MOVE] },
+                { role: 'distributor', amount: 1, body: [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE] },
+            ];
+        }
+        if (level === 5) {
+            return [
+                { role: 'harvester', amount: 1, body: [WORK, CARRY, MOVE] },
+                { role: 'distributor', amount: 1, body: [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE] },
+                { role: 'attacker', amount: 1, body: [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, RANGED_ATTACK] },
+            ];
+        }
+    }
+
     var miningJobs = 0;
     var attackFlags = [];
     var miningFlags = [];
@@ -168,10 +221,10 @@ var getTargets = function (room) {
             { role: 'upgrader', amount: 1, body: [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY] },
             { role: 'harvester', amount: room.memory.mines.length, body: [WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE] },
             { role: 'distributor', amount: 2, body: [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE] },
-            { role: 'outharvester', amount: miningFlags.length * 2, body: [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY] },
-            { role: 'attacker', amount: attackFlags.length * 5, body: [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE, MOVE, ATTACK] },
+            { role: 'attacker', amount: attackFlags.length * 5, body: [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, RANGED_ATTACK] },
+            { role: 'builder', amount: room.memory.spawn.rechargeSpots.length - 2, body: [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY] },
             { role: 'upgrader', amount: 5, body: [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY] },
-            { role: 'builder', amount: room.memory.spawn.rechargeSpots.length - 2, body: [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY] }
+            { role: 'outharvester', amount: miningFlags.length * 2, body: [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY] },
         ];
     }
 }

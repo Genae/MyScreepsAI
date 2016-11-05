@@ -12,14 +12,12 @@ var roleOutHarvester = function (creep) {
             Game.rooms[creep.memory.roomName].memory.thisJobs[creep.memory.job.flag] = 1;
         } else {
             Game.rooms[creep.memory.roomName].memory.thisJobs[creep.memory.job.flag]++;
+            if (Game.rooms[creep.memory.roomName].memory.thisJobs[creep.memory.job.flag] > 2) {
+                planningJobs.findJob(creep, creep.room);
+            }
         }
     }
     
-    if (creep.memory.moving) {
-        if (actionMove.continueMove(creep)) {
-            return;
-        }
-    }
     //state machine
     if (creep.memory.state === undefined) { // this has no state if energy > 0 && energy < max, so start at mining
         creep.memory.state = 'mining';
@@ -27,18 +25,31 @@ var roleOutHarvester = function (creep) {
     if (creep.carry.energy === 0) {
         creep.memory.state = 'mining';
     }
-    if (creep.carry.energy === creep.carryCapacity) {
+    var myflag = Game.flags[creep.memory.job.flag];
+    var mysource = creep.pos.findClosestByRange(FIND_SOURCES);
+    if (creep.carry.energy === creep.carryCapacity|| (mysource !== null && mysource.energy === 0 && creep.carry.energy> 0)) {
         creep.memory.state = 'emptying';
     }
 
 
-    var myflag = Game.flags[creep.memory.job.flag];
     if (creep.memory.state === 'mining') {
+        var energy = creep.pos.findInRange(FIND_DROPPED_ENERGY, 30, {
+            filter: function(e) { return e.amount > 1000 }
+        });
+        if (energy.length > 0) {
+            if (creep.pickup(energy[0]) === ERR_NOT_IN_RANGE) {
+                creep.moveTo(energy[0]);
+                return;
+            }
+        }
+        energy = creep.pos.findInRange(FIND_DROPPED_ENERGY, 2);
+        if (energy.length > 0) {
+            creep.pickup(energy[0]);
+        }
         if (creep.pos.getRangeTo(myflag) > 1) {
             creep.moveTo(myflag);
         }
         else {
-            var mysource = creep.pos.findClosestByRange(FIND_SOURCES);
             var h = creep.harvest(mysource);
             if (h === ERR_NOT_IN_RANGE || h === ERR_NOT_ENOUGH_RESOURCES) {
                 creep.moveTo(mysource);
@@ -47,6 +58,29 @@ var roleOutHarvester = function (creep) {
         
     }
     else if (creep.memory.state === 'emptying') {
+        if (creep.pos.x > 1 && creep.pos.y > 1 && creep.pos.x < 48 && creep.pos.y < 48) {
+            var constructionSites = creep.pos.findInRange(FIND_CONSTRUCTION_SITES, 3);
+            if (constructionSites.length > 0) {
+                creep.build(constructionSites[0]);
+                return;
+            }
+            if (constructionSites.length > 0) {
+                creep.build(constructionSites[0]);
+                return;
+            }
+            var repairSites = creep.pos.findInRange(FIND_STRUCTURES, 3, {
+                filter: function (s) {
+                    if (s.structureType === STRUCTURE_WALL)
+                        return false;
+                    return (s.structureType !== STRUCTURE_RAMPART && s.hits <= s.hitsMax - 2000) ||
+                        s.structureType === STRUCTURE_RAMPART && s.hits <= 100000;
+                }
+            });
+            if (repairSites.length > 0) {
+                creep.repair(repairSites[0]);
+                return;
+            }
+        }
         var storage = Game.rooms[creep.memory.roomName].find(FIND_MY_STRUCTURES, {
             filter: function(structure) {
                 return structure.structureType === STRUCTURE_STORAGE;

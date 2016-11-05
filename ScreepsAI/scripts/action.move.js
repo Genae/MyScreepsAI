@@ -26,9 +26,9 @@ var moveToAny = function (creep, pos, range) {
             return false;
         }
     }
-    
+
     if (unblockedPos.length === 0) {
-        return moveToAny(creep, pos, range+1);
+        return moveToAny(creep, pos, range + 1);
     }
     var closest = creep.pos.findClosestByRange(unblockedPos);
     if (creep.pos.getRangeTo(closest) > 10) {
@@ -48,10 +48,16 @@ var moveToAny = function (creep, pos, range) {
     return continueMove(creep);
 }
 
-var fix = function(path) {
+var fix = function (path) {
     for (let i = 0; i < path.length; i++) {
-        path[i].x = path[i].x % 49;
-        path[i].y = path[i].y % 49;
+        if (path[i].x === 0)
+            path[i].x = 1;
+        if (path[i].y === 0)
+            path[i].y = 1;
+        if (path[i].x === 49)
+            path[i].x = 48;
+        if (path[i].y === 49)
+            path[i].y = 48;
     }
     return path;
 }
@@ -61,13 +67,13 @@ var followPath = function (creep, path) {
     creep.memory.pathBlocked = 0;
     creep.memory.pathTargets = undefined;
     var res = {};
-    var closestDist = Math.min.apply(Math, path.map(function(o) {
+    var closestDist = Math.min.apply(Math, path.map(function (o) {
         var dist = creep.pos.getRangeTo(o.x, o.y);
         res[dist] = o;
         return dist;
     }));
     if (closestDist === 0) {
-        creep.memory.path= path ;
+        creep.memory.path = path;
         creep.memory.moving = true;
         return continueMove(creep);
     }
@@ -114,7 +120,7 @@ var continueMove = function (creep) {
     return true;
 }
 
-var isBlocked = function(pos) {
+var isBlocked = function (pos) {
     var stuff = pos.look();
     for (var i = 0; i < stuff.length; i++) {
         if (stuff[i].type === 'creep') {

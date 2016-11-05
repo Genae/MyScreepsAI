@@ -17,7 +17,7 @@ const STATE_STORING = 'storing';
 ////////////////////////
 var changeToRefilling = function (creep, myExt) {
     //if i have extensions to fill and not enough energy -> refill
-    if (myExt !== undefined && myExt !== null && (creep.carry.energy < creep.carryCapacity || creep.carry.energy < myExt.energyCapacity)) {
+    if (myExt !== undefined && myExt !== null && creep.carry.energy < myExt.energyCapacity) {
         creep.memory.state = STATE_REFILLING;
         return true;
     }
@@ -173,7 +173,7 @@ var doEmptying = function (creep) {
 
 var doRefilling = function (creep, myStor) {
     var spawn = Game.getObjectById(creep.room.memory.spawn.resource.id);
-    if (spawn.energy > 50) {
+    if (spawn.energy > 50 || myStor.store[RESOURCE_ENERGY] <= 500) {
         var rechargeSpots = creep.room.memory.spawn.rechargeSpots;
         for (var rs = 0; rs < rechargeSpots.length; rs++) {
             if (rechargeSpots[rs].pos.x === creep.pos.x && rechargeSpots[rs].pos.y === creep.pos.y) {

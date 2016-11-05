@@ -35,6 +35,8 @@ var planRoomConstruction = function (room) {
         return;
     if (improveController(room))
         return;
+    if (improveOuterMines(room))
+        return;
     if (improveDefense(room))
         return;
     if (room.memory.improveTo < room.controller.level) {
@@ -78,6 +80,27 @@ var improveMine = function (room) {
         }
     }
     return false;
+}
+
+///
+/// OuterMine
+///
+var improveOuterMines = function (room) {
+    var spawn = Game.getObjectById(room.memory.spawn.resource.id);
+    for (var flagName in Game.flags) {
+        var flag = Game.flags[flagName];
+        if (flag.color === COLOR_BROWN && Memory.rooms[flag.pos.roomName].masterRoom === room.name) {
+            if (flag.memory.improvedTo === undefined)
+                flag.memory.improvedTo = 0;
+            if (flag.memory.improvedTo === 0 && room.memory.improveTo >= 4) {
+                var p = findPathUsingRoads(spawn.pos, { pos: flag.pos, range: 0 });
+                if (p !== null) {
+                    improvePath(p.path);
+                    flag.memory.improvedTo = 1;
+                }
+            }
+        }
+    }
 }
 
 ///
@@ -254,8 +277,44 @@ var checkBrokenStuff = function (room) {
 
 var improvePath = function (path, room) {
     for (var i = 0; i < path.length; i++) {
-        new RoomPosition(path[i].x, path[i].y, (room === undefined ? path[i].roomName : room.name)).createConstructionSite(STRUCTURE_ROAD);
+        var pos = new RoomPosition(path[i].x, path[i].y, (room === undefined ? path[i].roomName : room.name));
+        pos.createConstructionSite(STRUCTURE_ROAD);
     }
+}
+
+var findPathUsingRoads = function (start, goals) {
+    var roomMissing = false;
+    var res = PathFinder.search(
+        start, goals,
+        {
+            // We need to set the defaults costs higher so that we
+            // can set the road cost lower in `roomCallback`
+            plainCost: 2,
+            swampCost: 10,
+
+            roomCallback: function(roomName) {
+                let room = Game.rooms[roomName];
+                // In this example `room` will always exist, but since PathFinder 
+                // supports searches which span multiple rooms you should be careful!
+                if (!room) {
+                    roomMissing = true;
+                    return 1;
+                }
+                let costs = new PathFinder.CostMatrix;
+                room.find(FIND_STRUCTURES).forEach(function(structure) {
+                    if (structure.structureType === STRUCTURE_ROAD) {
+                        // Favor roads over plain tiles
+                        costs.set(structure.pos.x, structure.pos.y, 1);
+                    } else if (structure.structureType !== STRUCTURE_RAMPART ||
+                        !structure.my) {
+                        // Can't walk through buildings, except for our own ramparts
+                        costs.set(structure.pos.x, structure.pos.y, 0xff);
+                    }
+                });
+                return costs;
+            }
+        });
+    return roomMissing ? null : res;
 }
 
 module.exports = {

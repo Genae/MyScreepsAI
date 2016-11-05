@@ -24,7 +24,10 @@ var roleBuilder = function (creep, storage, droppedEnergy) {
     if (creep.memory.state === 'repairing') {
         if (Game.rooms[creep.memory.roomName].memory.repair.length === 0) {
             var targets = creep.pos.findInRange(FIND_STRUCTURES, 3, {
-                filter: function(s) { return s.hits < s.hitsMax }
+                filter: function(s) {
+                    return (s.hits < s.hitsMax && s.structureType !== STRUCTURE_RAMPART && s.structureType !== STRUCTURE_WALL) || 
+                        (s.hits < creep.room.memory.wallHitpoints && (s.structureType === STRUCTURE_RAMPART || s.structureType === STRUCTURE_WALL))
+                }
             });
             if(targets.length > 0)
                 repairTarget = targets[0];

@@ -8,15 +8,19 @@ var planningUnits = require('planning.units');
 var planningInfrastructure = require('planning.infrastructure');
 
 module.exports.loop = function () {
+    var cpu = {};
+    var lastCpu = 0;
     var errors = [];
     var e;
     try {
+        lastCpu = snapshotCpu('deserializing', lastCpu, cpu);
         try {
             removeDeadCreeps();
         } catch (e) {
             console.log("Error while removing dead creeps: " + e);
             errors.push(e);
         }
+        lastCpu = snapshotCpu('remove dead', lastCpu, cpu);
         
         try {
             roomPlanning();
@@ -24,6 +28,7 @@ module.exports.loop = function () {
             console.log("Error while room planning: " + e);
             errors.push(e);
         }
+        lastCpu = snapshotCpu('room planing', lastCpu, cpu);
 
         var pois;
         try {
@@ -32,6 +37,7 @@ module.exports.loop = function () {
             console.log("Error while getting pois: " + e);
             errors.push(e);
         }
+        lastCpu = snapshotCpu('pois', lastCpu, cpu);
         
 
         var builders = [];
@@ -61,6 +67,7 @@ module.exports.loop = function () {
                 if (creep.memory.role === 'distributor') {
                     roleDistributor.roleDistributor(creep, homeRoom, pois[homeRoom.name].extensions, pois[homeRoom.name].droppedEnergy, pois[homeRoom.name].storage);
                 }
+                lastCpu = snapshotCpu(creep.memory.role, lastCpu, cpu);
             } catch (e) {
                 console.log("creep " + name + " has error: " + e);
                 errors.push(e);
@@ -71,6 +78,7 @@ module.exports.loop = function () {
             let homeRoom = Game.rooms[builders[b].memory.roomName];
             try {
                 roleBuilder.roleBuilder(builders[b], pois[homeRoom.name].storage, pois[homeRoom.name].droppedEnergy);
+                lastCpu = snapshotCpu('builder', lastCpu, cpu);
             } catch (e) {
                 console.log("error with builder: " + builders[b].name);
                 errors.push(e);
@@ -87,6 +95,17 @@ module.exports.loop = function () {
         console.log(errors.length + " errors");
         throw errors[0];
     }
+
+    for (var cp in cpu) {
+        if (cpu[cp] > 1)
+            console.log(cp + ": " + cpu[cp]);
+    }
+}
+
+var snapshotCpu = function(name, last, obj) {
+    var used = Game.cpu.getUsed();
+    obj[name] = used - last;
+    return used;
 }
 
 var removeDeadCreeps = function() {
@@ -119,6 +138,13 @@ var removeDeadCreeps = function() {
 var roomPlanning = function() {
     for (var roomName in Game.rooms) {
         var room = Game.rooms[roomName];
+        var enemys = room.find(FIND_HOSTILE_CREEPS);
+        if (enemys.length > 0) {
+            room.memory.underAttack = true;
+        } else {
+            room.memory.underAttack = false;
+            
+        }
         var spawn = room.find(FIND_MY_STRUCTURES, {
             filter: { structureType: STRUCTURE_SPAWN }
         })[0];
@@ -134,9 +160,11 @@ var roomPlanning = function() {
         }
 
         checkSlaveRooms(room, spawn);
-        
-        planningInfrastructure.planRoomConstruction(room);
-        planningUnits.buildUnits(room);
+
+        if(Game.time % 5 === 0)
+            planningInfrastructure.planRoomConstruction(room);
+        if ((Game.time + 1) % 5 === 0)
+            planningUnits.buildUnits(room);
         //reset jobs
         room.memory.lastJobs = room.memory.thisJobs;
         room.memory.thisJobs = {};
@@ -168,7 +196,7 @@ var defendRoom = function (room) {
             if (room.name === creep.room.name) {
                 if (creep.memory.role === 'attacker') {
                     //fight
-                } else if (creep.memory.role === 'builder') {
+                } else if (creep.memory.role === 'builder' || creep.memory.role === 'outharvester') {
                     //dont care
                 } else {
                     var targets = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 6);
