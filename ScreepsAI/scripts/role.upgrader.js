@@ -1,6 +1,7 @@
 var actionMove = require('action.move');
 
 var roleUpgrader = function (creep, storage) {
+    storage = storage.concat(creep.room.find(FIND_MY_STRUCTURES, {filter: function(s) { return s.structureType === STRUCTURE_LINK && s.energy > 0}}));
     if (creep.memory.moving) {
         if (actionMove.continueMove(creep)) {
             if (!(creep.memory.state === 'upgrading' && creep.pos.getRangeTo(creep.room.controller.pos.x, creep.room.controller.pos.y) < 4)) {
@@ -22,6 +23,8 @@ var roleUpgrader = function (creep, storage) {
             var myStor = creep.pos.findClosestByRange(storage);
             if (creep.withdraw(myStor, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE)
                 actionMove.moveTo(creep, myStor.pos, 1);
+            else
+                creep.memory.state = 'upgrading';
         } else if (!creep.room.memory.energy.canUpgrade || creep.withdraw(creep.room.find(FIND_MY_SPAWNS)[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
             actionMove.followPath(creep, contrConstr.pathTo.path.slice(0).reverse());
         }

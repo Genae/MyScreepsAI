@@ -73,6 +73,13 @@ var roleDistributor = function (creep, room, extensions, droppedEnergy, storage)
             }
         }
 
+        for (let l = 0; l < creep.room.memory.links.length; l++) {
+            var sl = creep.room.memory.links[l];
+            var slObj = Game.getObjectById(sl.link.id);
+            if (sl.type === 'store' && slObj.energy <= 200)
+                extensions.push(slObj);
+        }
+
         var myExt = creep.pos.findClosestByRange(extensions);
         var myStor = creep.pos.findClosestByRange(storage);
 

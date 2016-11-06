@@ -2,6 +2,7 @@ var constructionController = require('construction.controller');
 var constructionMine = require('construction.mine');
 var constructionSpawn = require('construction.spawn');
 var constructionWalls = require('construction.walls');
+var constructionLink = require('construction.link');
 
 var planRoomConstruction = function (room) {
     if (room.memory.mines === undefined) {
@@ -12,6 +13,18 @@ var planRoomConstruction = function (room) {
         }
         room.memory.mines.sort(function (a, b) { return a.pathToMine.cost - b.pathToMine.cost });
     }
+
+    if (room.memory.links === undefined) {
+        room.memory.links = [];
+    }
+    var links = room.find(FIND_MY_STRUCTURES, { filter: function (s) { return s.structureType === STRUCTURE_LINK } });
+    if (room.memory.links.length < links.length) {
+        room.memory.links = [];
+        for (let i = 0; i < links.length; i++) {
+            room.memory.links.push(constructionLink.createLink(links[i]));
+        }
+    }
+
     if (room.memory.controller === undefined) {
         room.memory.controller = constructionController.createController(room.controller, room);
     }

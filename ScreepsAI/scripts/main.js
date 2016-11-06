@@ -141,6 +141,13 @@ var removeDeadCreeps = function() {
 var roomPlanning = function() {
     for (var roomName in Game.rooms) {
         var room = Game.rooms[roomName];
+
+        try {
+            runLinks(room);
+        } catch (e) {
+            console.log(e);
+        }
+
         var enemys = room.find(FIND_HOSTILE_CREEPS, {
             filter: function (hc) { return hc.owner.username !== 'Hosmagix' }
         });
@@ -299,6 +306,44 @@ var checkSlaveRooms = function (room, spawn) {
                         Game.rooms[spawn.pos.roomName].memory.slaveRooms = [];
                     }
                     Game.rooms[spawn.pos.roomName].memory.slaveRooms.push(flag.pos.roomName);
+                }
+            }
+        }
+    }
+}
+
+var runLinks = function(room) {
+    var links = {
+        store: [],
+        empty: [],
+        fill: []
+    }
+    if (room.memory.links === undefined)
+        return;
+
+    for (let i = 0; i < room.memory.links.length; i++) {
+        links[room.memory.links[i].type].push(room.memory.links[i]);
+    }
+
+    for (let i = 0; i < room.memory.links.length; i++) {
+        var link = Game.getObjectById(room.memory.links[i].link.id);
+        if (link.cooldown > 0)
+            continue;
+        if (room.memory.links[i].type === 'empty' || room.memory.links[i].type === 'store') {
+            for (let j = 0; j < links.fill.length; j++) {
+                let link2 = Game.getObjectById(links.fill[j].link.id);
+                if (link2.energy < 700) {
+                    link.transferEnergy(link2);
+                    break;
+                }
+            }
+            if (room.memory.links[i].type === 'empty') {
+                for (let j = 0; j < links.store.length; j++) {
+                    let link2 = Game.getObjectById(links.fill[j].link.id);
+                    if (link2.energy < 700) {
+                        link.transferEnergy(link2);
+                        break;
+                    }
                 }
             }
         }
