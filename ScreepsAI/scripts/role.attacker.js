@@ -11,7 +11,9 @@ var roleAttacker = function (creep) {
         if (creep.room.name !== roomUnderAttack) {
             creep.moveTo(new RoomPosition(25, 25, roomUnderAttack));
         } else {
-            var target = creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+            var target = creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS, {
+                filter: function(hc){ return hc.owner.username !== 'Hosmagix' }
+            });
             if (target !== null) {
                 if (creep.attack(target) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(target);
@@ -59,7 +61,7 @@ var roleAttacker = function (creep) {
                 }
                 else {
                     var target = creep.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES, {
-                        filter: function (structure) { return structure.structureType === STRUCTURE_TOWER; }
+                        filter: function (structure) { return structure.structureType === STRUCTURE_TOWER && structure.owner.username !== 'Hosmagix'; }
                     });
                     if (target !== null) {
                         if (creep.attack(target) == ERR_NOT_IN_RANGE) {
@@ -68,7 +70,9 @@ var roleAttacker = function (creep) {
                         }
                         return;
                     }
-                    target = creep.pos.findClosestByRange(FIND_HOSTILE_SPAWNS);
+                    target = creep.pos.findClosestByRange(FIND_HOSTILE_SPAWNS, {
+                        filter: function (hc) { return hc.owner.username !== 'Hosmagix' }
+                    });
                     if (target !== null) {
                         if (creep.attack(target) == ERR_NOT_IN_RANGE) {
                             creep.rangedAttack(target);
@@ -76,7 +80,9 @@ var roleAttacker = function (creep) {
                         }
                         return;
                     }
-                    target = creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+                    target = creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS, {
+                        filter: function (hc) { return hc.owner.username !== 'Hosmagix' }
+                    });
                     if (target !== null) {
                         if (creep.attack(target) == ERR_NOT_IN_RANGE) {
                             creep.moveTo(target);
@@ -85,7 +91,7 @@ var roleAttacker = function (creep) {
                         return;
                     }
                     target = creep.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES, {
-                        filter: function (structure) { return structure.structureType !== STRUCTURE_CONTROLLER; }
+                        filter: function (structure) { return structure.structureType !== STRUCTURE_CONTROLLER && structure.owner.username !== 'Hosmagix' }
                     });
                     if (target !== null) {
                         if (creep.attack(target) == ERR_NOT_IN_RANGE) {

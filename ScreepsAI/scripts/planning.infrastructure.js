@@ -45,7 +45,7 @@ var planRoomConstruction = function (room) {
     }
 
     //if there is nothing else to do: improve wallstrength
-    if (room.memory.wallHitpoints < RAMPART_HITS_MAX[room.controller.level] / 10) {
+    if (room.memory.wallHitpoints < 1000000) {
         var newHits = room.memory.wallHitpoints + 100000;
         room.memory.wallHitpoints = Math.min(newHits, RAMPART_HITS_MAX[room.controller.level]/10);
     }
@@ -266,7 +266,7 @@ var checkBrokenStuff = function (room) {
     var targets = room.find(FIND_STRUCTURES, {
         filter: (structure) => {
             return (structure.hits < structure.hitsMax / 2 && structure.structureType !== STRUCTURE_WALL && structure.structureType !== STRUCTURE_RAMPART) ||
-                    structure.structureType === STRUCTURE_RAMPART && structure.hits < room.memory.wallHitpoints - 300000;
+                    structure.structureType === STRUCTURE_RAMPART && structure.hits < room.memory.wallHitpoints - 30000;
         }
     });
     for (let i = 0; i < targets.length; i++) {

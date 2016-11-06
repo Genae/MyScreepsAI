@@ -141,7 +141,9 @@ var removeDeadCreeps = function() {
 var roomPlanning = function() {
     for (var roomName in Game.rooms) {
         var room = Game.rooms[roomName];
-        var enemys = room.find(FIND_HOSTILE_CREEPS);
+        var enemys = room.find(FIND_HOSTILE_CREEPS, {
+            filter: function (hc) { return hc.owner.username !== 'Hosmagix' }
+        });
         var spawn = room.find(FIND_MY_STRUCTURES, {
             filter: { structureType: STRUCTURE_SPAWN }
         })[0];
@@ -196,9 +198,13 @@ var defendRoom = function (room) {
         }
     });
     var t;
-    if (room.find(FIND_HOSTILE_CREEPS).length > 0) {
+    if (room.find(FIND_HOSTILE_CREEPS, {
+        filter: function (hc) { return hc.owner.username !== 'Hosmagix' }
+    }).length > 0) {
         for (t = 0; t < towers.length; t++) {
-            var closestHostile = towers[t].pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+            var closestHostile = towers[t].pos.findClosestByRange(FIND_HOSTILE_CREEPS, {
+                filter: function (hc) { return hc.owner.username !== 'Hosmagix' }
+            });
             if (closestHostile) {
                 towers[t].attack(closestHostile);
             }
@@ -211,7 +217,9 @@ var defendRoom = function (room) {
                 } else if (creep.memory.role === 'builder' || creep.memory.role === 'outharvester') {
                     //dont care
                 } else {
-                    var targets = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 6);
+                    var targets = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 6, {
+                        filter: function (hc) { return hc.owner.username !== 'Hosmagix' }
+                    });
                     for (t = 0; t < targets.length; t++) {
                         if (creep.pos.getRangeTo(targets[t].pos) <= 4) {
                             //console.log("save me!");
@@ -230,8 +238,8 @@ var defendRoom = function (room) {
                 continue;
             var repairs = towers[t].pos.findInRange(FIND_STRUCTURES, 5, {
                 filter: function (structure) {
-                    return (structure.hits <= structure.hitsMax - 2000 && structure.structureType !== STRUCTURE_RAMPART) ||
-                           (structure.hits <= room.memory.wallHitpoints - 2000 && structure.structureType === STRUCTURE_RAMPART);
+                    return (structure.hits <= structure.hitsMax - 2000 && structure.structureType !== STRUCTURE_RAMPART && structure.structureType !== STRUCTURE_WALL) ||
+                           (structure.hits <= room.memory.wallHitpoints - 2000 && (structure.structureType === STRUCTURE_RAMPART || structure.structureType === STRUCTURE_WALL));
                 }
             });
             if (repairs.length > 0) {

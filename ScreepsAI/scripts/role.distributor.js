@@ -173,7 +173,7 @@ var doEmptying = function (creep) {
 
 var doRefilling = function (creep, myStor) {
     var spawn = Game.getObjectById(creep.room.memory.spawn.resource.id);
-    if (spawn.energy > 50 || myStor.store[RESOURCE_ENERGY] <= 500) {
+    if (spawn.energy > 50 || (myStor != null && myStor.store[RESOURCE_ENERGY] <= 500)) {
         var rechargeSpots = creep.room.memory.spawn.rechargeSpots;
         for (var rs = 0; rs < rechargeSpots.length; rs++) {
             if (rechargeSpots[rs].pos.x === creep.pos.x && rechargeSpots[rs].pos.y === creep.pos.y) {
@@ -182,7 +182,7 @@ var doRefilling = function (creep, myStor) {
             }
         }
         actionMove.moveToAny(creep, rechargeSpots.map(function(a) { return a.pos; }));
-    } else if (myStor.store[RESOURCE_ENERGY] > 500) {
+    } else if (myStor !== null && myStor.store[RESOURCE_ENERGY] > 500) {
         if (creep.withdraw(myStor, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
             actionMove.moveTo(creep, myStor.pos, 1);
         }

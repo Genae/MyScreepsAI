@@ -7,21 +7,19 @@ var createWalls = function (room, direction) {
     if (direction === TOP || direction === BOTTOM) {
         let one = direction === TOP ? 1 : 48;
         for (let x = 0; x < 50; x++) {
-            if (room.lookForAt(LOOK_TERRAIN, x, one)[0] !== 'wall') { // this is open
-                if (needsWall(room, direction, x)) {
-                    if (!connected) {
-                        index++;
-                        wallSlots[index] = {
-                            walls: [],
-                            exits: [],
-                            improvedTo: 0
-                        };
-                    }
-                    wallSlots[index].walls.push({ pos: new RoomPosition(x, one, room.name), type: STRUCTURE_WALL });
-                    connected = true;
-                } else {
-                    connected = false;
+            if (room.lookForAt(LOOK_TERRAIN, x, one)[0] !== 'wall' && needsWall(room, direction, x)) {
+                if (!connected) {
+                    index++;
+                    wallSlots[index] = {
+                        walls: [],
+                        exits: [],
+                        improvedTo: 0
+                    };
                 }
+                wallSlots[index].walls.push({ pos: new RoomPosition(x, one, room.name), type: STRUCTURE_WALL });
+                connected = true;
+            } else {
+                connected = false;
             }
         }
     }
@@ -29,21 +27,19 @@ var createWalls = function (room, direction) {
     if (direction === LEFT || direction === RIGHT) {
         let one = direction === LEFT ? 1 : 48;
         for (let y = 0; y < 50; y++) {
-            if (room.lookForAt(LOOK_TERRAIN, one, y)[0] !== 'wall') { // this is open
-                if (needsWall(room, direction, y)) {
-                    if (!connected) {
-                        index++;
-                        wallSlots[index] = {
-                            walls: [],
-                            exits: [],
-                            improvedTo: 0
-                        };
-                    }
-                    wallSlots[index].walls.push({ pos: new RoomPosition(one, y, room.name), type: STRUCTURE_WALL });
-                    connected = true;
-                } else {
-                    connected = false;
+            if (room.lookForAt(LOOK_TERRAIN, one, y)[0] !== 'wall' && needsWall(room, direction, y)) {
+                if (!connected) {
+                    index++;
+                    wallSlots[index] = {
+                        walls: [],
+                        exits: [],
+                        improvedTo: 0
+                    };
                 }
+                wallSlots[index].walls.push({ pos: new RoomPosition(one, y, room.name), type: STRUCTURE_WALL });
+                connected = true;
+            } else {
+                connected = false;
             }
         }
     }
