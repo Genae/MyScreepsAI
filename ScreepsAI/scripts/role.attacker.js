@@ -24,7 +24,7 @@ var roleAttacker = function (creep) {
         }
     } else {
         var squad = creep.room.find(FIND_MY_CREEPS, {
-            filter: function (c) { return c.memory.role === 'attacker'; }
+            filter: function (c) { return (c.memory.role === 'attacker' || c.memory.role === 'healer') && !c.spawning; }
         });
         if (creep.memory.state === undefined) {
             creep.memory.state = 'waiting';
@@ -39,28 +39,39 @@ var roleAttacker = function (creep) {
         if (squad.length >= 5 || !collect) {
             creep.memory.state = 'attacking';
         }
+        var priorityTargets = [];
+        for (var flagN in Game.flags) {
+            var flag = Game.flags[flagN];
+            if (flag.color === COLOR_PURPLE && creep.memory.state === 'attacking' && flag.pos.roomName === creep.pos.roomName) {
+                var targets = flag.pos.lookFor(LOOK_STRUCTURES, {
+                    filter: {function(s) {return s.structureType !== STRUCTURE_ROAD}}
+                });
+                if (targets.length > 0) {
+                    priorityTargets.push(targets[0]);
+                }
+            }
+        }
         for (var flagN in Game.flags) {
             var flag = Game.flags[flagN];
             if (flag.color === COLOR_YELLOW && creep.memory.state === 'waiting') {
                 creep.moveTo(flag);
             }
-            if (flag.color === COLOR_PURPLE && creep.memory.state === 'attacking') {
-                var targets = flag.pos.findInRange(FIND_STRUCTURES, 1);
-                if (targets.length > 0) {
-                    if (creep.attack(targets[0]) == ERR_NOT_IN_RANGE) {
-                        creep.rangedAttack(targets[0]);
-                        creep.moveTo(targets[0]);
-                    }
-                    return;
-                }
-            }
+            
             if (flag.color === COLOR_RED && creep.memory.state === 'attacking') {
                 if (creep.room.name !== flag.pos.roomName) {
                     creep.moveTo(flag);
                     return;
                 }
                 else {
-                    var target = creep.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES, {
+                    var target = creep.pos.findClosestByRange(priorityTargets);
+                    if (target !== null) {
+                        if (creep.attack(target) == ERR_NOT_IN_RANGE) {
+                            creep.rangedAttack(target);
+                            creep.moveTo(target);
+                        }
+                        return;
+                    }
+                    target = creep.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES, {
                         filter: function (structure) { return structure.structureType === STRUCTURE_TOWER && structure.owner.username !== 'Hosmagix'; }
                     });
                     if (target !== null) {

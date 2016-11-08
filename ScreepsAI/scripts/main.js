@@ -330,28 +330,29 @@ var runLinks = function(room) {
         if (link.cooldown > 0)
             continue;
         var targets = [];
+        if (room.memory.links[i].type === 'empty') {
+            for (let j = 0; j < links.store.length; j++) {
+                let link2 = Game.getObjectById(links.store[j].link.id);
+                targets[Math.floor((800 - link2.energy) / link.pos.getRangeTo(link2.pos))] = link2;
+                if (link2.energy < 800) {
+                    link.transferEnergy(link2);
+                    break;
+                }
+            }
+        }
         if (room.memory.links[i].type === 'empty' || room.memory.links[i].type === 'store') {
             for (let j = 0; j < links.fill.length; j++) {
                 let link2 = Game.getObjectById(links.fill[j].link.id);
-                targets[Math.floor((800 - link2.energy) / link.pos.getRangeTolink2.pos)] = link2;
+                targets[Math.floor((800 - link2.energy) / link.pos.getRangeTo(link2.pos))*2] = link2;
                 if (link2.energy < 700) {
                     link.transferEnergy(link2);
                     break;
                 }
             }
-            if (room.memory.links[i].type === 'empty') {
-                for (let j = 0; j < links.store.length; j++) {
-                    let link2 = Game.getObjectById(links.store[j].link.id);
-                    targets[Math.floor((800 - link2.energy) / link.pos.getRangeTolink2.pos)] = link2;
-                    if (link2.energy < 800) {
-                        link.transferEnergy(link2);
-                        break;
-                    }
-                }
-            }
-            if (targets.length > 0) {
-                link.transferEnergy(targets[targets.length - 1]);
-            }
+            
+        }
+        if (targets.length > 0) {
+            link.transferEnergy(targets[targets.length - 1]);
         }
     }
 }

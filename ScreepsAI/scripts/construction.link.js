@@ -20,4 +20,4 @@ var createLink = function (link) {
     };
 }
 
-module.exports = { createController: createController };
+module.exports = { createLink: createLink };
