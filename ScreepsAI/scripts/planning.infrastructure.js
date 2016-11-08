@@ -50,14 +50,14 @@ var planRoomConstruction = function (room) {
         return;
     if (improveOuterMines(room))
         return;
-    if (improveDefense(room))
-        return;
     if (room.memory.improveTo < room.controller.level) {
         room.memory.improveTo++;
         return;
     }
 
     //if there is nothing else to do: improve wallstrength
+    if (improveDefense(room))
+        return;
     if (room.memory.wallHitpoints < 1000000) {
         var newHits = room.memory.wallHitpoints + 100000;
         room.memory.wallHitpoints = Math.min(newHits, RAMPART_HITS_MAX[room.controller.level]/10);

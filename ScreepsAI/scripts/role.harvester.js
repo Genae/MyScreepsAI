@@ -53,7 +53,12 @@ var roleHarvester = function (creep) {
         }
     }
     else if (creep.memory.state === 'emptying') {
-        if (creep.transfer(creep.room.find(FIND_MY_SPAWNS)[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+        var links = creep.pos.findInRange(FIND_MY_STRUCTURES, 2, { filter: function (s) { return s.structureType === STRUCTURE_LINK && s.energy < s.energyCapacity } });
+        if (links.length > 0) {
+            creep.transfer(links[0], RESOURCE_ENERGY);
+            creep.memory.state = 'mining';
+        }
+        else if (creep.transfer(creep.room.find(FIND_MY_SPAWNS)[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
             actionMove.followPath(creep, mymine.pathToMine.path.slice(0).reverse());
         }
     }
