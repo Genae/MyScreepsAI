@@ -220,15 +220,6 @@ var improveDefense = function (room) {
                 return true;
             }
             else if (myWall.improvedTo === 2) {
-                for (let e = 0; e < myWall.exits.length; e++) {
-                    for (let dx = -1; dx <= 1; dx++) {
-                        for (let dy = -1; dy <= 1; dy++) {
-                            new RoomPosition(myWall.exits[e].x + dx, myWall.exits[e].y + dy, myWall.exits[e].roomName).createConstructionSite(STRUCTURE_RAMPART);
-                            room.memory.wallHitpoints = 100000;
-                        }
-                    }
-                    
-                }
                 for (let p = 0; p < myWall.walls.length; p++) {
                     for (let dx = -1; dx <= 1; dx++) {
                         for (let dy = -1; dy <= 1; dy++) {
@@ -301,15 +292,11 @@ var findPathUsingRoads = function (start, goals) {
     var res = PathFinder.search(
         start, goals,
         {
-            // We need to set the defaults costs higher so that we
-            // can set the road cost lower in `roomCallback`
             plainCost: 2,
             swampCost: 10,
 
             roomCallback: function(roomName) {
                 let room = Game.rooms[roomName];
-                // In this example `room` will always exist, but since PathFinder 
-                // supports searches which span multiple rooms you should be careful!
                 if (!room) {
                     roomMissing = true;
                     return 1;
@@ -317,11 +304,8 @@ var findPathUsingRoads = function (start, goals) {
                 let costs = new PathFinder.CostMatrix;
                 room.find(FIND_STRUCTURES).forEach(function(structure) {
                     if (structure.structureType === STRUCTURE_ROAD) {
-                        // Favor roads over plain tiles
                         costs.set(structure.pos.x, structure.pos.y, 1);
-                    } else if (structure.structureType !== STRUCTURE_RAMPART ||
-                        !structure.my) {
-                        // Can't walk through buildings, except for our own ramparts
+                    } else if (structure.structureType !== STRUCTURE_RAMPART || !structure.my) {
                         costs.set(structure.pos.x, structure.pos.y, 0xff);
                     }
                 });

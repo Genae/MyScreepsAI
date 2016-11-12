@@ -70,10 +70,8 @@ var roleOutHarvester = function (creep) {
             }
             var repairSites = creep.pos.findInRange(FIND_STRUCTURES, 3, {
                 filter: function (s) {
-                    if (s.structureType === STRUCTURE_WALL)
-                        return false;
-                    return (s.structureType !== STRUCTURE_RAMPART && s.hits <= s.hitsMax - 2000) ||
-                        s.structureType === STRUCTURE_RAMPART && s.hits <= 100000;
+                    return (s.structureType !== STRUCTURE_RAMPART && s.structureType !== STRUCTURE_WALL  && s.hits <= s.hitsMax - 2000) ||
+                        ((s.structureType === STRUCTURE_RAMPART || s.structureType === STRUCTURE_WALL) && (creep.room.memory.wallHitpoints !== undefined && creep.room.memory.wallHitpoints > s.hits));
                 }
             });
             if (repairSites.length > 0) {

@@ -179,6 +179,17 @@ var doEmptying = function (creep) {
 }
 
 var doRefilling = function (creep, myStor) {
+    for (var l = 0; l < creep.room.memory.links.length; l++) {
+        if (creep.room.memory.links[l].type === 'store') {
+            var link = Game.getObjectById(creep.room.memory.links[l].link.id);
+            if (link.energy > 500) {
+                if (creep.withdraw(link, RESOURCE_ENERGY, 100) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(link);
+                }
+                return;
+            }
+        }
+    }
     var spawn = Game.getObjectById(creep.room.memory.spawn.resource.id);
     if (spawn.energy > 50 || (myStor != null && myStor.store[RESOURCE_ENERGY] <= 500)) {
         var rechargeSpots = creep.room.memory.spawn.rechargeSpots;
@@ -199,6 +210,17 @@ var doRefilling = function (creep, myStor) {
 
 var doStoring = function (creep, myStor) {
     if (creep.carry.energy === 0) {
+        for (var l = 0; l < creep.room.memory.links.length; l++) {
+            if (creep.room.memory.links[l].type === 'store') {
+                var link = Game.getObjectById(creep.room.memory.links[l].link.id);
+                if (link.energy > 500) {
+                    if (creep.withdraw(link, RESOURCE_ENERGY, 100) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(link);
+                    }
+                    return;
+                }
+            }
+        }
         var needsMove = true;
         var rechargeSpots = creep.room.memory.spawn.rechargeSpots;
         for (var rs = 0; rs < rechargeSpots.length; rs++) {

@@ -61,7 +61,7 @@ var roleHarvester = function (creep) {
         }
     }
     else if (creep.memory.state === 'emptying') {
-        var links = creep.pos.findInRange(FIND_MY_STRUCTURES, 2, { filter: function (s) { return s.structureType === STRUCTURE_LINK && s.energy < s.energyCapacity } });
+        var links = creep.pos.findInRange(FIND_MY_STRUCTURES, 1, { filter: function (s) { return s.structureType === STRUCTURE_LINK && s.energy < s.energyCapacity } });
         if (links.length > 0) {
             creep.transfer(links[0], RESOURCE_ENERGY);
             creep.memory.state = 'mining';

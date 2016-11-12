@@ -2,6 +2,7 @@ var roleHarvester = require('role.harvester');
 var roleBuilder = require('role.builder');
 var roleUpgrader = require('role.upgrader');
 var roleAttacker = require('role.attacker');
+var roleHealer = require('role.healer');
 var roleDistributor = require('role.distributor');
 var roleOutharvester = require('role.outharvester');
 var roleClaimer = require('role.claimer');
@@ -64,6 +65,9 @@ module.exports.loop = function () {
                 }
                 if (creep.memory.role === 'attacker') {
                     roleAttacker.roleAttacker(creep);
+                }
+                if (creep.memory.role === 'healer') {
+                    roleHealer.roleHealer(creep);
                 }
                 if (creep.memory.role === 'distributor') {
                     roleDistributor.roleDistributor(creep, homeRoom, pois[homeRoom.name].extensions, pois[homeRoom.name].droppedEnergy, pois[homeRoom.name].storage);

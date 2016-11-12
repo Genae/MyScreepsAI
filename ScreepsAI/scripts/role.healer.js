@@ -1,8 +1,11 @@
 
-var roleAttacker = function (creep) {
+var roleHealer = function (creep) {
     var squad = creep.room.find(FIND_MY_CREEPS, {
         filter: function (c) { return (c.memory.role === 'attacker' || c.memory.role === 'healer') && !c.spawning; }
     });
+    if (creep.hits < creep.hitsMax) {
+        creep.heal(creep);
+    }
     if (creep.memory.state === undefined) {
         creep.memory.state = 'waiting';
     }
@@ -13,7 +16,7 @@ var roleAttacker = function (creep) {
             collect = true;
         }
     }
-    if (squad.length >= 5 || !collect) {
+    if (squad.length >= 6 || !collect) {
         creep.memory.state = 'attacking';
     }
 
@@ -25,7 +28,7 @@ var roleAttacker = function (creep) {
             
         if (flag.color === COLOR_RED && creep.memory.state === 'attacking') {
             if (creep.room.name !== flag.pos.roomName) {
-                creep.moveTo(flag);
+                creep.moveTo(flag, { ignoreCreeps: true });
                 return;
             }
             else {
@@ -35,13 +38,15 @@ var roleAttacker = function (creep) {
                 if (target !== null) {
                     if (creep.heal(target) === ERR_NOT_IN_RANGE) {
                         creep.rangedHeal(target);
-                        creep.moveTo(target);
+                        creep.moveTo(target, { reusePath: 0 });
                     }
                     return;
+                } else {
+                    creep.moveTo(flag, { eusePath: 0 });
                 }
             }
         }
     }
 }
     
-module.exports = { roleAttacker: roleAttacker };
+module.exports = { roleHealer: roleHealer };

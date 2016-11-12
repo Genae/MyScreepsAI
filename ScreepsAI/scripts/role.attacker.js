@@ -36,7 +36,7 @@ var roleAttacker = function (creep) {
                 collect = true;
             }
         }
-        if (squad.length >= 5 || !collect) {
+        if (squad.length >= 6 || !collect) {
             creep.memory.state = 'attacking';
         }
         var priorityTargets = [];
@@ -59,7 +59,7 @@ var roleAttacker = function (creep) {
             
             if (flag.color === COLOR_RED && creep.memory.state === 'attacking') {
                 if (creep.room.name !== flag.pos.roomName) {
-                    creep.moveTo(flag);
+                    creep.moveTo(flag, { ignoreCreeps: true });
                     return;
                 }
                 else {
@@ -67,7 +67,7 @@ var roleAttacker = function (creep) {
                     if (target !== null) {
                         if (creep.attack(target) == ERR_NOT_IN_RANGE) {
                             creep.rangedAttack(target);
-                            creep.moveTo(target);
+                            creep.moveTo(target, { reusePath: 0 });
                         }
                         return;
                     }
@@ -77,7 +77,7 @@ var roleAttacker = function (creep) {
                     if (target !== null) {
                         if (creep.attack(target) == ERR_NOT_IN_RANGE) {
                             creep.rangedAttack(target);
-                            creep.moveTo(target);
+                            creep.moveTo(target, { reusePath: 0 });
                         }
                         return;
                     }
@@ -87,7 +87,7 @@ var roleAttacker = function (creep) {
                     if (target !== null) {
                         if (creep.attack(target) == ERR_NOT_IN_RANGE) {
                             creep.rangedAttack(target);
-                            creep.moveTo(target);
+                            creep.moveTo(target, { reusePath: 0 });
                         }
                         return;
                     }
@@ -97,7 +97,7 @@ var roleAttacker = function (creep) {
                     if (target !== null) {
                         if (creep.attack(target) == ERR_NOT_IN_RANGE) {
                             creep.moveTo(target);
-                            creep.rangedAttack(target);
+                            creep.rangedAttack(target, { reusePath: 0 });
                         }
                         return;
                     }
@@ -107,7 +107,7 @@ var roleAttacker = function (creep) {
                     if (target !== null) {
                         if (creep.attack(target) == ERR_NOT_IN_RANGE) {
                             creep.moveTo(target);
-                            creep.rangedAttack(target);
+                            creep.rangedAttack(target, { reusePath: 0 });
                         }
                         return;
                     }

@@ -87,6 +87,7 @@
     <Content Include="scripts\planning.infrastructure.js" />
     <Content Include="scripts\planning.jobs.js" />
     <Content Include="scripts\planning.units.js" />
+    <Content Include="scripts\role.healer.js" />
     <Content Include="scripts\role.claimer.js" />
     <Content Include="scripts\role.outharvester.js" />
     <Content Include="scripts\role.attacker.js" />

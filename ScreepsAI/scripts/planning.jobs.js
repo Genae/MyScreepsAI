@@ -23,7 +23,7 @@ var findJob = function (creep) {
     if (creep.memory.role === 'outharvester') {
         for (var flagName in Game.flags) {
             var flag = Game.flags[flagName];
-            if (Memory.rooms[flag.pos.roomName].masterRoom !== room.name || flag.color !== COLOR_BROWN)
+            if (flag.color !== COLOR_BROWN || Memory.rooms[flag.pos.roomName].masterRoom !== room.name)
                 continue;
             if (room.memory.lastJobs[flagName] === undefined)
                 room.memory.lastJobs[flagName] = 0;
