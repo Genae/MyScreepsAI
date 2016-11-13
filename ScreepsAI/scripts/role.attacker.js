@@ -34,7 +34,7 @@ var roleAttacker = function (creep) {
         var flag;
         for (var name in Game.flags) {
             flag = Game.flags[name];
-            if (flag.color === COLOR_YELLOW) {
+            if (flag.color === COLOR_YELLOW && flag.room.name === creep.memory.roomName) {
                 collect = true;
             }
         }
@@ -55,7 +55,7 @@ var roleAttacker = function (creep) {
         }
         for (let flagN in Game.flags) {
             flag = Game.flags[flagN];
-            if (flag.color === COLOR_YELLOW && creep.memory.state === 'waiting') {
+            if (flag.color === COLOR_YELLOW && creep.memory.state === 'waiting' && flag.room.name === creep.memory.roomName) {
                 creep.moveTo(flag);
             }
             
@@ -65,6 +65,17 @@ var roleAttacker = function (creep) {
                     return;
                 }
                 else {
+                    var myHealers = creep.pos.findInRange(FIND_MY_CREEPS, 3, {
+                        filter: function(mc) { return mc.memory.role === 'healer' }
+
+                    });
+                    var myHealersInRoom = creep.room.find(FIND_MY_CREEPS, {
+                        filter: function (mc) { return mc.memory.role === 'healer' }
+
+                    });
+                    if (myHealersInRoom.length > 0 && myHealers.length === 0) { // no healers in Range
+                        return;
+                    }
                     var creeps = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 5, {
                         filter: function (hc) {
                             return (hc.getActiveBodyparts(ATTACK) > 0 || hc.getActiveBodyparts(RANGED_ATTACK) > 0) && hc.owner.username !== 'Hosmagix';

@@ -15,7 +15,7 @@ var planRoomConstruction = function (room) {
         room.memory.mines.sort(function (a, b) { return a.pathToMine.cost - b.pathToMine.cost });
     }
 
-    if (room.memory.mineral === undefined)
+    if (room.memory.mineral === undefined && room.find(FIND_MINERALS).length > 0)
     {
         room.memory.mineral = constructionMineral.createMineral(room);
     }
@@ -55,6 +55,8 @@ var planRoomConstruction = function (room) {
     if (improveController(room))
         return;
     if (improveOuterMines(room))
+        return;
+    if (improveMinerals(room))
         return;
     if (room.memory.improveTo < room.controller.level) {
         room.memory.improveTo++;
@@ -119,6 +121,33 @@ var improveOuterMines = function (room) {
                 }
             }
         }
+    }
+    return false;
+}
+
+///
+/// Minerals
+///
+var improveMinerals = function (room) {
+    if (room.memory.minerals === undefined)
+        return false;
+    var mineral = Game.getObjectById(room.memory.mineral.resource.id);
+    var spawn = Game.getObjectById(room.memory.spawn.resource.id);
+    if (room.find(FIND_CONSTRUCTION_SITES).length > 0)
+        return true;
+    //Tier 1
+    if (room.memory.mineral.improvedTo < 1 && room.memory.improveTo >= 1 && room.controller.level >= 6) {
+        var p = findPathUsingRoads(spawn.pos, { pos: mineral.pos, range: 1 });
+        if (p !== null) {
+            improvePath(p.path);
+            room.memory.mineral.improvedTo = 1;
+            return true;
+        }
+    }
+    //Tier 2
+    if (room.memory.mineral.improvedTo < 2 && room.memory.improveTo >= 2 && room.controller.level >= 6) {
+        mineral.pos.createConstructionSite(STRUCTURE_EXTRACTOR);
+        room.memory.mineral.improvedTo = 2;
     }
     return false;
 }
@@ -238,14 +267,18 @@ var improveDefense = function (room) {
                                     break;
                                 }
                                 if (stuff[i].structureType === STRUCTURE_ROAD) {
-                                    pos.createConstructionSite(STRUCTURE_RAMPART);
+                                    if (pos.createConstructionSite(STRUCTURE_RAMPART) !== OK) {
+                                        return true;
+                                    }
                                     room.memory.wallHitpoints = 100000;
                                     hasRampart = true;
                                     break;
                                 }
                             }
                             if (!hasRampart) {
-                                pos.createConstructionSite(STRUCTURE_WALL);
+                                if (pos.createConstructionSite(STRUCTURE_WALL) !== OK) {
+                                    return true;
+                                }
                                 room.memory.wallHitpoints = 100000;
                             }
                         }

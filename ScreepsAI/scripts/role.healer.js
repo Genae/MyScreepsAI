@@ -1,5 +1,5 @@
 var getVal = function(creep, healer) {
-    return healer.pos.getRangeTo(creep.pos) / (creep.hits / creep.hitsMax);
+    return creep.hits / creep.hitsMax;
 }
 
 var roleHealer = function (creep) {
@@ -15,7 +15,7 @@ var roleHealer = function (creep) {
     var collect = false;
     for (var name in Game.flags) {
         let flag = Game.flags[name];
-        if (flag.color === COLOR_YELLOW) {
+        if (flag.color === COLOR_YELLOW && creep.memory.roomName === flag.room.name) {
             collect = true;
         }
     }
@@ -25,7 +25,7 @@ var roleHealer = function (creep) {
 
     for (let flagN in Game.flags) {
         let flag = Game.flags[flagN];
-        if (flag.color === COLOR_YELLOW && creep.memory.state === 'waiting') {
+        if (flag.color === COLOR_YELLOW && creep.memory.state === 'waiting' && creep.memory.roomName === flag.room.name) {
             creep.moveTo(flag);
         }
             
@@ -35,22 +35,24 @@ var roleHealer = function (creep) {
                 return;
             }
             else {
-                var targets = creep.pos.find(FIND_MY_CREEPS, {
+                var targets = creep.pos.findInRange(FIND_MY_CREEPS, 10, {
                     filter: function (mc) { return mc.hits < mc.hitsMax }
                 });
                 if (targets.length > 0) {
                     targets.sort(function(a, b) { return getVal(a, creep) - getVal(b, creep)});
                     var target = targets[0];
-                    if (creep.heal(target) === ERR_NOT_IN_RANGE) {
+                    var res = creep.heal(target);
+                    if (res === ERR_NOT_IN_RANGE) {
                         creep.rangedHeal(target);
                         creep.moveTo(target, { reusePath: 0 });
                     }
-                    else if (creep.pos.x === 0 || creep.pos.x === 49 || creep.pos.y === 0 || creep.pos.y === 49) {
+                    else {
                         creep.moveTo(flag, { reusePath: 0 });
                     }
                     return;
                 } else {
                     creep.moveTo(flag, { reusePath: 0 });
+                    return;
                 }
             }
         }
