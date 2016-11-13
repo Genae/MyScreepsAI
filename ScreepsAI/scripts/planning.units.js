@@ -20,6 +20,8 @@ var getLevel = function (room) {
     return 0;
 }
 
+var roomLevels = [300, 550, 800, 1300, 1800, 2300];
+
 var getStoredEnergy = function (room) {
     var storage = room.find(FIND_MY_STRUCTURES, {
         filter: { structureType: STRUCTURE_STORAGE }
@@ -56,7 +58,7 @@ var buildUnits = function (room) {
     if (room.memory.energy.fullSpawn === undefined) {
         room.memory.energy.fullSpawn = 0;
     }
-    if (room.energyCapacityAvailable <= room.energyAvailable) {
+    if (roomLevels[getLevel(room) - 1] <= room.energyAvailable) {
         room.memory.energy.fullSpawn++;
     } else {
         room.memory.energy.fullSpawn = 0;
@@ -79,8 +81,9 @@ var buildUnits = function (room) {
             myUnits[myTargets[t].role] = 0;
         if (myUnits[myTargets[t].role] < myTargets[t].amount) {
             if (myTargets[t].role === 'builder') {
-                if ((room.memory.energy.fullSpawn > 5 && getStoredEnergy(room) === -1) || getStoredEnergy(room) > myUnits[myTargets[t].role] * 50000) {
+                if ((room.memory.energy.fullSpawn > 3 && getStoredEnergy(room) === -1) || getStoredEnergy(room) > myUnits[myTargets[t].role] * 50000) {
                     spawn.createCreep(myTargets[t].body, undefined, { role: myTargets[t].role });
+                    room.memory.energy.fullSpawn = 0;
                 }
                 else {
                     continue;
@@ -113,7 +116,7 @@ var getTargets = function (room, anyUnderAttack) {
     if (level === 0) {
         return [];
     }
-
+    var miningJobs;
     if (anyUnderAttack) {
         if (level === 1) {
             for (var i = 0; i < room.memory.mines.length; i++) {
@@ -121,7 +124,8 @@ var getTargets = function (room, anyUnderAttack) {
             }
             return [
                 { role: 'harvester', amount: 2, body: [WORK, CARRY, MOVE] },
-                { role: 'upgrader', amount: 1, body: [WORK, CARRY, MOVE, CARRY, MOVE] }
+                { role: 'upgrader', amount: 1, body: [WORK, CARRY, MOVE, CARRY, MOVE] },
+                { role: 'attacker', amount: 1, body: [TOUGH, TOUGH, MOVE, MOVE, ATTACK, ATTACK] }
             ];
         }
         if (level === 2) {
@@ -131,6 +135,7 @@ var getTargets = function (room, anyUnderAttack) {
             return [
                 { role: 'harvester', amount: 2, body: [WORK, CARRY, MOVE] },
                 { role: 'distributor', amount: 1, body: [CARRY, MOVE, CARRY, MOVE] },
+                { role: 'attacker', amount: 1, body: [TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, ATTACK, ATTACK, RANGED_ATTACK] }
             ];
         }
         if (level === 3) {
@@ -139,13 +144,15 @@ var getTargets = function (room, anyUnderAttack) {
             }
             return [
                 { role: 'harvester', amount: 1, body: [WORK, CARRY, MOVE] },
-                { role: 'distributor', amount: 1, body: [CARRY, MOVE, CARRY, MOVE] }
+                { role: 'distributor', amount: 1, body: [CARRY, MOVE, CARRY, MOVE] },
+                { role: 'attacker', amount: 1, body: [TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, RANGED_ATTACK] }
             ];
         }
         if (level === 4) {
             return [
                 { role: 'harvester', amount: 1, body: [WORK, CARRY, MOVE] },
                 { role: 'distributor', amount: 1, body: [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE] },
+                { role: 'attacker', amount: 1, body: [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK] }
             ];
         }
         if (level === 5) {
@@ -163,8 +170,7 @@ var getTargets = function (room, anyUnderAttack) {
             ];
         }
     }
-
-    var miningJobs = 0;
+    miningJobs = 0;
     var attackFlags = [];
     var miningFlags = [];
     for (var flag in Game.flags) {

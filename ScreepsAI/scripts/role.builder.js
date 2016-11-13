@@ -72,7 +72,8 @@ var roleBuilder = function (creep, storage, droppedEnergy) {
             //is this spot ok?
             for (var rs = 0; rs < rechargeSpots.length; rs++) {
                 if (rechargeSpots[rs].pos.x === creep.pos.x && rechargeSpots[rs].pos.y === creep.pos.y) {
-                    creep.withdraw(Game.getObjectById(Game.rooms[creep.memory.roomName].memory.spawn.resource.id), RESOURCE_ENERGY);
+                    if (Game.rooms[creep.memory.roomName].memory.energy.canBuild)
+                        creep.withdraw(Game.getObjectById(Game.rooms[creep.memory.roomName].memory.spawn.resource.id), RESOURCE_ENERGY);
                     return;
                 }
             }
