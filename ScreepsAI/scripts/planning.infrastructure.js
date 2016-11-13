@@ -3,6 +3,7 @@ var constructionMine = require('construction.mine');
 var constructionSpawn = require('construction.spawn');
 var constructionWalls = require('construction.walls');
 var constructionLink = require('construction.link');
+var constructionMineral = require('construction.mineral');
 
 var planRoomConstruction = function (room) {
     if (room.memory.mines === undefined) {
@@ -12,6 +13,11 @@ var planRoomConstruction = function (room) {
             constructionMine.scanMine(sources[i], room);
         }
         room.memory.mines.sort(function (a, b) { return a.pathToMine.cost - b.pathToMine.cost });
+    }
+
+    if (room.memory.mineral === undefined)
+    {
+        room.memory.mineral = constructionMineral.createMineral(room);
     }
 
     if (room.memory.links === undefined) {
@@ -180,11 +186,11 @@ var improveSpawn = function (room) {
 ////////////
 var improveDefense = function (room) {
     //always build ramparts under towers
-    var towers = room.find(FIND_MY_STRUCTURES, {
-        filter: function(s) { return s.structureType === STRUCTURE_TOWER }
+    var preotectedStructures = room.find(FIND_MY_STRUCTURES, {
+        filter: function(s) { return s.structureType === STRUCTURE_TOWER || s.structureType === STRUCTURE_STORAGE || s.structureType === STRUCTURE_SPAWN}
     });
-    for (let i = 0; i < towers.length; i++) {
-        towers[i].pos.createConstructionSite(STRUCTURE_RAMPART);
+    for (let i = 0; i < preotectedStructures.length; i++) {
+        preotectedStructures[i].pos.createConstructionSite(STRUCTURE_RAMPART);
     }
     if (room.find(FIND_CONSTRUCTION_SITES).length > 0)
         return true;

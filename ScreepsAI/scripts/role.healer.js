@@ -1,3 +1,6 @@
+var getVal = function(creep, healer) {
+    return healer.pos.getRangeTo(creep.pos) / (creep.hits / creep.hitsMax);
+}
 
 var roleHealer = function (creep) {
     var squad = creep.room.find(FIND_MY_CREEPS, {
@@ -32,17 +35,22 @@ var roleHealer = function (creep) {
                 return;
             }
             else {
-                var target = creep.pos.findClosestByRange(FIND_MY_CREEPS, {
-                    filter: function (creep) { return creep.hits < creep.hitsMax }
+                var targets = creep.pos.find(FIND_MY_CREEPS, {
+                    filter: function (mc) { return mc.hits < mc.hitsMax }
                 });
-                if (target !== null) {
+                if (targets.length > 0) {
+                    targets.sort(function(a, b) { return getVal(a, creep) - getVal(b, creep)});
+                    var target = targets[0];
                     if (creep.heal(target) === ERR_NOT_IN_RANGE) {
                         creep.rangedHeal(target);
                         creep.moveTo(target, { reusePath: 0 });
                     }
+                    else if (creep.pos.x === 0 || creep.pos.x === 49 || creep.pos.y === 0 || creep.pos.y === 49) {
+                        creep.moveTo(flag, { reusePath: 0 });
+                    }
                     return;
                 } else {
-                    creep.moveTo(flag, { eusePath: 0 });
+                    creep.moveTo(flag, { reusePath: 0 });
                 }
             }
         }

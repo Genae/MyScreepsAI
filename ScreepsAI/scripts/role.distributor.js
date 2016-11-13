@@ -183,8 +183,10 @@ var doRefilling = function (creep, myStor) {
         if (creep.room.memory.links[l].type === 'store') {
             var link = Game.getObjectById(creep.room.memory.links[l].link.id);
             if (link.energy > 500) {
-                if (creep.withdraw(link, RESOURCE_ENERGY, 100) == ERR_NOT_IN_RANGE) {
+                if (creep.withdraw(link, RESOURCE_ENERGY, 100) === ERR_NOT_IN_RANGE) {
                     creep.moveTo(link);
+                } else if (creep.withdraw(link, RESOURCE_ENERGY, 100) === ERR_FULL) {
+                    creep.withdraw(link, RESOURCE_ENERGY);
                 }
                 return;
             }
@@ -216,6 +218,8 @@ var doStoring = function (creep, myStor) {
                 if (link.energy > 500) {
                     if (creep.withdraw(link, RESOURCE_ENERGY, 100) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(link);
+                    } else if (creep.withdraw(link, RESOURCE_ENERGY, 100) === ERR_FULL) {
+                        creep.withdraw(link, RESOURCE_ENERGY);
                     }
                     return;
                 }
