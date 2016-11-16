@@ -14,7 +14,7 @@ var moveToAny = function (creep, pos, range) {
             for (var dx = -myrange; dx <= myrange; dx++) {
                 for (var dy = -myrange; dy <= myrange; dy++) {
                     var posi = new RoomPosition(pos[i].x + dx, pos[i].y + dy, pos[i].roomName);
-                    if (pos[i].x + dx > 0 && pos[i].x + dx < 49 && pos[i].y + dy > 0 && pos[i].y + dy < 49 && !isBlocked(posi)) {
+                    if (pos[i].x + dx > 0 && pos[i].x + dx < 49 && pos[i].y + dy > 0 && pos[i].y + dy < 49 && !isBlocked(posi, false)) {
                         unblockedPos.push(posi);
                     }
                 }
@@ -103,27 +103,23 @@ var continueMove = function (creep) {
     if (creep.pos.getRangeTo(posnew) > 1) {
         return moveTo(creep, posnew, 0);
     }
-    var stuff = posnew.look();
-    var blocked = false;
-    for (var i = 0; i < stuff.length; i++) {
-        if (stuff[i].type === 'creep' && stuff[i].creep.fatigue === 0) {
-            creep.memory.pathBlocked++;
-            blocked = true;
-            if (creep.memory.pathBlocked > 2 && creep.memory.pathTargets !== undefined)
-                return moveToAny(creep, creep.memory.pathTargets.pos, creep.memory.pathTargets.range);
-        }
+    var blocked = isBlocked();
+    if (blocked) {
+        creep.memory.pathBlocked++;
+        if (creep.memory.pathBlocked > 2 && creep.memory.pathTargets !== undefined)
+            return moveToAny(creep, creep.memory.pathTargets.pos, creep.memory.pathTargets.range);
     }
-    if (!blocked) {
+    else {
         creep.memory.pathBlocked = 0;
     }
     creep.move(creep.pos.getDirectionTo(posnew.x, posnew.y));
     return true;
 }
 
-var isBlocked = function (pos) {
+var isBlocked = function (pos, fat) {
     var stuff = pos.look();
     for (var i = 0; i < stuff.length; i++) {
-        if (stuff[i].type === 'creep') {
+        if (stuff[i].type === 'creep' && (!fat || stuff[i].creep.fatigue === 0)) {
             return true;
         }
         if (stuff[i].type === 'structure') {

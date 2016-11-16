@@ -90,7 +90,7 @@ var buildUnits = function (room) {
                 }
             }
             else if (myTargets[t].role === 'upgrader') {
-                if ((getStoredEnergy(room) > myUnits[myTargets[t].role] * 50000) || myUnits[myTargets[t].role] === 0) {
+                if ((getStoredEnergy(room) > myUnits[myTargets[t].role] * 50000) || myUnits[myTargets[t].role] === 0 || (room.memory.energy.fullSpawn > 3 && getStoredEnergy(room) === -1)) {
                     spawn.createCreep(myTargets[t].body, undefined, { role: myTargets[t].role });
                 } else {
                     if (myUnits[myTargets[t].role] === 0)
@@ -183,13 +183,17 @@ var getTargets = function (room, anyUnderAttack) {
     }
     if (level === 1) {
         for (var i = 0; i < room.memory.mines.length; i++) {
-            miningJobs += room.memory.mines[i].workingPlaces.length + 1;
+            if(level < 4)
+                miningJobs += room.memory.mines[i].workingPlaces.length + 1;
+            else
+                miningJobs += Math.min(3, room.memory.mines[i].workingPlaces.length + 1);
         }
         return [
             { role: 'harvester', amount: 2, body: [WORK, CARRY, MOVE] },
             { role: 'upgrader', amount: 1, body: [WORK, CARRY, MOVE, CARRY, MOVE] },
-            { role: 'harvester', amount: miningJobs, body: [WORK, WORK, CARRY, MOVE] },
-            { role: 'builder', amount: room.memory.spawn.rechargeSpots.length - 1, body: [WORK, CARRY, MOVE] }
+            { role: 'harvester', amount: miningJobs, body: [WORK, MOVE, CARRY, MOVE] },
+            { role: 'builder', amount: room.memory.spawn.rechargeSpots.length - 1, body: [WORK, CARRY, MOVE] },
+            { role: 'upgrader', amount: 5, body: [WORK, CARRY, MOVE, CARRY, MOVE] }
         ];
     }
     if (level === 2) {
@@ -202,7 +206,9 @@ var getTargets = function (room, anyUnderAttack) {
             { role: 'harvester', amount: 3, body: [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE] },
             { role: 'upgrader', amount: 1, body: [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE] },
             { role: 'harvester', amount: miningJobs, body: [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE] },
-            { role: 'builder', amount: room.memory.spawn.rechargeSpots.length - 1, body: [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE] }
+            { role: 'attacker', amount: attackFlags.length, body: [TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, ATTACK, ATTACK, RANGED_ATTACK] },
+            { role: 'builder', amount: room.memory.spawn.rechargeSpots.length - 1, body: [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE] },
+            { role: 'upgrader', amount: 5, body: [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE] }
         ];
     }
     if (level === 3) {
@@ -216,7 +222,9 @@ var getTargets = function (room, anyUnderAttack) {
             { role: 'upgrader', amount: 1, body: [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE] },
             { role: 'harvester', amount: miningJobs, body: [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE] },
             { role: 'attacker', amount: attackFlags.length * 5, body: [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE, MOVE, ATTACK] },
-            { role: 'builder', amount: room.memory.spawn.rechargeSpots.length - 1, body: [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE] }
+            { role: 'builder', amount: room.memory.spawn.rechargeSpots.length - 1, body: [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE] },
+            { role: 'upgrader', amount: 5, body: [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE] },
+            { role: 'outharvester', amount: miningFlags.length * 2, body: [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE] },
         ];
     }
     if (level === 4) {
@@ -228,7 +236,8 @@ var getTargets = function (room, anyUnderAttack) {
             { role: 'harvester', amount: room.memory.mines.length * 2, body: [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE] },
             { role: 'attacker', amount: attackFlags.length * 5, body: [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE, MOVE, ATTACK] },
             { role: 'builder', amount: room.memory.spawn.rechargeSpots.length - 1, body: [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE] },
-            { role: 'upgrader', amount: 3, body: [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY ]}
+            { role: 'upgrader', amount: 5, body: [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY] },
+            { role: 'outharvester', amount: miningFlags.length * 2, body: [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE] }
         ];
     }
     if (level === 5) {

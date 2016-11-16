@@ -81,7 +81,7 @@ var createWalls = function (room, direction) {
 var needsWall = function(room, direction, pos) {
     if (direction === TOP) {
         for (let dx = -1; dx <= 1; dx++) {
-            if (room.lookForAt(LOOK_TERRAIN, pos + dx, 0)[0] !== 'wall') {
+            if (room.lookForAt(LOOK_TERRAIN, pos + dx, 0)[0] != 'wall') {
                 return true;
             }
         }
@@ -89,7 +89,7 @@ var needsWall = function(room, direction, pos) {
     }
     if (direction === BOTTOM) {
         for (let dx = -1; dx <= 1; dx++) {
-            if (room.lookForAt(LOOK_TERRAIN, pos + dx, 49)[0] !== 'wall') {
+            if (room.lookForAt(LOOK_TERRAIN, pos + dx, 49)[0] != 'wall') {
                 return true;
             }
         }
@@ -97,7 +97,7 @@ var needsWall = function(room, direction, pos) {
     }
     if (direction === LEFT) {
         for (let dy = -1; dy <= 1; dy++) {
-            if (room.lookForAt(LOOK_TERRAIN, 0, pos + dy)[0] !== 'wall') {
+            if (room.lookForAt(LOOK_TERRAIN, 0, pos + dy)[0] != 'wall') {
                 return true;
             }
         }
@@ -105,7 +105,7 @@ var needsWall = function(room, direction, pos) {
     }
     if (direction === RIGHT) {
         for (let dy = -1; dy <= 1; dy++) {
-            if (room.lookForAt(LOOK_TERRAIN, 49, pos + dy)[0] !== 'wall') {
+            if (room.lookForAt(LOOK_TERRAIN, 49, pos + dy)[0] != 'wall') {
                 return true;
             }
         }

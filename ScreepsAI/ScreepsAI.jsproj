@@ -79,6 +79,7 @@
     <Content Include="ScreepsAutocomplete\Structures\StructureTower.js" />
     <Content Include="ScreepsAutocomplete\Structures\StructureWall.js" />
     <Content Include="scripts\action.move.js" />
+    <Content Include="scripts\construction.mineral.js" />
     <Content Include="scripts\construction.link.js" />
     <Content Include="scripts\construction.walls.js" />
     <Content Include="scripts\construction.spawn.js" />

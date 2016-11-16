@@ -61,12 +61,22 @@ var roleHarvester = function (creep) {
         }
     }
     else if (creep.memory.state === 'emptying') {
-        var links = creep.pos.findInRange(FIND_MY_STRUCTURES, 1, { filter: function (s) { return s.structureType === STRUCTURE_LINK && s.energy < s.energyCapacity } });
+       var links = creep.pos.findInRange(FIND_MY_STRUCTURES, 1, { filter: function (s) { return s.structureType === STRUCTURE_LINK && s.energy < s.energyCapacity } });
         if (links.length > 0) {
             creep.transfer(links[0], RESOURCE_ENERGY);
             creep.memory.state = 'mining';
         }
         else if (creep.transfer(creep.room.find(FIND_MY_SPAWNS)[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+            var repairSites = creep.pos.findInRange(FIND_STRUCTURES, 3, {
+                filter: function (s) {
+                    return (s.structureType !== STRUCTURE_RAMPART && s.structureType !== STRUCTURE_WALL && s.hits <= s.hitsMax - 2000) ||
+                        ((s.structureType === STRUCTURE_RAMPART || s.structureType === STRUCTURE_WALL) && (creep.room.memory.wallHitpoints !== undefined && creep.room.memory.wallHitpoints > s.hits));
+                }
+            });
+            if (repairSites.length > 0) {
+                creep.repair(repairSites[0]);
+                return;
+            }
             actionMove.followPath(creep, mymine.pathToMine.path.slice(0).reverse());
         }
     }

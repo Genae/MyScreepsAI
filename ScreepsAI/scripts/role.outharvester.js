@@ -26,11 +26,7 @@ var roleOutHarvester = function (creep) {
         creep.memory.state = 'mining';
     }
     var myflag = Game.flags[creep.memory.job.flag];
-    var mysource = creep.pos.findClosestByRange(FIND_SOURCES);
-    if (creep.carry.energy === creep.carryCapacity|| (mysource !== null && mysource.energy === 0 && creep.carry.energy> 0)) {
-        creep.memory.state = 'emptying';
-    }
-
+    
 
     if (creep.memory.state === 'mining') {
         var energy = creep.pos.findInRange(FIND_DROPPED_ENERGY, 30, {
@@ -50,6 +46,10 @@ var roleOutHarvester = function (creep) {
             creep.moveTo(myflag);
         }
         else {
+            var mysource = myflag.pos.findClosestByRange(FIND_SOURCES);
+            if (creep.carry.energy === creep.carryCapacity || (mysource !== null && mysource.energy === 0 && creep.carry.energy > 0)) {
+                creep.memory.state = 'emptying';
+            }
             var h = creep.harvest(mysource);
             if (h === ERR_NOT_IN_RANGE || h === ERR_NOT_ENOUGH_RESOURCES) {
                 creep.moveTo(mysource);
@@ -59,14 +59,18 @@ var roleOutHarvester = function (creep) {
     }
     else if (creep.memory.state === 'emptying') {
         if (creep.pos.x > 1 && creep.pos.y > 1 && creep.pos.x < 48 && creep.pos.y < 48) {
-            var constructionSites = creep.pos.findInRange(FIND_CONSTRUCTION_SITES, 3);
+            var constructionSites = creep.pos.findInRange(FIND_CONSTRUCTION_SITES, 30, {filter: function(cs){return cs.structureType === STRUCTURE_SPAWN}});
             if (constructionSites.length > 0) {
-                creep.build(constructionSites[0]);
+                if (creep.build(constructionSites[0]) === ERR_NOT_IN_RANGE) {
+                    creep.moveTo(constructionSites[0]);
+                }
                 return;
             }
+            constructionSites = creep.pos.findInRange(FIND_CONSTRUCTION_SITES, 3);
             if (constructionSites.length > 0) {
-                creep.build(constructionSites[0]);
-                return;
+                if (creep.build(constructionSites[0]) === OK) {
+                    return;
+                }
             }
             var repairSites = creep.pos.findInRange(FIND_STRUCTURES, 3, {
                 filter: function (s) {
@@ -75,8 +79,9 @@ var roleOutHarvester = function (creep) {
                 }
             });
             if (repairSites.length > 0) {
-                creep.repair(repairSites[0]);
-                return;
+                if (creep.repair(repairSites[0]) === OK) {
+                    return;
+                }
             }
         }
         var storage = Game.rooms[creep.memory.roomName].find(FIND_MY_STRUCTURES, {
@@ -88,13 +93,23 @@ var roleOutHarvester = function (creep) {
             if (creep.transfer(storage[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(storage[0]);
             }
+            return;
         }
-        else {
-            var mySpawn = Game.rooms[creep.memory.roomName].find(FIND_MY_SPAWNS)[0];
-            if (creep.transfer(mySpawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(mySpawn);
+        var ext = Game.rooms[creep.memory.roomName].find(FIND_MY_STRUCTURES, {
+            filter: function (structure) {
+                return structure.structureType === STRUCTURE_EXTENSION && structure.energy < structure.energyCapacity;
             }
-            
+        });
+        var me = creep.pos.findClosestByRange(ext);
+        if (me !== null) {
+            if (creep.transfer(me, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(me);
+            }
+            return;
+        }
+        var mySpawn = Game.rooms[creep.memory.roomName].find(FIND_MY_SPAWNS)[0];
+        if (creep.transfer(mySpawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+            creep.moveTo(mySpawn);
         }
     }
 }
