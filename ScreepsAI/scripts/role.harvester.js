@@ -19,8 +19,16 @@ var roleHarvester = function (creep) {
             }
         }
     }
-
+    var controller;
     if (creep.memory.moving) {
+        controller = creep.pos.findInRange(FIND_MY_STRUCTURES, 3, { filter: function (s) { return s.structureType === STRUCTURE_CONTROLLER } });
+        if (controller.length > 0) {
+            creep.upgradeController(controller[0]);
+            if (creep.carry.energy === 0 && creep.memory.state === 'emptying') {
+                creep.memory.moving = false;
+                roleHarvester(creep);
+            }
+        }
         if (actionMove.continueMove(creep)) {
             return;
         }
@@ -54,14 +62,18 @@ var roleHarvester = function (creep) {
                 return;
             }
             if (creep.pos.getRangeTo(mymine.resource.pos.x, mymine.resource.pos.y) < 3) {
-                actionMove.moveTo(creep, mysource.pos, 1);
+                actionMove.moveToAny(creep, mymine.workingPlaces, 0);
             } else {
                 actionMove.followPath(creep, mymine.pathToMine.path);
             }
         }
     }
     else if (creep.memory.state === 'emptying') {
-       var links = creep.pos.findInRange(FIND_MY_STRUCTURES, 1, { filter: function (s) { return s.structureType === STRUCTURE_LINK && s.energy < s.energyCapacity } });
+        controller = creep.pos.findInRange(FIND_MY_STRUCTURES, 3, { filter: function (s) { return s.structureType === STRUCTURE_CONTROLLER } });
+        if (controller.length > 0) {
+            creep.upgradeController(controller[0]);
+        }
+        var links = creep.pos.findInRange(FIND_MY_STRUCTURES, 1, { filter: function (s) { return s.structureType === STRUCTURE_LINK && s.energy < s.energyCapacity } });
         if (links.length > 0) {
             creep.transfer(links[0], RESOURCE_ENERGY);
             creep.memory.state = 'mining';

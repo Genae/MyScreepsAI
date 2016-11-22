@@ -38,7 +38,9 @@ var planExtension = function(spawn, room) {
     }
 }
 
-var isBlocked = function(pos, room) {
+var isBlocked = function (pos, room) {
+    if (pos.x <= 3 || pos.y <= 3 || pos.x >= 47 || pos.y >= 47)
+        return true;
     var stuff = pos.look();
     for (var i = 0; i < stuff.length; i++) {
         if (stuff[i].type == "creep") {

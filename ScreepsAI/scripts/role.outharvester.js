@@ -2,7 +2,7 @@ var actionMove = require('action.move');
 var planningJobs = require('planning.jobs');
 
 var roleOutHarvester = function (creep) {
-    if (creep.memory.job === undefined) {
+    if (creep.memory.job === undefined || Game.flags[creep.memory.job.flag] === undefined) {
         planningJobs.findJob(creep, creep.room);
         if (creep.memory.job === undefined)
             return;
@@ -71,6 +71,7 @@ var roleOutHarvester = function (creep) {
                 if (creep.build(constructionSites[0]) === OK) {
                     return;
                 }
+                creep.moveTo(constructionSites[0]);
             }
             var repairSites = creep.pos.findInRange(FIND_STRUCTURES, 3, {
                 filter: function (s) {
@@ -82,6 +83,7 @@ var roleOutHarvester = function (creep) {
                 if (creep.repair(repairSites[0]) === OK) {
                     return;
                 }
+                creep.moveTo(repairSites[0]);
             }
         }
         var storage = Game.rooms[creep.memory.roomName].find(FIND_MY_STRUCTURES, {

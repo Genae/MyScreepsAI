@@ -10,6 +10,7 @@ var planningUnits = require('planning.units');
 var planningInfrastructure = require('planning.infrastructure');
 
 module.exports.loop = function () {
+    //PathFinder.use(true);
     var cpu = {};
     var lastCpu = 0;
     var errors = [];
@@ -41,6 +42,12 @@ module.exports.loop = function () {
         }
         lastCpu = snapshotCpu('pois', lastCpu, cpu);
         
+        try {
+            checkSlaveRooms();
+        } catch (e) {
+            console.log("Error while checking slaverooms: " + e);
+            errors.push(e);
+        }
 
         var builders = [];
         //creepAI
@@ -184,7 +191,6 @@ var roomPlanning = function() {
             room.memory.wallHitpoints = 100000;
         }
 
-        checkSlaveRooms(room, spawn);
 
         if(Game.time % 5 === 0)
             planningInfrastructure.planRoomConstruction(room);
@@ -229,11 +235,10 @@ var defendRoom = function (room) {
                     //dont care
                 } else {
                     var targets = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 6, {
-                        filter: function (hc) { return hc.owner.username !== 'Hosmagix' }
+                        filter: function (hc) { return hc.owner.username !== 'Hosmagix' && hc.pos.x > 2 && hc.pos.x < 47 && hc.pos.y > 2 && hc.pos.y < 47 }
                     });
                     for (t = 0; t < targets.length; t++) {
                         if (creep.pos.getRangeTo(targets[t].pos) <= 4) {
-                            //console.log("save me!");
                             room.controller.activateSafeMode();
                         }
                     }
@@ -280,7 +285,7 @@ var getAllRoomsPOI = function () {
                 storage.push(structure);
             }
         }
-        var droppedEnergy;
+        var droppedEnergy = undefined;
         if (room.memory.energy !== undefined) {
             droppedEnergy = room.find(FIND_DROPPED_ENERGY, {
                 filter: (energy) => {
@@ -294,22 +299,31 @@ var getAllRoomsPOI = function () {
     return pois;
 }
 
-var checkSlaveRooms = function (room, spawn) {
+var checkSlaveRooms = function () {
     for (let name in Game.flags) {
         var flag = Game.flags[name];
         if (flag.color === COLOR_BROWN) {
             if (Memory.rooms[flag.pos.roomName] === undefined) {
                 Memory.rooms[flag.pos.roomName] = {};
             }
+            var master;
             if (Memory.rooms[flag.pos.roomName].masterRoom === undefined) {
-                if (false) {
-                    //TODO
-                } else {
-                    Memory.rooms[flag.pos.roomName].masterRoom = spawn.pos.roomName;
-                    if (Game.rooms[spawn.pos.roomName].memory.slaveRooms === undefined) {
-                        Game.rooms[spawn.pos.roomName].memory.slaveRooms = [];
+                master = findClosestRoom(flag.pos);
+                Memory.rooms[flag.pos.roomName].masterRoom = master;
+                if (Game.rooms[master].memory.slaveRooms === undefined) {
+                    Game.rooms[master].memory.slaveRooms = [];
+                }
+                Game.rooms[master].memory.slaveRooms.push(flag.pos.roomName);
+            } else {
+                if (Game.rooms[flag.pos.roomName] !== undefined && flag.room.controller.level > 0) {
+                    flag.remove();
+                    Memory.rooms[flag.pos.roomName].underAttack = false;
+                    master = Memory.rooms[flag.pos.roomName].masterRoom;
+                    delete Memory.rooms[flag.pos.roomName].masterRoom;
+                    var index = Game.rooms[master].memory.slaveRooms.indexOf(210);
+                    if (index > -1) {
+                        Game.rooms[master].memory.slaveRooms.splice(index, 1);
                     }
-                    Game.rooms[spawn.pos.roomName].memory.slaveRooms.push(flag.pos.roomName);
                 }
             }
         }
@@ -359,4 +373,13 @@ var runLinks = function(room) {
             link.transferEnergy(targets[targets.length - 1]);
         }
     }
+}
+
+var findClosestRoom = function (start) {
+    var goals = [];
+    for (var spawn in Game.spawns) {
+        goals.push({ pos: Game.spawns[spawn].pos, range: 1 });
+    }
+    var res = PathFinder.search(start, goals);
+    return res.path[res.path.length - 1].roomName;
 }

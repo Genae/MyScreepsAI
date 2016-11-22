@@ -103,7 +103,7 @@ var continueMove = function (creep) {
     if (creep.pos.getRangeTo(posnew) > 1) {
         return moveTo(creep, posnew, 0);
     }
-    var blocked = isBlocked();
+    var blocked = isBlocked(creep.pos, true);
     if (blocked) {
         creep.memory.pathBlocked++;
         if (creep.memory.pathBlocked > 2 && creep.memory.pathTargets !== undefined)

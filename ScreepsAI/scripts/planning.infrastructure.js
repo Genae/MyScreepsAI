@@ -268,7 +268,7 @@ var improveDefense = function (room) {
                                 }
                                 if (stuff[i].structureType === STRUCTURE_ROAD) {
                                     if (pos.createConstructionSite(STRUCTURE_RAMPART) !== OK) {
-                                        return true;
+                                        //return true;
                                     }
                                     room.memory.wallHitpoints = 100000;
                                     hasRampart = true;
@@ -277,7 +277,7 @@ var improveDefense = function (room) {
                             }
                             if (!hasRampart) {
                                 if (pos.createConstructionSite(STRUCTURE_WALL) !== OK) {
-                                    return true;
+                                    //return true;
                                 }
                                 room.memory.wallHitpoints = 100000;
                             }

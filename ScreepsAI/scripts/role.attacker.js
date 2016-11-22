@@ -61,7 +61,7 @@ var roleAttacker = function (creep) {
             
             if (flag.color === COLOR_RED && creep.memory.state === 'attacking') {
                 if (creep.room.name !== flag.pos.roomName) {
-                    creep.moveTo(flag, { ignoreCreeps: true });
+                    creep.moveTo(flag, { ignoreCreeps: true, reusePath: 50 });
                     return;
                 }
                 else {
@@ -96,9 +96,12 @@ var roleAttacker = function (creep) {
                     if (target !== null) {
                         if (creep.attack(target) === ERR_NOT_IN_RANGE) {
                             creep.rangedAttack(target);
-                            creep.moveTo(target, { reusePath: 0 });
+                            if (creep.moveTo(target, { reusePath: 0 }) !== ERR_NO_PATH)
+                                return;
                         }
-                        return;
+                        else {
+                            return;
+                        }
                     }
                     target = creep.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES, {
                         filter: function (structure) { return structure.structureType === STRUCTURE_TOWER && structure.owner.username !== 'Hosmagix'; }
@@ -106,9 +109,12 @@ var roleAttacker = function (creep) {
                     if (target !== null) {
                         if (creep.attack(target) === ERR_NOT_IN_RANGE) {
                             creep.rangedAttack(target);
-                            creep.moveTo(target, { reusePath: 0 });
+                            if (creep.moveTo(target, { reusePath: 0 }) !== ERR_NO_PATH)
+                                return;
                         }
-                        return;
+                        else {
+                            return;
+                        }
                     }
                     target = creep.pos.findClosestByRange(FIND_HOSTILE_SPAWNS, {
                         filter: function (hc) { return hc.owner.username !== 'Hosmagix' }
@@ -116,18 +122,41 @@ var roleAttacker = function (creep) {
                     if (target !== null) {
                         if (creep.attack(target) === ERR_NOT_IN_RANGE) {
                             creep.rangedAttack(target);
-                            creep.moveTo(target, { reusePath: 0 });
+                            if (creep.moveTo(target, { reusePath: 0 }) !== ERR_NO_PATH)
+                                return;
                         }
-                        return;
+                        else {
+                            return;
+                        }
                     }
                     target = creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS, {
                         filter: function (hc) { return hc.owner.username !== 'Hosmagix' }
                     });
                     if (target !== null) {
                         if (creep.attack(target) === ERR_NOT_IN_RANGE) {
-                            creep.moveTo(target);
+                            creep.rangedAttack(target);
+                            if (creep.moveTo(target, { reusePath: 0 }) !== ERR_NO_PATH)
+                                return;
+                        }
+                        else {
+                            return;
+                        }
+                    }
+                    target = creep.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES, {
+                        filter: function (structure) { return structure.structureType !== STRUCTURE_CONTROLLER && structure.structureType !== STRUCTURE_RAMPART && structure.owner.username !== 'Hosmagix' }
+                    });
+                    if (target !== null) {
+                        if (creep.attack(target) === ERR_NOT_IN_RANGE) {
+                            creep.rangedAttack(target);
                             creep.rangedAttack(target, { reusePath: 0 });
                         }
+                        return;
+                    }
+                    target = creep.pos.findClosestByRange(FIND_HOSTILE_CONSTRUCTION_SITES, {
+                        filter: function (structure) { return structure.owner.username !== 'Hosmagix' }
+                    });
+                    if (target !== null) {
+                        creep.moveTo(target);
                         return;
                     }
                     target = creep.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES, {
