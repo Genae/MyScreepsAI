@@ -129,7 +129,7 @@ var improveOuterMines = function (room) {
 /// Minerals
 ///
 var improveMinerals = function (room) {
-    if (room.memory.minerals === undefined)
+    if (room.memory.mineral === undefined)
         return false;
     var mineral = Game.getObjectById(room.memory.mineral.resource.id);
     var spawn = Game.getObjectById(room.memory.spawn.resource.id);

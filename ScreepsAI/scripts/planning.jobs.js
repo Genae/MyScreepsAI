@@ -1,7 +1,7 @@
 var findJob = function (creep) {
     var room = Game.rooms[creep.memory.roomName];
     if (creep.memory.role === 'harvester') {
-        for (var i = 0; i < room.memory.mines.length; i++) {
+        for (let i = 0; i < room.memory.mines.length; i++) {
             if (room.memory.lastJobs[i] === undefined)
                 room.memory.lastJobs[i] = 0;
             if ((room.memory.lastJobs[i] < room.memory.mines[i].workingPlaces.length && room.energyCapacityAvailable < 1300) ||
@@ -11,7 +11,7 @@ var findJob = function (creep) {
                 return;
             }
         }
-        for (var i = 0; i < room.memory.mines.length; i++) {
+        for (let i = 0; i < room.memory.mines.length; i++) {
             if ((room.memory.lastJobs[i] < room.memory.mines[i].workingPlaces.length + 1 && room.energyCapacityAvailable < 1300) ||
                 (room.memory.lastJobs[i] === 1 && room.energyCapacityAvailable >= 1300)) {
                 creep.memory.job = { mineIndex: i };
@@ -21,8 +21,8 @@ var findJob = function (creep) {
         }
     }
     if (creep.memory.role === 'outharvester') {
-        for (var flagName in Game.flags) {
-            var flag = Game.flags[flagName];
+        for (let flagName in Game.flags) {
+            let flag = Game.flags[flagName];
             if (flag.color !== COLOR_BROWN || Memory.rooms[flag.pos.roomName].masterRoom !== room.name)
                 continue;
             if (room.memory.lastJobs[flagName] === undefined)
@@ -31,6 +31,21 @@ var findJob = function (creep) {
                 creep.memory.job = { flag: flagName };
                 room.memory.lastJobs[flagName]++;
                 return;
+            }
+        }
+    }
+    if (creep.memory.role === 'reserver') {
+        var slaverooms = {};
+        for (let flagName in Game.flags) {
+            let flag = Game.flags[flagName];
+            if (flag.color !== COLOR_BROWN || Memory.rooms[flag.pos.roomName].masterRoom !== room.name)
+                continue;
+            if (slaverooms[flag.pos.roomName] === undefined) {
+                slaverooms[flag.pos.roomName] = 0;
+            }
+            slaverooms[flag.pos.roomName]++;
+            if (slaverooms[flag.pos.roomName] >= 2 && room.memory.lastJobs["reserve" + flag.pos.roomName] !== 1) {
+                creep.memory.job = { roomName: flag.pos.roomName };
             }
         }
     }

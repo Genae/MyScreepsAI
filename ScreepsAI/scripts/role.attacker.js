@@ -1,3 +1,17 @@
+var seekAndDestroy = function(creep, target) {
+    if (target !== null) {
+        if (creep.attack(target) === ERR_NOT_IN_RANGE) {
+            creep.rangedAttack(target);
+            if (creep.moveTo(target, { reusePath: 0 }) !== ERR_NO_PATH)
+                return true;
+        }
+        else {
+            return true;
+        }
+    }
+    return false;
+}
+
 
 var roleAttacker = function (creep) {
     var roomUnderAttack;
@@ -50,6 +64,8 @@ var roleAttacker = function (creep) {
                 });
                 if (targets.length > 0) {
                     priorityTargets.push(targets[0]);
+                } else {
+                    flag.remove();
                 }
             }
         }
@@ -82,76 +98,37 @@ var roleAttacker = function (creep) {
                         }
                     });
                     target = creep.pos.findClosestByRange(creeps);
-                    if (target !== null) {
-                        if (creep.attack(target) === ERR_NOT_IN_RANGE) {
-                            creep.rangedAttack(target);
-                            if (creep.moveTo(target, { reusePath: 0 }) !== ERR_NO_PATH)
-                                return;
-                        }
-                        else {
-                            return;
-                        }
-                    }
+                    if (seekAndDestroy(creep, target))
+                        return;
+
                     target = creep.pos.findClosestByRange(priorityTargets);
-                    if (target !== null) {
-                        if (creep.attack(target) === ERR_NOT_IN_RANGE) {
-                            creep.rangedAttack(target);
-                            if (creep.moveTo(target, { reusePath: 0 }) !== ERR_NO_PATH)
-                                return;
-                        }
-                        else {
-                            return;
-                        }
-                    }
+                    if (seekAndDestroy(creep, target))
+                        return;
+
                     target = creep.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES, {
                         filter: function (structure) { return structure.structureType === STRUCTURE_TOWER && structure.owner.username !== 'Hosmagix'; }
                     });
-                    if (target !== null) {
-                        if (creep.attack(target) === ERR_NOT_IN_RANGE) {
-                            creep.rangedAttack(target);
-                            if (creep.moveTo(target, { reusePath: 0 }) !== ERR_NO_PATH)
-                                return;
-                        }
-                        else {
-                            return;
-                        }
-                    }
+                    if (seekAndDestroy(creep, target))
+                        return;
+
                     target = creep.pos.findClosestByRange(FIND_HOSTILE_SPAWNS, {
                         filter: function (hc) { return hc.owner.username !== 'Hosmagix' }
                     });
-                    if (target !== null) {
-                        if (creep.attack(target) === ERR_NOT_IN_RANGE) {
-                            creep.rangedAttack(target);
-                            if (creep.moveTo(target, { reusePath: 0 }) !== ERR_NO_PATH)
-                                return;
-                        }
-                        else {
-                            return;
-                        }
-                    }
+                    if (seekAndDestroy(creep, target))
+                        return;
+
                     target = creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS, {
                         filter: function (hc) { return hc.owner.username !== 'Hosmagix' }
                     });
-                    if (target !== null) {
-                        if (creep.attack(target) === ERR_NOT_IN_RANGE) {
-                            creep.rangedAttack(target);
-                            if (creep.moveTo(target, { reusePath: 0 }) !== ERR_NO_PATH)
-                                return;
-                        }
-                        else {
-                            return;
-                        }
-                    }
+                    if (seekAndDestroy(creep, target))
+                        return;
+
                     target = creep.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES, {
                         filter: function (structure) { return structure.structureType !== STRUCTURE_CONTROLLER && structure.structureType !== STRUCTURE_RAMPART && structure.owner.username !== 'Hosmagix' }
                     });
-                    if (target !== null) {
-                        if (creep.attack(target) === ERR_NOT_IN_RANGE) {
-                            creep.rangedAttack(target);
-                            creep.rangedAttack(target, { reusePath: 0 });
-                        }
+                    if (seekAndDestroy(creep, target))
                         return;
-                    }
+
                     target = creep.pos.findClosestByRange(FIND_HOSTILE_CONSTRUCTION_SITES, {
                         filter: function (structure) { return structure.owner.username !== 'Hosmagix' }
                     });
@@ -159,16 +136,19 @@ var roleAttacker = function (creep) {
                         creep.moveTo(target);
                         return;
                     }
+
                     target = creep.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES, {
                         filter: function (structure) { return structure.structureType !== STRUCTURE_CONTROLLER && structure.owner.username !== 'Hosmagix' }
                     });
-                    if (target !== null) {
-                        if (creep.attack(target) === ERR_NOT_IN_RANGE) {
-                            creep.moveTo(target);
-                            creep.rangedAttack(target, { reusePath: 0 });
-                        }
+                    if (seekAndDestroy(creep, target))
                         return;
-                    }
+
+                    target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+                        filter: function (structure) { return structure.structureType === STRUCTURE_WALL }
+                    });
+                    if (seekAndDestroy(creep, target))
+                        return;
+
                     creep.moveTo(flag, { reusePath: 0 });
                     
                     return;

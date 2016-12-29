@@ -5,6 +5,8 @@ var roleAttacker = require('role.attacker');
 var roleHealer = require('role.healer');
 var roleDistributor = require('role.distributor');
 var roleOutharvester = require('role.outharvester');
+var roleReserver = require('role.reserver');
+var roleMiner = require('role.miner');
 var roleClaimer = require('role.claimer');
 var planningUnits = require('planning.units');
 var planningInfrastructure = require('planning.infrastructure');
@@ -24,7 +26,15 @@ module.exports.loop = function () {
             errors.push(e);
         }
         lastCpu = snapshotCpu('remove dead', lastCpu, cpu);
-        
+
+        try {
+            tickDownControllers();
+        } catch (e) {
+            console.log("Error while ticking down controllers: " + e);
+            errors.push(e);
+        }
+        lastCpu = snapshotCpu('tick down', lastCpu, cpu);
+
         try {
             roomPlanning();
         } catch (e) {
@@ -41,7 +51,7 @@ module.exports.loop = function () {
             errors.push(e);
         }
         lastCpu = snapshotCpu('pois', lastCpu, cpu);
-        
+
         try {
             checkSlaveRooms();
         } catch (e) {
@@ -76,6 +86,12 @@ module.exports.loop = function () {
                 if (creep.memory.role === 'healer') {
                     roleHealer.roleHealer(creep);
                 }
+                if (creep.memory.role === 'reserver') {
+                    roleReserver.roleReserver(creep);
+                }
+                if (creep.memory.role === 'miner') {
+                    roleMiner.roleMiner(creep);
+                }
                 if (creep.memory.role === 'distributor') {
                     roleDistributor.roleDistributor(creep, homeRoom, pois[homeRoom.name].extensions, pois[homeRoom.name].droppedEnergy, pois[homeRoom.name].storage);
                 }
@@ -103,7 +119,7 @@ module.exports.loop = function () {
         errors.push(e);
 
     }
-    
+
     //console.log("cpu: " + Game.cpu.getUsed());
 
     if (errors.length > 0) {
@@ -116,13 +132,21 @@ module.exports.loop = function () {
     }
 }
 
-var snapshotCpu = function(name, last, obj) {
+var tickDownControllers = function () {
+    for (let rn in Memory.rooms) {
+        var room = Memory.rooms[rn];
+        if (room.controllerTicks !== undefined)
+            room.controllerTicks--;
+    }
+}
+
+var snapshotCpu = function (name, last, obj) {
     var used = Game.cpu.getUsed();
     obj[name] = used - last;
     return used;
 }
 
-var removeDeadCreeps = function() {
+var removeDeadCreeps = function () {
     for (let i in Memory.creeps) {
         if (!Game.creeps[i]) {
             if (Memory.creeps[i].rechargeSpot !== undefined) {
@@ -149,7 +173,7 @@ var removeDeadCreeps = function() {
     }
 }
 
-var roomPlanning = function() {
+var roomPlanning = function () {
     for (var roomName in Game.rooms) {
         var room = Game.rooms[roomName];
 
@@ -169,7 +193,7 @@ var roomPlanning = function() {
             room.memory.underAttack = true;
         } else {
             room.memory.underAttack = false;
-            
+
         }
         if (spawn === undefined || spawn === null)
             continue;
@@ -192,7 +216,7 @@ var roomPlanning = function() {
         }
 
 
-        if(Game.time % 5 === 0)
+        if (Game.time % 5 === 0)
             planningInfrastructure.planRoomConstruction(room);
         if ((Game.time + 1) % 5 === 0)
             planningUnits.buildUnits(room);
@@ -267,7 +291,7 @@ var defendRoom = function (room) {
 
 var getAllRoomsPOI = function () {
     var pois = {};
-    
+
     for (var roomName in Game.rooms) {
         var room = Game.rooms[roomName];
         var structures = room.find(FIND_MY_STRUCTURES);
@@ -330,7 +354,7 @@ var checkSlaveRooms = function () {
     }
 }
 
-var runLinks = function(room) {
+var runLinks = function (room) {
     var links = {
         store: [],
         empty: [],
@@ -361,13 +385,13 @@ var runLinks = function(room) {
         if (room.memory.links[i].type === 'empty' || room.memory.links[i].type === 'store') {
             for (let j = 0; j < links.fill.length; j++) {
                 let link2 = Game.getObjectById(links.fill[j].link.id);
-                targets[Math.floor((800 - link2.energy) / link.pos.getRangeTo(link2.pos))*2] = link2;
+                targets[Math.floor((800 - link2.energy) / link.pos.getRangeTo(link2.pos)) * 2] = link2;
                 if (link2.energy < 700) {
                     link.transferEnergy(link2);
                     break;
                 }
             }
-            
+
         }
         if (targets.length > 0) {
             link.transferEnergy(targets[targets.length - 1]);
