@@ -9,6 +9,8 @@
  *
  * @class
  * @extends {OwnedStructure}
+ *
+ * @see {@link http://support.screeps.com/hc/en-us/articles/207713399-StructureTerminal}
  */
 StructureTerminal = function() { };
 
@@ -19,6 +21,8 @@ StructureTerminal.prototype =
      * Each object key is one of the RESOURCE_* constants, values are resources amounts.
      * Use _.sum(structure.store) to get the total amount of contents.
      *
+     * @see {@link http://support.screeps.com/hc/en-us/articles/207713399-StructureTerminal#store}
+     *
      * @type {Array<string, number>}
      */
     store: {},
@@ -26,12 +30,25 @@ StructureTerminal.prototype =
     /**
      * The total amount of resources the storage can contain.
      *
+     * @see {@link http://support.screeps.com/hc/en-us/articles/207713399-StructureTerminal#storeCapacity}
+     *
      * @type {number}
      */
     storeCapacity: 0,
+    
+    /**
+    * The remaining amount of ticks while this terminal cannot be used to make StructureTerminal.send or Game.market.deal calls.
+    *
+    * @see {@link http://docs.screeps.com/api/#StructureTerminal.store}
+    *
+    * @type {number}
+    */
+    cooldown: 0,
 
     /**
      * Sends resource to a Terminal in another room with the specified name.
+     *
+     * @see {@link http://support.screeps.com/hc/en-us/articles/207713399-StructureTerminal#send}
      *
      * @type {function}
      *
@@ -50,6 +67,8 @@ StructureTerminal.prototype =
      * Transfer resource from this terminal to a creep.
      * The target has to be at adjacent square.
      * You can transfer resources to your creeps from hostile structures as well.
+     *
+     * @see {@link http://support.screeps.com/hc/en-us/articles/207713399-StructureTerminal#transfer}
      *
      * @type {function}
      *
