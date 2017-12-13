@@ -145,8 +145,6 @@ let improveMinerals = function (room) {
         return false;
     let mineral = Game.getObjectById(room.memory.structures.mineral.obj.id);
     let spawn = Game.getObjectById(room.memory.structures.spawn.obj.id);
-    if (room.find(FIND_CONSTRUCTION_SITES).length > 0)
-        return true;
     //Tier 1
     if (room.memory.structures.mineral.improvedTo < 1 && room.memory.structures.improveTo >= 1 && room.controller.level >= 6) {
         let p = pathfindingHelper.findPathUsingRoads(spawn.pos, { pos: mineral.pos, range: 1 });
@@ -168,10 +166,8 @@ let improveMinerals = function (room) {
 /// Controller
 ///
 let improveController = function (room) {
-    if (room.find(FIND_CONSTRUCTION_SITES).length > 0)
-        return true;
     //Tier 1
-    if (room.memory.structures.controller.improvedTo < 1 && room.memory.improveTo >= 1) {
+    if (room.memory.structures.controller.improvedTo < 1 && room.memory.structures.improveTo >= 1) {
         improvePath(room.memory.structures.controller.pathTo.path);
         room.memory.structures.controller.improvedTo = 1;
         return true;
