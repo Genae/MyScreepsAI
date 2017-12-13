@@ -1,12 +1,10 @@
-var createMineral = function (room) {
-
-    var mineral = room.find(FIND_MINERALS)[0];
+let createMineral = function (room, mineral) {
     
     //save object
     return {
-        resource: { id: mineral.id, pos: mineral.pos },
+        obj: { id: mineral.id, pos: mineral.pos },
         improvedTo: 0
     };
-}
+};
 
 module.exports = { createMineral: createMineral };

@@ -1,7 +1,5 @@
-var actionMove = require('action.move');
-
-//convenience
-
+let actionMove = require('action.move');
+let storageHelper = require('util.storageHelper');
 
 ////////////////////////
 //       states      //
@@ -15,73 +13,78 @@ const STATE_STORING = 'storing';
 ////////////////////////
 //  state conditions  //
 ////////////////////////
-var changeToRefilling = function (creep, myExt) {
+let changeToRefilling = function (creep, myExt) {
     //if i have extensions to fill and not enough energy -> refill
     if (myExt !== undefined && myExt !== null && creep.carry.energy < myExt.energyCapacity) {
         creep.memory.state = STATE_REFILLING;
         return true;
     }
     return false;
-}
+};
 
-var changeToInjecting = function (creep, myExt) {
+let changeToInjecting = function (creep, myExt) {
     //if i have extensions to fill and enough energy to do so -> inject
-    if (myExt !== undefined && myExt !== null && (creep.carry.energy >= myExt.energyCapacity  || creep.carry.energy === creep.carryCapacity)) {
+    if (myExt !== undefined && myExt !== null && (creep.carry.energy >= myExt.energyCapacity || creep.carry.energy === creep.carryCapacity)) {
         creep.memory.state = STATE_INJECTING;
         return true;
     }
     return false;
-}
+};
 
-var changeToCollecting = function (creep, myExt, droppedEnergy) {
+let changeToCollecting = function (creep, myExt, droppedEnergy) {
     //if there is no extension to fill -> check if there is energy to collect
     if ((myExt === undefined || myExt === null) && creep.carry.energy === 0 && droppedEnergy.length > 0) {
         creep.memory.state = STATE_COLLECTING;
         return true;
     }
     return false;
-}
+};
 
-var changeToEmptying = function (creep, myExt) {
+let changeToEmptying = function (creep, myExt) {
     //if there is no extension to fill -> empty creep
     if (myExt === undefined || myExt === null) {
         creep.memory.state = STATE_EMPTYING;
         return true;
     }
     return false;
-}
+};
 
-var changeToStoring = function (creep, myStor) {
+let changeToStoring = function (creep, myStor) {
     //if there is no extension to fill -> empty creep
     if (myStor !== null && myStor !== undefined) {
         creep.memory.state = STATE_STORING;
         return true;
     }
     return false;
-}
+};
 
 //////////////////
 //state machine
 //////////////////
-var roleDistributor = function (creep, room, extensions, droppedEnergy, storage) {
-    var it = 0;
+let roleDistributor = function (creep) {
+    let it = 0;
+    if (creep.memory.moving && creep.room.name === creep.memory.roomName) {
+        if (actionMove.continueMove(creep)) {
+            return true;
+        }
+    }
+    let roomStructures = storageHelper.getStructuresInRoom(creep.room);
+    let extensions = roomStructures.priorityStorage;
+    let storage = roomStructures.storage;
+    let droppedEnergy = roomStructures.drops;
+    for (let l = 0; l < creep.room.memory.structures.links.length; l++) {
+        let sl = creep.room.memory.structures.links[l];
+        let slObj = Game.getObjectById(sl.link.id);
+        if (sl.type === 'store' && slObj.energy <= 200)
+            extensions.push(slObj);
+    }
+
+    let myExt = creep.pos.findClosestByRange(extensions);
+    let myStor = creep.pos.findClosestByRange(storage);
+    
     while (it < 10) {
         it++;
-        if (creep.memory.moving && creep.room.name === creep.memory.roomName) {
-            if (actionMove.continueMove(creep)) {
-                return true;
-            }
-        }
-
-        for (let l = 0; l < creep.room.memory.links.length; l++) {
-            var sl = creep.room.memory.links[l];
-            var slObj = Game.getObjectById(sl.link.id);
-            if (sl.type === 'store' && slObj.energy <= 200)
-                extensions.push(slObj);
-        }
-
-        var myExt = creep.pos.findClosestByRange(extensions);
-        var myStor = creep.pos.findClosestByRange(storage);
+           
 
         //+++++++++++ STATE EMPTYING +++++++++++++++
         if (creep.memory.state === STATE_EMPTYING) {
@@ -164,24 +167,23 @@ var roleDistributor = function (creep, room, extensions, droppedEnergy, storage)
             return 0;
         }
     }
-}
+};
 
-var doEmptying = function (creep) {
-    var rechargeSpots = creep.room.memory.spawn.rechargeSpots;
-    for (var rs = 0; rs < rechargeSpots.length; rs++) {
+let doEmptying = function (creep) {
+    let rechargeSpots = creep.room.memory.structures.spawn.rechargeSpots;
+    for (let rs = 0; rs < rechargeSpots.length; rs++) {
         if (rechargeSpots[rs].pos.x === creep.pos.x && rechargeSpots[rs].pos.y === creep.pos.y) {
-            creep.transfer(Game.getObjectById(creep.room.memory.spawn.resource.id), RESOURCE_ENERGY);
+            creep.transfer(Game.getObjectById(creep.room.memory.structures.spawn.resource.id), RESOURCE_ENERGY);
             return;
         }
     }
     actionMove.moveToAny(creep, rechargeSpots.map(function (a) { return a.pos; }));
-    return;
-}
+};
 
-var doRefilling = function (creep, myStor) {
-    for (var l = 0; l < creep.room.memory.links.length; l++) {
-        if (creep.room.memory.links[l].type === 'store') {
-            var link = Game.getObjectById(creep.room.memory.links[l].link.id);
+let doRefilling = function (creep, myStor) {
+    for (let l = 0; l < creep.room.memory.structures.links.length; l++) {
+        if (creep.room.memory.structures.links[l].type === 'store') {
+            let link = Game.getObjectById(creep.room.memory.structures.links[l].link.id);
             if (link.energy > 500) {
                 if (creep.withdraw(link, RESOURCE_ENERGY, 100) === ERR_NOT_IN_RANGE) {
                     creep.moveTo(link);
@@ -192,10 +194,10 @@ var doRefilling = function (creep, myStor) {
             }
         }
     }
-    var spawn = Game.getObjectById(creep.room.memory.spawn.resource.id);
-    if (spawn.energy > 50 || myStor === null || (myStor != null && myStor.store[RESOURCE_ENERGY] <= 500)) {
-        var rechargeSpots = creep.room.memory.spawn.rechargeSpots;
-        for (var rs = 0; rs < rechargeSpots.length; rs++) {
+    let spawn = Game.getObjectById(creep.room.memory.structures.spawn.resource.id);
+    if (spawn.energy > 50 || myStor === null || (myStor !== null && myStor.store[RESOURCE_ENERGY] <= 500)) {
+        let rechargeSpots = creep.room.memory.structures.spawn.rechargeSpots;
+        for (let rs = 0; rs < rechargeSpots.length; rs++) {
             if (rechargeSpots[rs].pos.x === creep.pos.x && rechargeSpots[rs].pos.y === creep.pos.y) {
                 creep.withdraw(spawn, RESOURCE_ENERGY);
                 return;
@@ -207,16 +209,15 @@ var doRefilling = function (creep, myStor) {
             actionMove.moveTo(creep, myStor.pos, 1);
         }
     }
-    return;
-}
+};
 
-var doStoring = function (creep, myStor) {
+let doStoring = function (creep, myStor) {
     if (creep.carry.energy === 0) {
-        for (var l = 0; l < creep.room.memory.links.length; l++) {
-            if (creep.room.memory.links[l].type === 'store') {
-                var link = Game.getObjectById(creep.room.memory.links[l].link.id);
+        for (let l = 0; l < creep.room.memory.structures.links.length; l++) {
+            if (creep.room.memory.structures.links[l].type === 'store') {
+                let link = Game.getObjectById(creep.room.memory.structures.links[l].link.id);
                 if (link.energy > 500) {
-                    if (creep.withdraw(link, RESOURCE_ENERGY, 100) == ERR_NOT_IN_RANGE) {
+                    if (creep.withdraw(link, RESOURCE_ENERGY, 100) === ERR_NOT_IN_RANGE) {
                         creep.moveTo(link);
                     } else if (creep.withdraw(link, RESOURCE_ENERGY, 100) === ERR_FULL) {
                         creep.withdraw(link, RESOURCE_ENERGY);
@@ -225,11 +226,11 @@ var doStoring = function (creep, myStor) {
                 }
             }
         }
-        var needsMove = true;
-        var rechargeSpots = creep.room.memory.spawn.rechargeSpots;
-        for (var rs = 0; rs < rechargeSpots.length; rs++) {
+        let needsMove = true;
+        let rechargeSpots = creep.room.memory.structures.spawn.rechargeSpots;
+        for (let rs = 0; rs < rechargeSpots.length; rs++) {
             if (rechargeSpots[rs].pos.x === creep.pos.x && rechargeSpots[rs].pos.y === creep.pos.y) {
-                creep.withdraw(Game.getObjectById(creep.room.memory.spawn.resource.id), RESOURCE_ENERGY);
+                creep.withdraw(Game.getObjectById(creep.room.memory.structures.spawn.resource.id), RESOURCE_ENERGY);
                 needsMove = false;
                 if(creep.carry.energy === 0)
                     return;
@@ -246,20 +247,18 @@ var doStoring = function (creep, myStor) {
         }
     }
     
-}
+};
 
-var doInjecting = function (creep, myExt) {
+let doInjecting = function (creep, myExt) {
     if (creep.transfer(myExt, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
         actionMove.moveTo(creep, myExt.pos, 1);
     }
-    return;
-}
+};
 
-var doCollecting = function (creep, droppedEnergy) {
+let doCollecting = function (creep, droppedEnergy) {
     if (creep.pickup(droppedEnergy[0]) === ERR_NOT_IN_RANGE) {
         actionMove.moveTo(creep, droppedEnergy[0].pos, 1);
     }
-    return;
-}
+};
 
-module.exports = { roleDistributor: roleDistributor }
+module.exports = { roleDistributor: roleDistributor };

@@ -1,6 +1,6 @@
-var planningJobs = require('planning.jobs');
+let planningJobs = require('planning.jobs');
 
-var roleReserver = function (creep) {
+let roleReserver = function (creep) {
     if (creep.memory.job === undefined) {
         planningJobs.findJob(creep, creep.room);
         if (creep.memory.job === undefined)
@@ -20,12 +20,14 @@ var roleReserver = function (creep) {
     }
 
     if (creep.room.name !== creep.memory.job.roomName) {
-        creep.moveTo(new RoomPosition(25, 25, creep.memory.job.roomName));    } else {
+        creep.moveTo(new RoomPosition(25, 25, creep.memory.job.roomName));
+    } else {
         if (creep.reserveController(creep.room.controller) === ERR_NOT_IN_RANGE) {
             creep.moveTo(creep.room.controller);
-        } else {            creep.room.memory.controllerTicks = creep.room.controller.reservation.ticksToEnd;        }    }
-       
-    
-}
+        } else {
+            creep.room.memory.controllerTicks = creep.room.controller.reservation.ticksToEnd;
+        }
+    }    
+};
 
 module.exports = { roleReserver: roleReserver };

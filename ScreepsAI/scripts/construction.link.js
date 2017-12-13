@@ -1,23 +1,23 @@
-var createLink = function (link) {
-    var minesInRange = link.pos.findInRange(FIND_SOURCES, 2);
-    var controllerRange = link.pos.getRangeTo(link.room.controller);
+let createLink = function (link) {
+    let minesInRange = link.pos.findInRange(FIND_SOURCES, 2);
+    let controllerRange = link.pos.getRangeTo(link.room.controller);
 
-    var type;
+    let type;
     if (minesInRange.length > 0 && controllerRange > 2) {
-        type = "empty";
+        type = 'empty';
     }
     else if (minesInRange.length === 0 && controllerRange <= 2) {
-        type = "fill";
+        type = 'fill';
     } else {
-        type = "store";
+        type = 'store';
     }
 
     //save object
     return {
-        link: { id: link.id, pos: link.pos },
+        obj: {id: link.id, pos: link.pos},
         type: type,
         improvedTo: 0
     };
-}
+};
 
 module.exports = { createLink: createLink };

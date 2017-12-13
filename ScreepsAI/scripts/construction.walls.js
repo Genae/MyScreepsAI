@@ -1,8 +1,8 @@
-var createWalls = function (room, direction) {
+let createWalls = function (room, direction) {
 
-    var wallSlots = [];
-    var index = -1;
-    var connected = false;
+    let wallSlots = [];
+    let index = -1;
+    let connected = false;
     //check NORTH and SOUTH
     if (direction === TOP || direction === BOTTOM) {
         let one = direction === TOP ? 1 : 48;
@@ -53,20 +53,20 @@ var createWalls = function (room, direction) {
             wallSlots[p].exits.push(wallSlots[p].walls[Math.floor(wallSlots[p].walls.length / 2)].pos);
         }
         else if (wallSlots[p].walls.length <= 15) {
-            var center = Math.floor(wallSlots[p].walls.length / 2);
+            let center = Math.floor(wallSlots[p].walls.length / 2);
             for (let s = center-1; s <= center + 1; s++) {
                 wallSlots[p].walls[s].type = STRUCTURE_RAMPART;
             }
             wallSlots[p].exits.push(wallSlots[p].walls[center].pos);
         }
         else {
-            var center1 = Math.floor(wallSlots[p].walls.length / 3);
+            let center1 = Math.floor(wallSlots[p].walls.length / 3);
             for (let s = center1 - 1; s <= center1 + 1; s++) {
                 wallSlots[p].walls[s].type = STRUCTURE_RAMPART;
             }
             wallSlots[p].exits.push(wallSlots[p].walls[center1].pos);
 
-            var center2 = Math.floor(wallSlots[p].walls.length / 3) * 2;
+            let center2 = Math.floor(wallSlots[p].walls.length / 3) * 2;
             for (let s = center2 - 1; s <= center2 + 1; s++) {
                 wallSlots[p].walls[s].type = STRUCTURE_RAMPART;
             }
@@ -76,12 +76,12 @@ var createWalls = function (room, direction) {
 
     //save object
     return wallSlots;
-}
+};
 
-var needsWall = function(room, direction, pos) {
+let needsWall = function(room, direction, pos) {
     if (direction === TOP) {
         for (let dx = -1; dx <= 1; dx++) {
-            if (room.lookForAt(LOOK_TERRAIN, pos + dx, 0)[0] != 'wall') {
+            if (room.lookForAt(LOOK_TERRAIN, pos + dx, 0)[0] !== 'wall') {
                 return true;
             }
         }
@@ -89,7 +89,7 @@ var needsWall = function(room, direction, pos) {
     }
     if (direction === BOTTOM) {
         for (let dx = -1; dx <= 1; dx++) {
-            if (room.lookForAt(LOOK_TERRAIN, pos + dx, 49)[0] != 'wall') {
+            if (room.lookForAt(LOOK_TERRAIN, pos + dx, 49)[0] !== 'wall') {
                 return true;
             }
         }
@@ -97,7 +97,7 @@ var needsWall = function(room, direction, pos) {
     }
     if (direction === LEFT) {
         for (let dy = -1; dy <= 1; dy++) {
-            if (room.lookForAt(LOOK_TERRAIN, 0, pos + dy)[0] != 'wall') {
+            if (room.lookForAt(LOOK_TERRAIN, 0, pos + dy)[0] !== 'wall') {
                 return true;
             }
         }
@@ -105,12 +105,12 @@ var needsWall = function(room, direction, pos) {
     }
     if (direction === RIGHT) {
         for (let dy = -1; dy <= 1; dy++) {
-            if (room.lookForAt(LOOK_TERRAIN, 49, pos + dy)[0] != 'wall') {
+            if (room.lookForAt(LOOK_TERRAIN, 49, pos + dy)[0] !== 'wall') {
                 return true;
             }
         }
         return false;
     }
-}
+};
 
 module.exports = { createWalls: createWalls };

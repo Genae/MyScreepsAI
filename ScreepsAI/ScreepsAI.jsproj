@@ -48,6 +48,7 @@
     <Content Include="ScreepsAutocomplete\Memory.js" />
     <Content Include="ScreepsAutocomplete\Mineral.js" />
     <Content Include="ScreepsAutocomplete\Nuke.js" />
+    <Content Include="ScreepsAutocomplete\Order.js" />
     <Content Include="ScreepsAutocomplete\OwnedStructure.js" />
     <Content Include="ScreepsAutocomplete\package.json" />
     <Content Include="ScreepsAutocomplete\PathFinder.js" />
@@ -57,6 +58,7 @@
     <Content Include="ScreepsAutocomplete\Room.js" />
     <Content Include="ScreepsAutocomplete\RoomObject.js" />
     <Content Include="ScreepsAutocomplete\RoomPosition.js" />
+    <Content Include="ScreepsAutocomplete\RoomVisual.js" />
     <Content Include="ScreepsAutocomplete\Source.js" />
     <Content Include="ScreepsAutocomplete\Structure.js" />
     <Content Include="ScreepsAutocomplete\Structures\StructureContainer.js" />
@@ -78,27 +80,94 @@
     <Content Include="ScreepsAutocomplete\Structures\StructureTerminal.js" />
     <Content Include="ScreepsAutocomplete\Structures\StructureTower.js" />
     <Content Include="ScreepsAutocomplete\Structures\StructureWall.js" />
-    <Content Include="scripts\action.move.js" />
-    <Content Include="scripts\construction.mineral.js" />
-    <Content Include="scripts\construction.link.js" />
-    <Content Include="scripts\construction.walls.js" />
-    <Content Include="scripts\construction.spawn.js" />
-    <Content Include="scripts\construction.controller.js" />
-    <Content Include="scripts\construction.mine.js" />
-    <Content Include="scripts\planning.infrastructure.js" />
-    <Content Include="scripts\planning.jobs.js" />
-    <Content Include="scripts\planning.units.js" />
-    <Content Include="scripts\role.miner.js" />
-    <Content Include="scripts\role.reserver.js" />
-    <Content Include="scripts\role.healer.js" />
-    <Content Include="scripts\role.claimer.js" />
-    <Content Include="scripts\role.outharvester.js" />
-    <Content Include="scripts\role.attacker.js" />
-    <Content Include="scripts\role.distributor.js" />
-    <Content Include="scripts\role.upgrader.js" />
-    <Content Include="scripts\role.builder.js" />
-    <Content Include="scripts\role.harvester.js" />
+    <Content Include="ScreepsAutocomplete\TODO.md" />
+    <Content Include="scripts\action.move.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\action.refilling.js" />
+    <Content Include="scripts\action.upgrading.js" />
+    <Content Include="scripts\construction.controller.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\construction.link.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\construction.mine.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\construction.mineral.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\construction.spawn.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\construction.walls.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
     <Content Include="scripts\main.js" />
+    <Content Include="scripts\OLD\action.move.js" />
+    <Content Include="scripts\OLD\construction.controller.js" />
+    <Content Include="scripts\OLD\construction.link.js" />
+    <Content Include="scripts\OLD\construction.mine.js" />
+    <Content Include="scripts\OLD\construction.mineral.js" />
+    <Content Include="scripts\OLD\construction.spawn.js" />
+    <Content Include="scripts\OLD\construction.walls.js" />
+    <Content Include="scripts\OLD\main.js" />
+    <Content Include="scripts\OLD\planning.infrastructure.js" />
+    <Content Include="scripts\OLD\planning.jobs.js" />
+    <Content Include="scripts\OLD\planning.units.js" />
+    <Content Include="scripts\OLD\role.attacker.js" />
+    <Content Include="scripts\OLD\role.builder.js" />
+    <Content Include="scripts\OLD\role.claimer.js" />
+    <Content Include="scripts\OLD\role.distributor.js" />
+    <Content Include="scripts\OLD\role.harvester.js" />
+    <Content Include="scripts\OLD\role.healer.js" />
+    <Content Include="scripts\OLD\role.miner.js" />
+    <Content Include="scripts\OLD\role.outharvester.js" />
+    <Content Include="scripts\OLD\role.reserver.js" />
+    <Content Include="scripts\OLD\role.upgrader.js" />
+    <Content Include="scripts\planning.jobs.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\planning.room.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\planning.units.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\role.builder.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\role.distributor.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\role.harvester.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\role.miner.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\role.outharvester.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\role.reserver.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\role.upgrader.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\role.warrior.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\role.claimer.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\system.links.js" />
+    <Content Include="scripts\system.towers.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\util.pathfindingHelper.js" />
+    <Content Include="scripts\util.storageHelper.js" />
     <Content Include="_references.js" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

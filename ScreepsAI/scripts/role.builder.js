@@ -1,6 +1,8 @@
-var actionMove = require('action.move');
+let actionMove = require('action.move');
+let actionUpgrading = require('action.upgrading');
+let actionRefilling = require('action.refilling');
 
-var roleBuilder = function (creep, storage, droppedEnergy) {
+let roleBuilder = function (creep) {
     if (creep.memory.moving && creep.room.name === creep.memory.roomName) {
         if (actionMove.continueMove(creep)) {
             if (!(creep.memory.state === 'upgrading' && creep.pos.getRangeTo(creep.room.controller.pos.x, creep.room.controller.pos.y) < 4)) {
@@ -17,13 +19,13 @@ var roleBuilder = function (creep, storage, droppedEnergy) {
         construnctionSite = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
     let wall = creep.pos.findClosestByRange(FIND_STRUCTURES, {
         filter: function (s) {
-            return s.structureType === STRUCTURE_WALL && s.hits < creep.room.memory.wallHitpoints;
+            return s.structureType === STRUCTURE_WALL && s.hits < creep.room.memory.structures.wallHitpoints;
         }
     });
-    var repairTarget = null;
+    let repairTarget = null;
     if (creep.memory.state === 'repairing') {
-        if (Game.rooms[creep.memory.roomName].memory.repair.length === 0) {
-            var targets = creep.pos.findInRange(FIND_STRUCTURES, 3, {
+        if (Game.rooms[creep.memory.roomName].memory.structures.repair.length === 0) {
+            let targets = creep.pos.findInRange(FIND_STRUCTURES, 3, {
                 filter: function(s) {
                     return (s.hits < s.hitsMax && s.structureType !== STRUCTURE_RAMPART && s.structureType !== STRUCTURE_WALL) || 
                         (s.hits < creep.room.memory.wallHitpoints && (s.structureType === STRUCTURE_RAMPART || s.structureType === STRUCTURE_WALL))
@@ -32,7 +34,7 @@ var roleBuilder = function (creep, storage, droppedEnergy) {
             if(targets.length > 0)
                 repairTarget = targets[0];
         } else {
-            repairTarget = Game.getObjectById(Game.rooms[creep.memory.roomName].memory.repair[0]);
+            repairTarget = Game.getObjectById(Game.rooms[creep.memory.roomName].memory.structures.repair[0]);
         }
     }
     //state machine
@@ -42,7 +44,7 @@ var roleBuilder = function (creep, storage, droppedEnergy) {
     }
     
     if (creep.memory.state === 'refilling' && creep.carry.energy === creep.carryCapacity) {
-        if (creep.room.memory.repair.length > 0) {
+        if (creep.room.memory.structures.repair.length > 0) {
             creep.memory.state = 'repairing';
         }
         else if (construnctionSite !== null) {
@@ -56,30 +58,22 @@ var roleBuilder = function (creep, storage, droppedEnergy) {
         }
     }
 
-    var rechargeSpots = Game.rooms[creep.memory.roomName].memory.spawn.rechargeSpots;
+    let rechargeSpots = Game.rooms[creep.memory.roomName].memory.structures.spawn.rechargeSpots;
     //run states
     if (creep.memory.state === 'refilling') {
-        if (droppedEnergy.length > 0) {
-            var myDrop = creep.pos.findClosestByRange(droppedEnergy);
-            myDrop.room.memory.energy.reservedDrops.push(myDrop);
-            if (creep.pickup(myDrop) === ERR_NOT_IN_RANGE)
-                actionMove.moveTo(creep, myDrop.pos, 1);
-        } else if (storage.length > 0) {
-            var myStor = creep.pos.findClosestByRange(storage);
-            if(creep.withdraw(myStor, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE)
-                actionMove.moveTo(creep, myStor.pos, 1);
-        } else {
+        if (actionRefilling.doRefilling(creep, true) === 'nothingFound') {
             //is this spot ok?
-            for (var rs = 0; rs < rechargeSpots.length; rs++) {
+            for (let rs = 0; rs < rechargeSpots.length; rs++) {
                 if (rechargeSpots[rs].pos.x === creep.pos.x && rechargeSpots[rs].pos.y === creep.pos.y) {
-                    if (Game.rooms[creep.memory.roomName].memory.energy.canBuild)
-                        creep.withdraw(Game.getObjectById(Game.rooms[creep.memory.roomName].memory.spawn.resource.id), RESOURCE_ENERGY);
+                    if (Game.rooms[creep.memory.roomName].memory.info.energy.canBuild)
+                        creep.withdraw(Game.getObjectById(Game.rooms[creep.memory.roomName].memory.structures.spawn.obj.id), RESOURCE_ENERGY);
                     return;
                 }
             }
-            actionMove.moveToAny(creep, rechargeSpots.map(function (a) { return a.pos; }));
-        }
-        
+            actionMove.moveToAny(creep, rechargeSpots.map(function (a) {
+                return a.pos;
+            }));
+        }        
         return;
     }
     else if (creep.memory.rechargeSpot !== undefined) {
@@ -87,17 +81,17 @@ var roleBuilder = function (creep, storage, droppedEnergy) {
         creep.memory.rechargeSpot = undefined;
     }
 
-    var target;
+    let target;
     if (creep.memory.state === 'building') {
         target = construnctionSite;
         if (target !== null) {
-            var res = 0;
+            let res = 0;
             if (construnctionSite.hits !== undefined) {
                 res = creep.repair(target);
             } else {
                 res = creep.build(target);
             }
-            if (res == ERR_NOT_IN_RANGE) {
+            if (res === ERR_NOT_IN_RANGE) {
                 actionMove.moveTo(creep, target.pos, 2);
             } else {
                 creep.memory.moving = false;
@@ -109,7 +103,7 @@ var roleBuilder = function (creep, storage, droppedEnergy) {
     }
     if (creep.memory.state === 'repairing') {
         target = repairTarget;
-        if (creep.repair(target) == ERR_NOT_IN_RANGE) {
+        if (creep.repair(target) === ERR_NOT_IN_RANGE) {
             actionMove.moveTo(creep, target.pos, 2);
         } else {
             creep.memory.moving = false;
@@ -118,7 +112,7 @@ var roleBuilder = function (creep, storage, droppedEnergy) {
     }
     if (creep.memory.state === 'upgradeWalls') {
         target = wall;
-        if (creep.repair(target) == ERR_NOT_IN_RANGE) {
+        if (creep.repair(target) === ERR_NOT_IN_RANGE) {
             actionMove.moveTo(creep, target.pos, 2);
         } else {
             creep.memory.moving = false;
@@ -126,18 +120,8 @@ var roleBuilder = function (creep, storage, droppedEnergy) {
         return;
     }
     if (creep.memory.state === 'upgrading') {
-        var controller = creep.room.controller;
-        if (creep.pos.getRangeTo(controller.pos.x, controller.pos.y) > 2) {
-            if (creep.pos.getRangeTo(controller.pos.x, controller.pos.y) < 4) {
-                actionMove.moveTo(creep, controller.pos, 1);
-            } else {
-                actionMove.followPath(creep, creep.room.memory.controller.pathTo.path);
-            }
-        } else {
-            creep.upgradeController(controller);
-            creep.memory.moving = false;
-        }
+        actionUpgrading.doUpgrading(creep);
     }
-}
+};
 
 module.exports = { roleBuilder: roleBuilder };
