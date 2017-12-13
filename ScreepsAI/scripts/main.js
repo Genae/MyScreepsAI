@@ -1,4 +1,4 @@
-﻿let roleHarvester = require('role.harvester');
+let roleHarvester = require('role.harvester');
 let roleBuilder = require('role.builder');
 let roleUpgrader = require('role.upgrader');
 let roleWarrior = require('role.warrior');
