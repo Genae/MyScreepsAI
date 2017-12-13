@@ -32,7 +32,7 @@ let roleHarvester = function (creep) {
     if (creep.carry.energy < creep.carryCapacity * 0.2) {
         creep.memory.state = 'mining';
     }
-    let mysource = Game.getObjectById(mymine.resource.id);
+    let mysource = Game.getObjectById(mymine.obj.id);
     if (creep.carry.energy === creep.carryCapacity) {
         creep.memory.state = 'emptying';
     }
@@ -50,10 +50,10 @@ let roleHarvester = function (creep) {
         }
         let h = creep.harvest(mysource);
         if (h === ERR_NOT_IN_RANGE || h === ERR_NOT_ENOUGH_RESOURCES) {
-            if (creep.pos.getRangeTo(mymine.resource.pos.x, mymine.resource.pos.y) < 3 && h === ERR_NOT_ENOUGH_RESOURCES) {
+            if (creep.pos.getRangeTo(mymine.obj.pos.x, mymine.obj.pos.y) < 3 && h === ERR_NOT_ENOUGH_RESOURCES) {
                 return;
             }
-            if (creep.pos.getRangeTo(mymine.resource.pos.x, mymine.resource.pos.y) < 3) {
+            if (creep.pos.getRangeTo(mymine.obj.pos.x, mymine.obj.pos.y) < 3) {
                 actionMove.moveToAny(creep, mymine.workingPlaces, 0);
             } else {
                 actionMove.followPath(creep, mymine.pathToMine.path);

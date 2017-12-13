@@ -40,21 +40,6 @@ let mainLoop = function (errors) {
     if (!settings.runScripts)
         return;
 
-    //Cleanup Memory
-    try {
-        removeDeadCreeps();
-    } catch (e) {
-        console.log("Error while removing dead creeps: " + e);
-        errors.push(e);
-    }
-
-    try {
-        removeMissingDrops();
-    } catch (e) {
-        console.log("Error while removing missing drops: " + e);
-        errors.push(e);
-    }
-
     //Global Planning
     let globalInfo;
     try {
@@ -96,6 +81,21 @@ let mainLoop = function (errors) {
         checkSlaveRooms();
     } catch (e) {
         console.log("Error while checking for new slave rooms: " + e);
+        errors.push(e);
+    }
+
+    //Cleanup Memory
+    try {
+        removeDeadCreeps();
+    } catch (e) {
+        console.log("Error while removing dead creeps: " + e);
+        errors.push(e);
+    }
+
+    try {
+        removeMissingDrops();
+    } catch (e) {
+        console.log("Error while removing missing drops: " + e);
         errors.push(e);
     }
 
@@ -149,7 +149,7 @@ let mainLoop = function (errors) {
                 roleClaimer.roleClaimer(creep);
             }
         } catch (e) {
-            console.log("error with " + creep.memory.role + " " + builders[b].name + ": " + e);
+            console.log("error with " + creep.memory.role + " " + creep.name + ": " + e);
             errors.push(e);
         }
 
@@ -172,9 +172,9 @@ let mainLoop = function (errors) {
                 planningRoom.scanRoom(Game.rooms[roomName]);
                 roomInfo[roomName].rescan = false;
             }
-            if (((Game.time + i) % 5) === 0)
+            if (((Game.time + i) % 2) === 0)
                 planningRoom.planRoomConstruction(Game.rooms[roomName]);
-            if (((Game.time + i + 1) % 5) === 0)
+            if (((Game.time + i + 1) % 2) === 0)
                 planningUnits.buildUnits(Game.rooms[roomName]);
             i+=2;
         }
@@ -203,7 +203,7 @@ let mainLoop = function (errors) {
 let loadGlobalSettings = function() {
     if (Memory.globalSettings === undefined) {
         Memory.globalSettings = {
-            runScripts: false,
+            runScripts: true,
             autoMineExternal: false,
             autoExpand: false,
             autoAttack: false,

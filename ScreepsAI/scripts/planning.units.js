@@ -19,17 +19,20 @@ let buildUnits = function (room) {
     let spawns = room.find(FIND_MY_STRUCTURES, {
         filter: {structureType: STRUCTURE_SPAWN}
     });
-    if (spawns.length === 0)
+    if (spawns.length === 0) {
+        console.log("No spawn found.");
         return;
+    }
     let spawnReady;
     for (let spawn of spawns){
-        if (spawn.spawnCreep([MOVE], 'test', {dryRun: true}))
+        if (spawn.spawnCreep([MOVE], 'test', {dryRun: true}) === 0)
         {
             spawnReady = spawn;
             break;
         }
     }
     if (room.energyAvailable < 200 || spawnReady === undefined) {
+        console.log(room.energyAvailable < 200 ? "not enough energy available" : "No Spawn ready");
         return; //can't do anything
     }
 
@@ -51,6 +54,10 @@ let buildUnits = function (room) {
         }
     }
 
+    if (myTargets.length === 0){
+        console.log("No targets.");
+    }
+    
     for (let t = 0; t < myTargets.length; t++) {
         if (myUnits[myTargets[t].role] === undefined)
             myUnits[myTargets[t].role] = 0;
@@ -76,11 +83,12 @@ let buildUnits = function (room) {
             return;
         }
     }
-    room.memory.energy.canBuild = true; // every unit built, build again.
+    room.memory.info.energy.canBuild = true; // every unit built, build again.
 };
 
 let createCreep  = function (body, role, spawn) {
-    spawn.spawnCreep(body, generateName("[" + capitalizeFirstLetter(role) + "]"), {memory:{role:role}});
+    let name = generateName("[" + capitalizeFirstLetter(role) + "]");
+    spawn.spawnCreep(body, name, {memory:{role:role}});
 };
 
 function capitalizeFirstLetter(string) {
@@ -108,12 +116,12 @@ let generateName = function (prefix) {
 //Target Units
 let getTargets = function (room, anyUnderAttack) {
     let level = getLevel(room);
-    if (level === 0) {
+    if (level < 0) {
         return [];
     }
     let miningJobs;
     for (let i = 0; i < room.memory.structures.mines.length; i++) {
-        if (level < 4)
+        if (level < 3)
             miningJobs += Math.min(4, room.memory.structures.mines[i].workingPlaces.length + 1);
         else
             miningJobs += Math.min(3, room.memory.structures.mines[i].workingPlaces.length + 1);
@@ -155,7 +163,7 @@ let getTargets = function (room, anyUnderAttack) {
         targets.push({ role: 'harvester', amount: 4, body: getWorkerBody(Math.min(550, room.energyCapacityAvailable), false, false) });
         targets.push({ role: 'upgrader', amount: 2, body: getWorkerBody(room.energyCapacityAvailable, true, false) });
         targets.push({ role: 'harvester', amount: miningJobs, body: getWorkerBody(room.energyCapacityAvailable, false, false) });
-        if (level < 6){
+        if (level < 5){
             targets.push({ role: 'attacker', amount: attackFlags.length * 6, body: getWarriorBody(room.energyCapacityAvailable, true) });
         }
         else {
@@ -164,7 +172,7 @@ let getTargets = function (room, anyUnderAttack) {
         }
         targets.push({ role: 'builder', amount: room.memory.structures.spawn.rechargeSpots.length - 1, body: getWorkerBody(room.energyCapacityAvailable, true, false)});
         targets.push({ role: 'upgrader', amount: 5, body: getWorkerBody(room.energyCapacityAvailable, true, false) });
-        if (level >= 6)
+        if (level >= 5)
             targets.push({ role: 'miner', amount: 1, body: getWorkerBody(room.energyCapacityAvailable, false, false)});
         targets.push({ role: 'claimer', amount: claimingJobs, body: getClaimingBody(room.energyCapacityAvailable, true, false) });            
         targets.push({ role: 'reserver', amount: reservingJobs, body: getClaimingBody(room.energyCapacityAvailable, true, false) });
@@ -214,11 +222,20 @@ let getWorkerBody = function(availableEnergy, bigInventory, noRoads) {
 };
 
 //Body Builder
-let costs = new Map([[MOVE, 50],[WORK, 100],[CARRY, 50],[ATTACK, 80],[RANGED_ATTACK, 150],[HEAL, 250],[CLAIM, 600],[TOUGH,10]]);
+let costs = {};
+costs[MOVE] = 50;
+costs[WORK] = 100;
+costs[CARRY] = 50;
+costs[ATTACK] = 80;
+costs[RANGED_ATTACK] = 150;
+costs[HEAL] = 250;
+costs[CLAIM] = 600;
+costs[TOUGH] = 10;
+
 let getBody = function(availableEnergy, parts) {
     let body = [];
     let cost = getCost(parts);
-    while(availableEnergy > cost){
+    while(availableEnergy >= cost){
         body = body.concat(parts);     
         availableEnergy -= cost;
     }
