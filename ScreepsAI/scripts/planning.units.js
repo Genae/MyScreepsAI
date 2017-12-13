@@ -74,7 +74,6 @@ let buildUnits = function (room) {
             }
             else {
                 if (createCreep(myTargets[t].body, myTargets[t].role, spawnReady) === ERR_NOT_ENOUGH_ENERGY) {
-                    console.log("Not enoug energy for creep, block building");
                     room.memory.info.energy.canBuild = false;
                     return;
                 }

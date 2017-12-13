@@ -192,17 +192,30 @@ let improveSpawn = function (room) {
         room.memory.structures.spawn.improvedTo = 1;
         return true;
     }
+    //Tier 4
+    if (room.memory.structures.spawn.improvedTo < 4 && room.memory.structures.improveTo >= 4) {
+        let center = room.memory.structures.spawn.storage;
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                if (dy !== 0 || dx !== 0) {
+                    new RoomPosition(center.x + dx, center.y + dy, room.name).createConstructionSite(STRUCTURE_ROAD);
+                }
+            }
+        }
+        center.createConstructionSite(STRUCTURE_STORAGE);
+        return true;
+    }
     //Tier 2 - 8
     if (room.memory.structures.spawn.improvedTo < room.memory.structures.improveTo) {
         if (room.find(FIND_MY_STRUCTURES, { filter: (structure) => { return structure.structureType === STRUCTURE_TOWER; } }).length < CONTROLLER_STRUCTURES.tower[room.memory.structures.improveTo]) {
-            let ext = constructionSpawn.planExtension(room.memory.structures.spawn, room);
+            let ext = constructionSpawn.planExtension(room.memory.structures.spawn);
             ext.createConstructionSite(STRUCTURE_TOWER);
             new RoomPosition(ext.x, ext.y + 1, room.name).createConstructionSite(STRUCTURE_ROAD);
             new RoomPosition(ext.x, ext.y - 1, room.name).createConstructionSite(STRUCTURE_ROAD);
             new RoomPosition(ext.x + 1, ext.y, room.name).createConstructionSite(STRUCTURE_ROAD);
             new RoomPosition(ext.x - 1, ext.y, room.name).createConstructionSite(STRUCTURE_ROAD);
         } else if (room.find(FIND_MY_STRUCTURES, { filter: (structure) => { return structure.structureType === STRUCTURE_EXTENSION; } }).length < CONTROLLER_STRUCTURES.extension[room.memory.structures.improveTo]) {
-            let ext = constructionSpawn.planExtension(room.memory.structures.spawn, room);
+            let ext = constructionSpawn.planExtension(room.memory.structures.spawn);
             ext.createConstructionSite(STRUCTURE_EXTENSION);
             new RoomPosition(ext.x, ext.y + 1, room.name).createConstructionSite(STRUCTURE_ROAD);
             new RoomPosition(ext.x, ext.y - 1, room.name).createConstructionSite(STRUCTURE_ROAD);
