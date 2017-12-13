@@ -29,7 +29,7 @@ let roleOutHarvester = function (creep) {
     
 
     if (creep.memory.state === 'mining') {
-        let energy = creep.pos.findInRange(FIND_DROPPED_ENERGY, 30, {
+        let energy = creep.pos.findInRange(FIND_DROPPED_RESOURCES, 30, {
             filter: function(e) { return e.amount > 1000 }
         });
         if (energy.length > 0) {
@@ -38,7 +38,7 @@ let roleOutHarvester = function (creep) {
                 return;
             }
         }
-        energy = creep.pos.findInRange(FIND_DROPPED_ENERGY, 2);
+        energy = creep.pos.findInRange(FIND_DROPPED_RESOURCES, 2);
         if (energy.length > 0) {
             creep.pickup(energy[0]);
         }
