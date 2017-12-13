@@ -24,7 +24,7 @@ let roleUpgrader = function (creep) {
             creep.memory.state = 'upgrading';
     }
     else if (creep.memory.state === 'upgrading') {
-        actionUpgrading.doUpgrading();
+        actionUpgrading.doUpgrading(creep);
     }
 };
 

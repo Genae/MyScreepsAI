@@ -7,7 +7,7 @@ let doRefilling = function (creep, noSpawn) {
         noSpawn = false;
     let myStor = storageHelper.getStorageToWithdraw(creep, noSpawn);
     if (myStor !== null) {
-        if (closest.resourceType !== undefined) {
+        if (myStor.resourceType !== undefined) {
             if (creep.pickup(myStor) === ERR_NOT_IN_RANGE) {
                 actionMove.moveTo(creep, myStor.pos, 1);
             }

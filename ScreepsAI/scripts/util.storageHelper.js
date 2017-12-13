@@ -5,7 +5,7 @@ let getStorageToWithdraw = function (creep, noSpawn) {
         withdrawStorages = withdrawStorages.concat(storagesInRoom.spawns)
     }
     let closest = creep.pos.findClosestByRange(withdrawStorages);
-    if (closest.resourceType !== undefined){
+    if (closest !== null && closest.resourceType !== undefined){
         closest.room.memory.info.energy.reservedDrops.push(closest);
     }
     return closest;
@@ -49,7 +49,7 @@ let getStructuresInRoom = function(room, noLinks) {
         }
         cache[room.name].spawns = cache[room.name].storage.concat(room.find(FIND_MY_SPAWNS));
         if (!noLinks){
-            for (let link of room.memory.links){
+            for (let link of room.memory.structures.links){
                 if (link.type === 'empty')
                     cache[room.name].storage.push(Game.getObjectById(link.obj.id));
                 if (link.type === 'store')
