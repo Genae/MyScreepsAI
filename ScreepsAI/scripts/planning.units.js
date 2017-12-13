@@ -16,12 +16,20 @@ let getStoredEnergy = function (room) {
 let buildUnits = function (room) {
     room.memory.info.energy.canBuild = false; // block building if not enough energy
 
-    let spawn = room.find(FIND_MY_STRUCTURES, {
+    let spawns = room.find(FIND_MY_STRUCTURES, {
         filter: {structureType: STRUCTURE_SPAWN}
-    })[0];
-    if (spawn === undefined || spawn === null)
+    });
+    if (spawns.length === 0)
         return;
-    if (room.energyAvailable < 200 || spawn.canCreateCreep([MOVE]) < 0) {
+    let spawnReady;
+    for (let spawn of spawns){
+        if (spawn.spawnCreep([MOVE], 'test', {dryRun: true}))
+        {
+            spawnReady = spawn;
+            break;
+        }
+    }
+    if (room.energyAvailable < 200 || spawnReady === undefined) {
         return; //can't do anything
     }
 
@@ -49,7 +57,7 @@ let buildUnits = function (room) {
         if (myUnits[myTargets[t].role] < myTargets[t].amount) {
             if (myTargets[t].role === 'builder') {
                 if ((room.memory.energy.fullSpawn > 3 && getStoredEnergy(room) === -1) || getStoredEnergy(room) > myUnits[myTargets[t].role] * 50000 * Math.min(1, (room.controller.level - 4))) {
-                    spawn.createCreep(myTargets[t].body, undefined, {role: myTargets[t].role});
+                    createCreep(myTargets[t].body, myTargets[t].role, spawnReady);
                 }
                 else {
                     break;
@@ -57,18 +65,40 @@ let buildUnits = function (room) {
             }
             else if (myTargets[t].role === 'upgrader') {
                 if ((room.memory.energy.fullSpawn > 3 && getStoredEnergy(room) === -1) || (getStoredEnergy(room) > myUnits[myTargets[t].role] * 50000 * Math.min(1, (room.controller.level - 4))) || myUnits[myTargets[t].role] === 0) {
-                    spawn.createCreep(myTargets[t].body, undefined, {role: myTargets[t].role});
+                    createCreep(myTargets[t].body, myTargets[t].role, spawnReady);
                 } else {
                     break;
                 }
             }
             else {
-                spawn.createCreep(myTargets[t].body, undefined, {role: myTargets[t].role});
+                createCreep(myTargets[t].body, myTargets[t].role, spawnReady);
             }
             return;
         }
     }
     room.memory.energy.canBuild = true; // every unit built, build again.
+};
+
+let createCreep  = function (body, role, spawn) {
+    spawn.spawnCreep(body, generateName("[" + role + "]"), {memory:{role:role}});
+};
+
+let firstName = ["Serewine","Oraha","Macmuel","Pherbri","Sora","Betjohn","Ke-ald","Brasge","Ricchris","Georo","Bethmond","Donsan","Thywald","Edcas","Eli","Leycuth","Andkim","Carbar","Eabeth","Nijeff","Minald","Songard","Lafcan","Renchell","Uwine","Pesara","Cuth","Ridsha","Nangard","Nielliam","Lesdon","Wynceo","Pher","Anea","Sanbert","Ronever","Meri","Jalett","Vin","Ly'wise","Bertmit","Dinona","Bertisen","Cas","Edferth","Rolwyn","Ingret","Aneverjo","Tompa","Branddra","Ridmuel","Ronegel","Meritol","Nasmac","Vinceol","Ferdisen","Gardmescrow","Fortinnan","Chetealpe","Vidbert"];
+let secondName = ["Rageblue","Manday","Force","Maw","Shinesummer","Fire-dwarf","Walkerram","Wavegate","Dragonhell","Helmeye","Batsummer","Orecat","Hair","Sheeplock","Breakpaladin","Wyrmgray","Swordblue","Mightautumn","Tall","Staffbow","Wallpower","Thunderduskfire","Mawmight","Bluehair","Hillhound","Bushsand","Shieldsun","Lipsdagger","Darkhunter","Warblur","Bush","Breezeblue","Bearhelm","Capelander","Bullspear","Axeland","Blackbolt","Hameear","Steelwargblue","Moose-maze","Wallstar","Goldbane","Shorthalf","Batwind","Arrowwarrior","Arrowrain","Walksun","Pickerstorm","Glazesummer","Lipsforce","Longsword","Gliderglaze","Shortblood","Swordwhite","Breaktree","Whitequiver","Fullcyan","Daggerbird","Screamblur","Houndhunt"];
+let generateName = function (prefix) {
+    let name, isNameTaken, tries = 0;
+    do {
+        let fname = firstName[Math.floor(Math.random() * firstName.length)];
+        let sname = secondName[Math.floor(Math.random() * secondName.length)];
+        if (tries > 3){
+            fname += "-" + fname[Math.floor(Math.random() * fname.length)];
+        }
+        name = prefix + " " + fname + " " + sname;
+        tries++;
+        isNameTaken = Game.creeps[name] !== undefined;
+    } while (isNameTaken);
+
+    return name;
 };
 
 //Target Units
