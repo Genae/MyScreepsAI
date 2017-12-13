@@ -35,9 +35,9 @@ let controlTowers = function (room) {
     } else {
         //repair with tower
         for (let tower of towers) {
-            if (towers.energy <= 500)
+            if (tower.energy <= 500)
                 continue;
-            let repairs = towers.pos.findInRange(FIND_STRUCTURES, 5, {
+            let repairs = tower.pos.findInRange(FIND_STRUCTURES, 5, {
                 filter: function (structure) {
                     return (structure.hits <= structure.hitsMax - 2000 && structure.structureType !== STRUCTURE_RAMPART && structure.structureType !== STRUCTURE_WALL) ||
                         (structure.hits <= room.memory.structures.wallHitpoints - 2000 && (structure.structureType === STRUCTURE_RAMPART || structure.structureType === STRUCTURE_WALL));

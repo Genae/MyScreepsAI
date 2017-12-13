@@ -173,7 +173,7 @@ let doEmptying = function (creep) {
     let rechargeSpots = creep.room.memory.structures.spawn.rechargeSpots;
     for (let rs = 0; rs < rechargeSpots.length; rs++) {
         if (rechargeSpots[rs].pos.x === creep.pos.x && rechargeSpots[rs].pos.y === creep.pos.y) {
-            creep.transfer(Game.getObjectById(creep.room.memory.structures.spawn.resource.id), RESOURCE_ENERGY);
+            creep.transfer(Game.getObjectById(creep.room.memory.structures.spawn.obj.id), RESOURCE_ENERGY);
             return;
         }
     }
@@ -194,7 +194,7 @@ let doRefilling = function (creep, myStor) {
             }
         }
     }
-    let spawn = Game.getObjectById(creep.room.memory.structures.spawn.resource.id);
+    let spawn = Game.getObjectById(creep.room.memory.structures.spawn.obj.id);
     if (spawn.energy > 50 || myStor === null || (myStor !== null && myStor.store[RESOURCE_ENERGY] <= 500)) {
         let rechargeSpots = creep.room.memory.structures.spawn.rechargeSpots;
         for (let rs = 0; rs < rechargeSpots.length; rs++) {
@@ -230,7 +230,7 @@ let doStoring = function (creep, myStor) {
         let rechargeSpots = creep.room.memory.structures.spawn.rechargeSpots;
         for (let rs = 0; rs < rechargeSpots.length; rs++) {
             if (rechargeSpots[rs].pos.x === creep.pos.x && rechargeSpots[rs].pos.y === creep.pos.y) {
-                creep.withdraw(Game.getObjectById(creep.room.memory.structures.spawn.resource.id), RESOURCE_ENERGY);
+                creep.withdraw(Game.getObjectById(creep.room.memory.structures.spawn.obj.id), RESOURCE_ENERGY);
                 needsMove = false;
                 if(creep.carry.energy === 0)
                     return;

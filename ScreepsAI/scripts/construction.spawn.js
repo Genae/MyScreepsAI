@@ -88,7 +88,7 @@ let isAreaBlocked = function (center, r, room) {
         }
     }
     return false;
-}
+};
 
 let isBlocked = function (pos, room) {
     if (pos.x <= 3 || pos.y <= 3 || pos.x >= 47 || pos.y >= 47)

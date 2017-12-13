@@ -194,7 +194,7 @@ let improveSpawn = function (room) {
     }
     //Tier 4
     if (room.memory.structures.spawn.improvedTo < 4 && room.memory.structures.improveTo >= 4) {
-        let center = room.memory.structures.spawn.storage;
+        let center = room.memory.structures.spawn.storageCenter;
         for (let dx = -1; dx <= 1; dx++) {
             for (let dy = -1; dy <= 1; dy++) {
                 if (dy !== 0 || dx !== 0) {
@@ -202,7 +202,14 @@ let improveSpawn = function (room) {
                 }
             }
         }
-        center.createConstructionSite(STRUCTURE_STORAGE);
+        let cpos = new RoomPosition(center.x, center.y, room.name);
+        cpos.createConstructionSite(STRUCTURE_STORAGE);
+        for (flagName in Game.flags){
+            let flag = Game.flags[flagName];
+            if (flag.color === COLOR_GREY && flag.secondaryColor === COLOR_YELLOW && flag.pos.roomName === room.name){
+                flag.remove();
+            }
+        }
         return true;
     }
     //Tier 2 - 8
