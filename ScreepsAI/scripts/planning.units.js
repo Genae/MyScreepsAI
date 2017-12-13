@@ -80,8 +80,12 @@ let buildUnits = function (room) {
 };
 
 let createCreep  = function (body, role, spawn) {
-    spawn.spawnCreep(body, generateName("[" + role + "]"), {memory:{role:role}});
+    spawn.spawnCreep(body, generateName("[" + capitalizeFirstLetter(role) + "]"), {memory:{role:role}});
 };
+
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
 
 let firstName = ["Serewine","Oraha","Macmuel","Pherbri","Sora","Betjohn","Ke-ald","Brasge","Ricchris","Georo","Bethmond","Donsan","Thywald","Edcas","Eli","Leycuth","Andkim","Carbar","Eabeth","Nijeff","Minald","Songard","Lafcan","Renchell","Uwine","Pesara","Cuth","Ridsha","Nangard","Nielliam","Lesdon","Wynceo","Pher","Anea","Sanbert","Ronever","Meri","Jalett","Vin","Ly'wise","Bertmit","Dinona","Bertisen","Cas","Edferth","Rolwyn","Ingret","Aneverjo","Tompa","Branddra","Ridmuel","Ronegel","Meritol","Nasmac","Vinceol","Ferdisen","Gardmescrow","Fortinnan","Chetealpe","Vidbert"];
 let secondName = ["Rageblue","Manday","Force","Maw","Shinesummer","Fire-dwarf","Walkerram","Wavegate","Dragonhell","Helmeye","Batsummer","Orecat","Hair","Sheeplock","Breakpaladin","Wyrmgray","Swordblue","Mightautumn","Tall","Staffbow","Wallpower","Thunderduskfire","Mawmight","Bluehair","Hillhound","Bushsand","Shieldsun","Lipsdagger","Darkhunter","Warblur","Bush","Breezeblue","Bearhelm","Capelander","Bullspear","Axeland","Blackbolt","Hameear","Steelwargblue","Moose-maze","Wallstar","Goldbane","Shorthalf","Batwind","Arrowwarrior","Arrowrain","Walksun","Pickerstorm","Glazesummer","Lipsforce","Longsword","Gliderglaze","Shortblood","Swordwhite","Breaktree","Whitequiver","Fullcyan","Daggerbird","Screamblur","Houndhunt"];

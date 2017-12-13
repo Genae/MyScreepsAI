@@ -1,4 +1,3 @@
-
 let getStorageToWithdraw = function (creep, noSpawn) {
     let storagesInRoom = getStructuresInRoom(creep.room);
     let withdrawStorages = storagesInRoom.storage.concat(storagesInRoom.withdrawStorage).concat(storagesInRoom.drops);

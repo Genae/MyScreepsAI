@@ -1,6 +1,6 @@
 let storageHelper = require('util.storageHelper');
 let actionMove = require('action.move');
-let _ = require('lodash');
+let lod = require('lodash');
 
 let doRefilling = function (creep, noSpawn) {
     if (noSpawn === undefined)
@@ -12,7 +12,7 @@ let doRefilling = function (creep, noSpawn) {
                 actionMove.moveTo(creep, myStor.pos, 1);
             }
             else {
-                return _.sum(creep.carry) === creep.carryCapacity;
+                return lod.sum(creep.carry) === creep.carryCapacity;
             }
         }
         else {
@@ -20,7 +20,7 @@ let doRefilling = function (creep, noSpawn) {
                 actionMove.moveTo(creep, myStor.pos, 1);
             }
             else {
-                return _.sum(creep.carry) === creep.carryCapacity;
+                return lod.sum(creep.carry) === creep.carryCapacity;
             }
         }
     }

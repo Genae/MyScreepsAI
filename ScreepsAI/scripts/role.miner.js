@@ -1,8 +1,8 @@
 let planningJobs = require('planning.jobs');
-let _ = require('lodash');
+let lod = require('lodash');
 
 let roleMiner = function (creep) {
-    if (_.sum(creep.carry) === creep.carryCapacity) {
+    if (lod.sum(creep.carry) === creep.carryCapacity) {
         for (let res in creep.carry) {
             if (creep.transfer(creep.room.storage, res) === ERR_NOT_IN_RANGE) {
                 creep.moveTo(creep.room.storage);
