@@ -11,8 +11,8 @@ let controlLinks = function (room) {
         links[room.memory.structures.links[i].type].push(room.memory.structures.links[i]);
     }
 
-    for (let i = 0; i < room.memory.links.length; i++) {
-        let link = Game.getObjectById(room.memory.memory.structures[i].obj.id);
+    for (let i = 0; i < room.memory.structures.links.length; i++) {
+        let link = Game.getObjectById(room.memory.structures.links[i].obj.id);
         if (link.cooldown > 0)
             continue;
         let targets = [];

@@ -1,4 +1,4 @@
-let roleHarvester = require('role.harvester');
+﻿let roleHarvester = require('role.harvester');
 let roleBuilder = require('role.builder');
 let roleUpgrader = require('role.upgrader');
 let roleWarrior = require('role.warrior');
@@ -75,7 +75,8 @@ let mainLoop = function (errors) {
             roomInfo[name] = loadRoomInfo(name);
         }
         //TODO other rooms for mining/expanding/attacking
-        for (let room of Game.rooms){
+        for (let roomName in Game.rooms){
+            let room = Game.rooms[roomName];
             if (room.memory.info.underAttack) {
                 globalInfo.roomsUnderAttack.push(room.controller.pos);
                 break;
@@ -100,24 +101,18 @@ let mainLoop = function (errors) {
 
     //Run Systems
     try {
-        for (const room of Game.rooms)
-            systemTowers.controlTowers(room);
+        for (let roomName in Game.rooms) {
+            systemTowers.controlTowers(Game.rooms[roomName]);
+        }
     } catch (e) {
         console.log("Error while controlling towers: " + e);
         errors.push(e);
     }
-    
-    try {
-        for (const room of Game.rooms)
-            systemLinks.controlLinks(room);
-    } catch (e) {
-        console.log("Error while controlling links: " + e);
-        errors.push(e);
-    }
-    
+        
     //Run Units
     let builders = [];
-    for (let creep of Game.creeps) {
+    for (let creepName in Game.creeps) {
+        let creep = Game.creeps[creepName];
         try {
             if (creep.memory.roomName === undefined)
                 creep.memory.roomName = creep.room.name;
@@ -185,6 +180,14 @@ let mainLoop = function (errors) {
         }
     } catch (e) {
         console.log("Error while planning rooms: " + e);
+        errors.push(e);
+    }
+
+    try {
+        for (const roomName in Game.rooms)
+            systemLinks.controlLinks(Game.rooms[roomName]);
+    } catch (e) {
+        console.log("Error while controlling links: " + e);
         errors.push(e);
     }
 
@@ -278,7 +281,8 @@ let loadRoomInfo = function(roomName){
 
 //check slave rooms
 let checkSlaveRooms = function () {
-    for (let flag of Game.flags) {
+    for (let flagName in Game.flags) {
+        let flag = Game.flags[flagName];
         if (flag.color === COLOR_BROWN) {
             if (Memory.rooms[flag.pos.roomName] === undefined) {
                 Memory.rooms[flag.pos.roomName] = {
@@ -344,7 +348,8 @@ let removeDeadCreeps = function () {
 
 //Remove Missing Drops
 let removeMissingDrops = function () {
-    for (const room of Game.rooms) {
+    for (let roomName in Game.rooms) {
+        let room = Game.rooms[roomName];
         const drops = [];
         let energy = room.memory.info.energy;
         for (let i = 0; i < energy.reservedDrops.length; i++) {

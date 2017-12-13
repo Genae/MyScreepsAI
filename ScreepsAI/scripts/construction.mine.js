@@ -15,7 +15,7 @@ let scanMine = function (source, room) {
     let pathToMine = PathFinder.search(spawns[0].pos, {pos: source.pos, range: 2});
 
     //save object
-    room.memory.mines.push({
+    room.memory.structures.mines.push({
         obj: {id: source.id, pos: source.pos},
         workingPlaces: positionsAround,
         pathToMine: pathToMine,

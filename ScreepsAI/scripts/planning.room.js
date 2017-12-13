@@ -58,7 +58,7 @@ let planRoomConstruction = function (room) {
     }
 
     checkBrokenStuff(room);
-    if (!room.info.needsPlanning || room.memory.structures.repair.length > 0 || room.find(FIND_CONSTRUCTION_SITES).length > 0)
+    if (!room.memory.info.needsPlanning || room.memory.structures.repair.length > 0 || room.find(FIND_CONSTRUCTION_SITES).length > 0)
         return;
     
     if (improveMine(room))

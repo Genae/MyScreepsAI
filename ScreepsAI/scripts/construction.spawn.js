@@ -6,8 +6,7 @@ let createSpawn = function (spawn, room) {
         for (let dy = -1; dy <= 1; dy++) {
             if (dy !== 0 || dx !== 0) {
                 const pos = new RoomPosition(spawn.pos.x + dx, spawn.pos.y + dy, spawn.room.name);
-                if (!isOnAnyPath(pos, room))
-                    rechargeSpots.push({ pos: pos, reserved: false });
+                rechargeSpots.push({ pos: pos, reserved: false });                    
             }
         }
     }
@@ -58,26 +57,8 @@ let isBlocked = function (pos, room) {
                 return true;
         }
     }
-    return isOnAnyPath(pos, room);
-    
-};
-
-let isOnPath = function (pos, path) {
-    for (let i = 0; i < path.length; i++) {
-        if (pos.x === path[i].x && pos.y === path[i].y) {
-            return true;
-        }
-    }
     return false;
-};
-
-let isOnAnyPath = function(pos, room){
-    for (let m = 0; m < room.memory.mines.length; m++) {
-        if (isOnPath(pos, room.memory.mines[m].pathToMine.path)) {
-            return true;
-        }
-    }
-    return isOnPath(pos, room.memory.controller.pathTo.path);    
+    
 };
 
 module.exports = { createSpawn: createSpawn, planExtension: planExtension };
