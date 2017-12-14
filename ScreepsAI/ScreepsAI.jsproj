@@ -106,6 +106,9 @@
     </Content>
     <Content Include="scripts\main.js" />
     <Content Include="scripts\OLD\action.move.js" />
+    <Content Include="scripts\OLD\action.move.new.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
     <Content Include="scripts\OLD\construction.controller.js" />
     <Content Include="scripts\OLD\construction.link.js" />
     <Content Include="scripts\OLD\construction.mine.js" />

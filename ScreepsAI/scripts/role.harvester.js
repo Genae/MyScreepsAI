@@ -1,25 +1,15 @@
-let actionMove = require('action.move');
+let actionMove = require('action.move.new');
 let planningJobs = require('planning.jobs');
 let storageHelper = require('util.storageHelper');
 
 let roleHarvester = function (creep) {
-    if (creep.memory.job === undefined) {
-        planningJobs.findJob(creep, creep.room);
-        if (creep.memory.job === undefined)
-            return;
-    }
-    let mymine = creep.room.memory.structures.mines[creep.memory.job.mineIndex];
-    if (creep.ticksToLive > 100) {
-        if (creep.room.memory.thisJobs[creep.memory.job.mineIndex] === undefined) {
-            creep.room.memory.thisJobs[creep.memory.job.mineIndex] = 1;
-        } else {
-            creep.room.memory.thisJobs[creep.memory.job.mineIndex]++;
-            if (creep.room.memory.thisJobs[creep.memory.job.mineIndex] > mymine.workingPlaces.length + 1) {
-                creep.memory.job = undefined;
-                roleHarvester(creep);
-            }
-        }
-    }
+    
+    let mymine = findMineToWork(creep);
+    if (mymine === undefined)
+        return;
+    if (actionMove.continueMove(creep))
+        return; // just move
+    
     let controller;
     //state machine
     if (creep.memory.state === undefined) { // this has no state if energy > 0 && energy < max, so start at mining
@@ -45,23 +35,39 @@ let roleHarvester = function (creep) {
             }
         }
         let h = creep.harvest(mysource);
-        if (h === ERR_NOT_IN_RANGE || h === ERR_NOT_ENOUGH_RESOURCES) {
-            if (creep.pos.getRangeTo(mymine.obj.pos.x, mymine.obj.pos.y) < 3 && h === ERR_NOT_ENOUGH_RESOURCES) {
-                return;
-            }
-            if (creep.pos.getRangeTo(mymine.obj.pos.x, mymine.obj.pos.y) < 3) {
-                actionMove.moveToAny(creep, mymine.workingPlaces, 0);
-            } else {
-                actionMove.followPath(creep, mymine.pathToMine.path);
-            }
+        if (h === ERR_NOT_ENOUGH_RESOURCES)
+            return;
+        if (h === ERR_NOT_IN_RANGE) {
+            actionMove.moveTo(creep, mymine.obj.pos, 1);            
         }
     }
     else if (creep.memory.state === 'emptying') {
         let stor = storageHelper.getStorageToFill(creep);
-        if (creep.transfer(stor, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE){
-            creep.moveTo(stor);
+        if (creep.transfer(stor, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+            actionMove.moveTo(creep, stor.pos, 1);
         }
     }
+};
+
+let findMineToWork = function (creep) {
+    if (creep.memory.job === undefined) {
+        planningJobs.findJob(creep, creep.room);
+        if (creep.memory.job === undefined)
+            return undefined;
+    }
+    let mymine = creep.room.memory.structures.mines[creep.memory.job.mineIndex];
+    if (creep.ticksToLive > 100) {
+        if (creep.room.memory.thisJobs[creep.memory.job.mineIndex] === undefined) {
+            creep.room.memory.thisJobs[creep.memory.job.mineIndex] = 1;
+        } else {
+            creep.room.memory.thisJobs[creep.memory.job.mineIndex]++;
+            if (creep.room.memory.thisJobs[creep.memory.job.mineIndex] > mymine.workingPlaces.length + 1) {
+                creep.memory.job = undefined;
+                return findMineToWork(creep);
+            }
+        }
+    }
+    return mymine;
 };
 
 module.exports = { roleHarvester: roleHarvester };

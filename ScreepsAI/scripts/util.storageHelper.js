@@ -1,4 +1,5 @@
 let getStorageToWithdraw = function (creep, noSpawn) {
+    cache = {};
     let storagesInRoom = getStructuresInRoom(creep.room);
     let withdrawStorages = storagesInRoom.storage.concat(storagesInRoom.withdrawStorage).concat(storagesInRoom.drops);
     if (!noSpawn){
@@ -12,6 +13,7 @@ let getStorageToWithdraw = function (creep, noSpawn) {
 };
 
 let getStorageToFill = function (creep) {
+    cache = {};
     let storagesInRoom = getStructuresInRoom(creep.room);
     let fillStorages = storagesInRoom.storage.concat(storagesInRoom.priorityStorage);
     return creep.pos.findClosestByRange(fillStorages);
