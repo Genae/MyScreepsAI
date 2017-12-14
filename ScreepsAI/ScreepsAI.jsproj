@@ -84,6 +84,9 @@
     <Content Include="scripts\action.move.js">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Content>
+    <Content Include="scripts\action.move.new.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
     <Content Include="scripts\action.refilling.js" />
     <Content Include="scripts\action.upgrading.js" />
     <Content Include="scripts\construction.controller.js">
@@ -106,9 +109,6 @@
     </Content>
     <Content Include="scripts\main.js" />
     <Content Include="scripts\OLD\action.move.js" />
-    <Content Include="scripts\OLD\action.move.new.js">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Content>
     <Content Include="scripts\OLD\construction.controller.js" />
     <Content Include="scripts\OLD\construction.link.js" />
     <Content Include="scripts\OLD\construction.mine.js" />
