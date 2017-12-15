@@ -7,6 +7,7 @@ let moveTo = function (creep, pos, range) {
     creep.memory.move = {};
     creep.memory.move.pathTargets = { pos: pos, range: range };
     creep.memory.move.moving = true;
+    creep.memory.move.recalculate = false;
     creep.memory.move.pathBlocked = 0;
     return continueMove(creep);
 };
@@ -24,15 +25,24 @@ let continueMove = function (creep) {
         creep.memory.move.pathBlocked = 0;
     }
     let targetPos = new RoomPosition(creep.memory.move.pathTargets.pos.x, creep.memory.move.pathTargets.pos.y, creep.memory.move.pathTargets.pos.roomName);
-    if (isInRange(creep.pos, targetPos, creep.memory.move.pathTargets.range)){
+
+    let dist = creep.pos.getRangeTo(targetPos);
+    if (dist <= creep.memory.move.pathTargets.range){
         creep.memory.move.moving = false;
         return false;
-    }        
-    let res = creep.moveTo(targetPos, {
-        reusePath: creep.memory.move.pathBlocked > 1 ? 1 : 30, 
-        visualizePathStyle: style, 
-        ignoreCreeps: creep.memory.move.pathBlocked <= 1
-    });
+    }
+    creep.memory.move.recalculate = dist < creep.memory.move.pathTargets.range + 2 || creep.memory.move.pathBlocked > 1;
+    let config = {
+        reusePath: creep.memory.move.recalculate === true ? 1 : 30,
+        visualizePathStyle: style,
+        ignoreCreeps: creep.memory.move.pathBlocked <= 1 && dist > creep.memory.move.pathTargets.range + 2
+    };
+    if (creep.memory.move.pathTargets.roomName === creep.pos.roomName){
+        config.maxRooms = 1;
+        config.maxOps = 200;
+    }
+    let res = creep.moveTo(targetPos, config);
+    creep.memory.move.recalculate = creep.memory.move.pathBlocked > 1;
     if (res === 0){
         creep.memory.move.lastPos = creep.pos;
     }
@@ -47,8 +57,5 @@ let style = {
     opacity: .1
 };
 
-let isInRange = function (pos1, pos2, range) {
-    return pos1.getRangeTo(pos2) <= range;
-};
 
 module.exports = { moveTo: moveTo, continueMove: continueMove};

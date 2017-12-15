@@ -1,6 +1,6 @@
 let roleWarrior = function (creep) {
     let target;
-    let roomUnderAttack = creep.room.controller.pos.findClosestByRange(Memory.globalInfo.roomsUnderAttack);    
+    let roomUnderAttack = creep.room.controller.pos.findClosestByRange(Memory.globalInfo.roomsUnderAttack);
     if (roomUnderAttack !== null) {
         if (creep.room.name !== roomUnderAttack.roomName) {
             creep.moveTo(roomUnderAttack);
@@ -20,7 +20,7 @@ let roleWarrior = function (creep) {
                 healingWarrior(creep, roomUnderAttack);
             }
         }
-    } 
+    }
     else {
         let squad = creep.room.find(FIND_MY_CREEPS, {
             filter: function (c) {
@@ -32,7 +32,8 @@ let roleWarrior = function (creep) {
         }
         let collect = false;
         let flag;
-        for (let flag of Game.flags) {
+        for (let flagN in Game.flags) {
+            let flag = Game.flags[flagN];
             if (flag.color === COLOR_YELLOW && flag.room.name === creep.memory.roomName) {
                 collect = true;
             }
@@ -73,7 +74,7 @@ let roleWarrior = function (creep) {
                 }
             }
         }
-    }    
+    }
 };
 
 let healingWarrior = function (creep, pos) {

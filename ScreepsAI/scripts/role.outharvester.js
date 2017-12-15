@@ -17,7 +17,7 @@ let roleOutHarvester = function (creep) {
             }
         }
     }
-    
+
     //state machine
     if (creep.memory.state === undefined) { // this has no state if energy > 0 && energy < max, so start at mining
         creep.memory.state = 'mining';
@@ -26,7 +26,7 @@ let roleOutHarvester = function (creep) {
         creep.memory.state = 'mining';
     }
     let myflag = Game.flags[creep.memory.job.flag];
-    
+
 
     if (creep.memory.state === 'mining') {
         let energy = creep.pos.findInRange(FIND_DROPPED_RESOURCES, 30, {
@@ -55,7 +55,7 @@ let roleOutHarvester = function (creep) {
                 creep.moveTo(mysource);
             }
         }
-        
+
     }
     else if (creep.memory.state === 'emptying') {
         if (creep.pos.x > 1 && creep.pos.y > 1 && creep.pos.x < 48 && creep.pos.y < 48) {

@@ -59,7 +59,7 @@ let getStructuresInRoom = function(room, noLinks) {
                 if (link.type === 'fill')
                     cache[room.name].withdrawStorage.push(Game.getObjectById(link.obj.id));
             }
-        }        
+        }
         cache[room.name].drops = room.find(FIND_DROPPED_RESOURCES, {
             filter: (energy) => {
                 return (energy.amount > 50) && room.memory.info.energy.reservedDrops.indexOf(energy.id) === -1;

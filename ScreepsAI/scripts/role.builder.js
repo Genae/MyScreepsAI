@@ -27,7 +27,7 @@ let roleBuilder = function (creep) {
         if (Game.rooms[creep.memory.roomName].memory.structures.repair.length === 0) {
             let targets = creep.pos.findInRange(FIND_STRUCTURES, 3, {
                 filter: function(s) {
-                    return (s.hits < s.hitsMax && s.structureType !== STRUCTURE_RAMPART && s.structureType !== STRUCTURE_WALL) || 
+                    return (s.hits < s.hitsMax && s.structureType !== STRUCTURE_RAMPART && s.structureType !== STRUCTURE_WALL) ||
                         (s.hits < creep.room.memory.wallHitpoints && (s.structureType === STRUCTURE_RAMPART || s.structureType === STRUCTURE_WALL))
                 }
             });
@@ -42,7 +42,7 @@ let roleBuilder = function (creep) {
         (wall === null && creep.memory.state === 'upgradeWalls')) {
         creep.memory.state = 'refilling';
     }
-    
+
     if (creep.memory.state === 'refilling' && creep.carry.energy === creep.carryCapacity) {
         if (creep.room.memory.structures.repair.length > 0) {
             creep.memory.state = 'repairing';
@@ -73,7 +73,7 @@ let roleBuilder = function (creep) {
             actionMove.moveToAny(creep, rechargeSpots.map(function (a) {
                 return a.pos;
             }));
-        }        
+        }
         return;
     }
     else if (creep.memory.rechargeSpot !== undefined) {

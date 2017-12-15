@@ -23,7 +23,7 @@ let findJob = function (creep) {
     if (creep.memory.role === 'outharvester') {
         for (let flagName in Game.flags) {
             let flag = Game.flags[flagName];
-            if (flag.color !== COLOR_BROWN || Memory.rooms[flag.pos.roomName].masterRoom !== room.name)
+            if (flag.color !== COLOR_BROWN || Memory.rooms[flag.pos.roomName].info.masterRoom !== room.name)
                 continue;
             if (room.memory.lastJobs[flagName] === undefined)
                 room.memory.lastJobs[flagName] = 0;
@@ -38,7 +38,7 @@ let findJob = function (creep) {
         let slaverooms = {};
         for (let flagName in Game.flags) {
             let flag = Game.flags[flagName];
-            if (flag.color !== COLOR_BROWN || Memory.rooms[flag.pos.roomName].masterRoom !== room.name)
+            if (flag.color !== COLOR_BROWN || Memory.rooms[flag.pos.roomName].info.masterRoom !== room.name)
                 continue;
             if (slaverooms[flag.pos.roomName] === undefined) {
                 slaverooms[flag.pos.roomName] = 0;

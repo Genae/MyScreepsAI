@@ -9,38 +9,43 @@ let pathfindingHelper = require('util.pathfindingHelper');
 let scanRoom = function(room){
     //clear all structures
     room.memory.structures = {};
-    
+
+    if (room.find(FIND_MY_SPAWNS)[0] === undefined) {
+        room.memory.info.needsPlanning = false;
+        return;
+    }
+
     //Scan Mines
     room.memory.structures.mines = [];
     let sources = room.find(FIND_SOURCES);
     for (let i = 0; i < sources.length; i++) {
         constructionMine.scanMine(sources[i], room);
     }
-    room.memory.structures.mines.sort(function (a, b) { return a.pathToMine.cost - b.pathToMine.cost });
-    
+    room.memory.structures.mines.sort(function (a, b) { return a.pathToMine === undefined? 0: a.pathToMine.cost - b.pathToMine === undefined? 0: b.pathToMine.cost });
+
     //Scan Minerals
     let minerals = room.find(FIND_MINERALS);
     if (minerals.length > 0)
     {
         room.memory.structures.mineral = constructionMineral.createMineral(room, minerals[0]);
     }
-    
+
     //Scan Links
     room.memory.structures.links = [];
-    
+
     //Scan Controller
     room.memory.structures.controller = constructionController.createController(room.controller, room);
-    
+
     //Scan Spawn
     room.memory.structures.spawn = constructionSpawn.createSpawn(room.find(FIND_MY_SPAWNS)[0], room);
-    
+
     //Scan Walls
     room.memory.structures.walls = constructionWalls.createWalls(room, TOP);
     room.memory.structures.walls = room.memory.structures.walls.concat(constructionWalls.createWalls(room, RIGHT));
     room.memory.structures.walls = room.memory.structures.walls.concat(constructionWalls.createWalls(room, BOTTOM));
     room.memory.structures.walls = room.memory.structures.walls.concat(constructionWalls.createWalls(room, LEFT));
     room.memory.structures.wallHitpoints = 100000;
-    
+
     //other
     room.memory.structures.repair = [];
     room.memory.structures.improveTo = 0;
@@ -48,9 +53,18 @@ let scanRoom = function(room){
 
 let planRoomConstruction = function (room) {
 
+    if (room.find(FIND_MY_SPAWNS)[0] === undefined) {
+        room.memory.info.needsPlanning = false;
+        console.log("no spawn")
+        return;
+    }
+    if(room.memory.structures.links == undefined){
+        room.memory.info.rescan = true;
+        return;
+    }
     //Rescan for new Links
     let links = room.find(FIND_MY_STRUCTURES, { filter: function (s) { return s.structureType === STRUCTURE_LINK } });
-    if (room.memory.structures.links.length < links.length) {
+    if (room.memory.structures.links !== undefined && room.memory.structures.links.length < links.length) {
         room.memory.structures.links = [];
         for (let i = 0; i < links.length; i++) {
             room.memory.structures.links.push(constructionLink.createLink(links[i]));
@@ -60,7 +74,7 @@ let planRoomConstruction = function (room) {
     checkBrokenStuff(room);
     if (!room.memory.info.needsPlanning || room.memory.structures.repair.length > 0 || room.find(FIND_CONSTRUCTION_SITES).length > 0)
         return;
-    
+
     if (improveMine(room))
         return;
     if (improveSpawn(room))
@@ -83,7 +97,7 @@ let planRoomConstruction = function (room) {
     if (room.memory.structures.wallHitpoints < 1000000) {
         room.memory.structures.wallHitpoints = Math.min(oldHits + 100000, RAMPART_HITS_MAX[room.controller.level]/10);
     }
-    room.info.needsPlanning = room.memory.structures.wallHitpoints !== oldHits;
+    room.memory.info.needsPlanning = room.memory.structures.wallHitpoints !== oldHits;
 };
 
 ///
@@ -258,7 +272,7 @@ let improveDefense = function (room) {
         return true;
     }
 
-    if (room.memory.structures.improveTo >= 4) {
+    if (room.memory.structures.improveTo >= 3) {
         let spawn = Game.getObjectById(room.memory.structures.spawn.obj.id);
         for (let i = 0; i < room.memory.structures.walls.length; i++) {
             let myWall = room.memory.structures.walls[i];
@@ -309,7 +323,7 @@ let improveDefense = function (room) {
                             }
                         }
                     }
-                    
+
                 }
                 myWall.improvedTo = 3;
                 return true;
@@ -332,7 +346,7 @@ let checkBrokenStuff = function (room) {
     let targets = room.find(FIND_STRUCTURES, {
         filter: (structure) => {
             return (structure.hits < structure.hitsMax / 2 && structure.structureType !== STRUCTURE_WALL && structure.structureType !== STRUCTURE_RAMPART) ||
-                    structure.structureType === STRUCTURE_RAMPART && structure.hits < room.memory.structures.wallHitpoints - 30000;
+                structure.structureType === STRUCTURE_RAMPART && structure.hits < room.memory.structures.wallHitpoints - 30000;
         }
     });
     for (let i = 0; i < targets.length; i++) {

@@ -3,13 +3,16 @@ let planningJobs = require('planning.jobs');
 let storageHelper = require('util.storageHelper');
 
 let roleHarvester = function (creep) {
-    
+
     let mymine = findMineToWork(creep);
     if (mymine === undefined)
         return;
+    if (creep.memory.state === 'emptying')
+        checkRepair(creep);
+
     if (actionMove.continueMove(creep))
         return; // just move
-    
+
     let controller;
     //state machine
     if (creep.memory.state === undefined) { // this has no state if energy > 0 && energy < max, so start at mining
@@ -38,7 +41,7 @@ let roleHarvester = function (creep) {
         if (h === ERR_NOT_ENOUGH_RESOURCES)
             return;
         if (h === ERR_NOT_IN_RANGE) {
-            actionMove.moveTo(creep, mymine.obj.pos, 1);            
+            actionMove.moveTo(creep, mymine.obj.pos, 1);
         }
     }
     else if (creep.memory.state === 'emptying') {
@@ -68,6 +71,22 @@ let findMineToWork = function (creep) {
         }
     }
     return mymine;
+};
+
+let checkRepair = function (creep) {
+    let repairSites = creep.pos.findInRange(FIND_STRUCTURES, 3, {
+        filter: function (s) {
+            return (s.structureType !== STRUCTURE_RAMPART && s.structureType !== STRUCTURE_WALL  && s.hits <= s.hitsMax - 2000) ||
+                ((s.structureType === STRUCTURE_RAMPART || s.structureType === STRUCTURE_WALL) && (creep.room.memory.structures.wallHitpoints !== undefined && creep.room.memory.structures.wallHitpoints > s.hits) ||
+                    (s.structureType === STRUCTURE_ROAD && s.hits <= s.hitsMax - 500));
+        }
+    });
+    if (repairSites.length > 0) {
+        if (creep.repair(repairSites[0]) === OK) {
+            return;
+        }
+        creep.moveTo(repairSites[0]);
+    }
 };
 
 module.exports = { roleHarvester: roleHarvester };

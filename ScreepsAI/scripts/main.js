@@ -52,7 +52,7 @@ let mainLoop = function (errors) {
         console.log("Error while global Planning: " + e);
         errors.push(e);
     }
-    
+
     //Load Room Infos
     const roomInfo = [];
     try {
@@ -108,7 +108,7 @@ let mainLoop = function (errors) {
         console.log("Error while controlling towers: " + e);
         errors.push(e);
     }
-        
+
     //Run Units
     let builders = [];
     for (let creepName in Game.creeps) {
@@ -163,7 +163,7 @@ let mainLoop = function (errors) {
             errors.push(e);
         }
     }
-    
+
     //Plan Room Development
     try {
         let i = 0;
@@ -237,7 +237,7 @@ let loadRoomInfo = function(roomName){
             masterRoom: undefined,
             slaveRooms: [],
             controllerLevel: room.controller !== null ? room.controller.level : -1,
-            needsPlanning: true, 
+            needsPlanning: true,
             rescan: true,
             underAttack: false,
             energy: {
@@ -258,7 +258,7 @@ let loadRoomInfo = function(roomName){
     if (spawnCount > 0 && room.memory.info.masterRoom !== undefined) {
         let index = Memory.rooms[room.memory.info.masterRoom].info.slaveRooms.indexOf(roomName);
         if (index > -1) {
-            Memory.rooms[Memory.rooms[roomName].info.masterRoom].slaveRooms.splice(index, 1);
+            Memory.rooms[Memory.rooms[roomName].info.masterRoom].info.slaveRooms.splice(index, 1);
         }
         room.memory.info.masterRoom = undefined
     }
@@ -269,11 +269,11 @@ let loadRoomInfo = function(roomName){
             room.memory.info.needsPlanning = true;
         }
     }
-        
+
     //reset jobs
     room.memory.lastJobs = room.memory.thisJobs;
     room.memory.thisJobs = {};
-    
+
     return room.memory.info;
 };
 
@@ -307,7 +307,7 @@ let checkSlaveRooms = function () {
                 Memory.rooms[flag.pos.roomName].info.masterRoom = master;
                 Game.rooms[master].memory.info.slaveRooms.push(flag.pos.roomName);
             } else {
-                if (Game.rooms[flag.pos.roomName] !== undefined && flag.room.controller.level > 0) {
+                if (Game.rooms[flag.pos.roomName] !== undefined && flag.room.controller.level > 1) {
                     flag.remove();
                     Memory.rooms[flag.pos.roomName].info.underAttack = false;
                     master = Memory.rooms[flag.pos.roomName].info.masterRoom;

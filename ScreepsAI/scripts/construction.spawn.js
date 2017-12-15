@@ -6,7 +6,7 @@ let createSpawn = function (spawn, room) {
         for (let dy = -1; dy <= 1; dy++) {
             if (dy !== 0 || dx !== 0) {
                 const pos = new RoomPosition(spawn.pos.x + dx, spawn.pos.y + dy, spawn.room.name);
-                rechargeSpots.push({ pos: pos, reserved: false });                    
+                rechargeSpots.push({ pos: pos, reserved: false });
             }
         }
     }
@@ -16,7 +16,7 @@ let createSpawn = function (spawn, room) {
     return {
         obj: { id: spawn.id, pos: spawn.pos },
         rechargeSpots: rechargeSpots,
-        storageCenter: storage, 
+        storageCenter: storage,
         improvedTo: 0
     };
 };
@@ -79,7 +79,7 @@ let getCenter = function(mySpawn, offset){
 };
 
 let isAreaBlocked = function (center, r, room) {
-    
+
     for (let dx = -r; dx <= r; dx++) {
         for (let dy = -r; dy <= r; dy++) {
             const pos = new RoomPosition(center.x + dx, center.y + dy, room.name);
@@ -110,7 +110,7 @@ let isBlocked = function (pos, room) {
         }
     }
     return false;
-    
+
 };
 
 module.exports = { createSpawn: createSpawn, planExtension: planExtension };

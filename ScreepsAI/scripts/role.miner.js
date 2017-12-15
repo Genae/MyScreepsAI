@@ -13,7 +13,7 @@ let roleMiner = function (creep) {
         let mineral = creep.pos.findClosestByRange(FIND_MINERALS);
         if (creep.harvest(mineral) === ERR_NOT_IN_RANGE) {
             creep.moveTo(mineral);
-        } 
+        }
     }
 };
 

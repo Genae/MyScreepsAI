@@ -81,10 +81,10 @@ let roleDistributor = function (creep) {
 
     let myExt = creep.pos.findClosestByRange(extensions);
     let myStor = creep.pos.findClosestByRange(storage);
-    
+
     while (it < 10) {
         it++;
-           
+
 
         //+++++++++++ STATE EMPTYING +++++++++++++++
         if (creep.memory.state === STATE_EMPTYING) {
@@ -104,7 +104,7 @@ let roleDistributor = function (creep) {
             //I did not change state, so do whatever I have to do here
             return doEmptying(creep);
         }
-            //+++++++++++ STATE REFILLING +++++++++++++++
+        //+++++++++++ STATE REFILLING +++++++++++++++
         else if (creep.memory.state === STATE_REFILLING) {
             if (changeToInjecting(creep, myExt)) {
                 continue;
@@ -116,7 +116,7 @@ let roleDistributor = function (creep) {
             //I did not change state, so do whatever I have to do here
             return doRefilling(creep, myStor);
         }
-            //+++++++++++ STATE INJECTING +++++++++++++++
+        //+++++++++++ STATE INJECTING +++++++++++++++
         else if (creep.memory.state === STATE_INJECTING) {
             if (myExt === undefined || myExt === null || !((creep.carry.energy - myExt.energy >= myExt.energyCapacity || creep.carry.energy === creep.carryCapacity))) { // i do not have enough energy or no job
                 if (changeToRefilling(creep, myExt)) {
@@ -130,7 +130,7 @@ let roleDistributor = function (creep) {
             //I did not change state, so do whatever I have to do here
             return doInjecting(creep, myExt);
         }
-            //+++++++++++ STATE COLLECTING +++++++++++++++
+        //+++++++++++ STATE COLLECTING +++++++++++++++
         else if (creep.memory.state === STATE_COLLECTING) {
             if (creep.carry.energy > 0 || droppedEnergy.length === 0) { //done collecting
                 if (changeToInjecting(creep, myExt)) {
@@ -147,7 +147,7 @@ let roleDistributor = function (creep) {
             //I did not change state, so do whatever I have to do here
             return doCollecting(creep, droppedEnergy);
         }
-            //+++++++++++ STATE STORING +++++++++++++++
+        //+++++++++++ STATE STORING +++++++++++++++
         else if (creep.memory.state === STATE_STORING) {
             if (changeToInjecting(creep, myExt)) {
                 continue;
@@ -246,7 +246,7 @@ let doStoring = function (creep, myStor) {
             actionMove.moveTo(creep, myStor.pos, 1);
         }
     }
-    
+
 };
 
 let doInjecting = function (creep, myExt) {

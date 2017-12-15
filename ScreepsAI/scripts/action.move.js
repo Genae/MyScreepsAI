@@ -78,12 +78,12 @@ let continueMove = function (creep) {
     if (creep.memory.path.length > 20 && creep.memory.path.length - index <= 5 && creep.memory.pathTargets !== undefined) { //reevaluate path
         return moveToAny(creep, creep.memory.pathTargets.pos, creep.memory.pathTargets.range);
     }
-    
+
     let posnew = new RoomPosition(creep.memory.path[index].x, creep.memory.path[index].y, creep.room.name);
     if (creep.pos.getRangeTo(posnew) > 1) {
         return moveTo(creep, posnew, 0);
     }
-    
+
     if (isBlocked(creep.pos, true)) {
         creep.memory.pathBlocked++;
         if (creep.memory.pathBlocked > 2 && creep.memory.pathTargets !== undefined)
@@ -114,7 +114,7 @@ let followPath = function (creep, path) {
     }
     return moveTo(creep, res[closestDist]);
 };
-    
+
 let isBlocked = function (pos, fat) {
     let stuff = pos.look();
     for (let i = 0; i < stuff.length; i++) {
