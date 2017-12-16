@@ -11,7 +11,8 @@ let controlTowers = function (room) {
             }
         }
         //check save mode
-        for (let creep of Game.creeps) {
+        for (let creepName in Game.creeps) {
+            let creep = Game.creeps[creepName];
             if (room.name === creep.room.name) {
                 if (creep.memory.role === 'attacker') {
                     //fight

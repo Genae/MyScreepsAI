@@ -163,6 +163,7 @@ let getTargets = function (room, anyUnderAttack) {
 
     let targets = [
         { role: 'harvester', amount: 1, body: getWorkerBody(300, false, false) },
+        { role: 'harvester', amount: 2, body: getWorkerBody(Math.min(550, room.energyCapacityAvailable), false, false) },
         { role: 'upgrader', amount: 1, body: getWorkerBody(Math.min(400, room.energyCapacityAvailable), true, false) }
     ];
     if (anyUnderAttack) {
@@ -171,11 +172,10 @@ let getTargets = function (room, anyUnderAttack) {
     else {
         if (level > 1)
             targets.push({ role: 'distributor', amount: 1, body: getCarrierBody(200) });
-        targets.push({ role: 'harvester', amount: 2, body: getWorkerBody(Math.min(550, room.energyCapacityAvailable), false, false) });
         if (level > 2)
             targets.push({ role: 'upgrader', amount: 2, body: getWorkerBody(room.energyCapacityAvailable, true, false) });
         targets.push({ role: 'harvester', amount: miningJobs, body: getWorkerBody(room.energyCapacityAvailable, false, false) });
-        if (level < 5){
+        if (level <= 4){
             targets.push({ role: 'attacker', amount: attackFlags.length * 6 + redattackFlags, body: getWarriorBody(room.energyCapacityAvailable, true) });
         }
         else {
@@ -196,10 +196,10 @@ let getTargets = function (room, anyUnderAttack) {
 
 //Body Configuration
 let getCarrierBody = function(availableEnergy) {
-    return getBody(availableEnergy, [CARRY, CARRY, MOVE]);
+    return sort(getBody(availableEnergy, [CARRY, CARRY, MOVE]));
 };
 let getClaimingBody = function(availableEnergy, max) {
-    return getBody(Math.min(availableEnergy, getCost([MOVE, CLAIM])*max), [MOVE, CLAIM]);
+    return sort(getBody(Math.min(availableEnergy, getCost([MOVE, CLAIM])*max), [MOVE, CLAIM]));
 };
 let getWarriorBody = function(availableEnergy, noRoads, singleRanged){
     let rangedBuild = [];
@@ -207,13 +207,12 @@ let getWarriorBody = function(availableEnergy, noRoads, singleRanged){
         rangedBuild = noRoads ? [RANGED_ATTACK, MOVE] : [RANGED_ATTACK, MOVE, TOUGH];
         availableEnergy -= getCost(rangedBuild);
     }
-    let body;
     if (noRoads)
-        body = getBody(availableEnergy, [ATTACK, TOUGH, MOVE, MOVE]).concat(rangedBuild);
-    body = getBody(availableEnergy, [ATTACK, TOUGH, MOVE]).concat(rangedBuild);
+        return sort(getBody(availableEnergy, [ATTACK, TOUGH, MOVE, MOVE]).concat(rangedBuild));
+    return sort(getBody(availableEnergy, [ATTACK, TOUGH, MOVE]).concat(rangedBuild));
 };
 let getHealerBody = function(availableEnergy, noRoads) {
-    return getBody(availableEnergy, [HEAL, TOUGH, MOVE, MOVE]);
+    return sort(getBody(availableEnergy, [HEAL, TOUGH, MOVE, MOVE]));
 };
 let getWorkerBody = function(availableEnergy, bigInventory, noRoads) {
     let body = [];
@@ -231,8 +230,7 @@ let getWorkerBody = function(availableEnergy, bigInventory, noRoads) {
         }
         body = body.concat(getBody(availableEnergy, [WORK, CARRY, MOVE]));
     }
-    body.sort();
-    return body;
+    return sort(body);
 };
 
 //Body Builder
@@ -246,6 +244,16 @@ costs[HEAL] = 250;
 costs[CLAIM] = 600;
 costs[TOUGH] = 10;
 
+let sortOrder = {};
+sortOrder[MOVE] = 5;
+sortOrder[WORK] = 2;
+sortOrder[CARRY] = 3;
+sortOrder[ATTACK] = 4;
+sortOrder[RANGED_ATTACK] = 6;
+sortOrder[HEAL] = 7;
+sortOrder[CLAIM] = 1;
+sortOrder[TOUGH] = 0;
+
 let getBody = function(availableEnergy, parts) {
     let body = [];
     let cost = getCost(parts);
@@ -253,7 +261,13 @@ let getBody = function(availableEnergy, parts) {
         body = body.concat(parts);
         availableEnergy -= cost;
     }
-    body.sort();
+    return body;
+};
+
+let sort = function (body) {
+    body.sort(function (a, b) {
+        return sortOrder[a] - sortOrder[b];
+    });
     return body;
 };
 
