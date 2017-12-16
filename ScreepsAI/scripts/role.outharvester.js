@@ -1,5 +1,6 @@
 let actionMove = require('action.move');
 let planningJobs = require('planning.jobs');
+let actionUpgrading = require('action.upgrading');
 
 let roleOutHarvester = function (creep) {
     if (creep.memory.job === undefined || Game.flags[creep.memory.job.flag] === undefined) {
@@ -18,6 +19,10 @@ let roleOutHarvester = function (creep) {
         }
     }
 
+
+    if (creep.room.memory.info.energy.fullSpawn > 5 && creep.memory.state === 'emptying')
+        actionUpgrading.doUpgrading(creep);
+
     //state machine
     if (creep.memory.state === undefined) { // this has no state if energy > 0 && energy < max, so start at mining
         creep.memory.state = 'mining';
@@ -26,7 +31,10 @@ let roleOutHarvester = function (creep) {
         creep.memory.state = 'mining';
     }
     let myflag = Game.flags[creep.memory.job.flag];
-
+    if (myflag === undefined) {
+        creep.memory.job = undefined;
+        return;
+    }
 
     if (creep.memory.state === 'mining') {
         let energy = creep.pos.findInRange(FIND_DROPPED_RESOURCES, 30, {

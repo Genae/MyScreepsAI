@@ -55,10 +55,9 @@ let planRoomConstruction = function (room) {
 
     if (room.find(FIND_MY_SPAWNS)[0] === undefined) {
         room.memory.info.needsPlanning = false;
-        console.log("no spawn")
         return;
     }
-    if(room.memory.structures.links == undefined){
+    if(room.memory.structures.links === undefined){
         room.memory.info.rescan = true;
         return;
     }
@@ -139,7 +138,7 @@ let improveOuterMines = function (room) {
         if (flag.color === COLOR_BROWN && Memory.rooms[flag.pos.roomName].masterRoom === room.name) {
             if (flag.memory.improvedTo === undefined)
                 flag.memory.improvedTo = 0;
-            if (flag.memory.improvedTo === 0 && room.memory.structures.improveTo >= 4) {
+            if (flag.memory.improvedTo === 0 && room.memory.structures.improveTo >= 3) {
                 let p = pathfindingHelper.findPathUsingRoads(spawn.pos, { pos: flag.pos, range: 0 });
                 if (p !== null) {
                     improvePath(p.path);

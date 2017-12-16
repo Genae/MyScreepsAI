@@ -29,7 +29,8 @@ let roleReserver = function (creep) {
         if (creep.reserveController(creep.room.controller) === ERR_NOT_IN_RANGE) {
             creep.moveTo(creep.room.controller);
         } else {
-            creep.room.memory.controllerTicks = creep.room.controller.reservation.ticksToEnd;
+            if (creep.room.controller.reservation)
+                creep.room.memory.controllerTicks = creep.room.controller.reservation.ticksToEnd;
         }
     }
 };

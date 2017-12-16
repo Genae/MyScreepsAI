@@ -1,6 +1,7 @@
 let actionMove = require('action.move.new');
 let planningJobs = require('planning.jobs');
 let storageHelper = require('util.storageHelper');
+let actionUpgrading = require('action.upgrading');
 
 let roleHarvester = function (creep) {
 
@@ -8,10 +9,13 @@ let roleHarvester = function (creep) {
     if (mymine === undefined)
         return;
     if (creep.memory.state === 'emptying')
-        checkRepair(creep);
-
+        checkRepair(creep);      
+        
     if (actionMove.continueMove(creep))
         return; // just move
+    
+    if (creep.room.memory.info.energy.fullSpawn > 5 && creep.memory.state === 'emptying')
+        actionUpgrading.doUpgrading(creep);
 
     let controller;
     //state machine
@@ -38,8 +42,11 @@ let roleHarvester = function (creep) {
             }
         }
         let h = creep.harvest(mysource);
-        if (h === ERR_NOT_ENOUGH_RESOURCES)
+        if (h === ERR_NOT_ENOUGH_RESOURCES) {
+            if (creep.pos.getRangeTo(mymine.obj.pos) > 2)
+                actionMove.moveTo(creep, mymine.obj.pos, 1);
             return;
+        }
         if (h === ERR_NOT_IN_RANGE) {
             actionMove.moveTo(creep, mymine.obj.pos, 1);
         }

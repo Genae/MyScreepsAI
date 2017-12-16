@@ -62,7 +62,7 @@ let mainLoop = function (errors) {
         //TODO other rooms for mining/expanding/attacking
         for (let roomName in Game.rooms){
             let room = Game.rooms[roomName];
-            if (room.memory.info.underAttack) {
+            if (room.memory.underAttack) {
                 globalInfo.roomsUnderAttack.push(room.controller.pos);
                 break;
             }
@@ -205,7 +205,7 @@ let loadGlobalSettings = function() {
             autoMineExternal: false,
             autoExpand: false,
             autoAttack: false,
-            allies: ['Hosmagix']
+            allies: ['Hosmagix', 'KHJGames']
         };
     }
     return Memory.globalSettings;
@@ -233,10 +233,10 @@ let loadRoomInfo = function(roomName){
         room.memory.thisJobs = {};
         room.memory.info = {
             lastSeen: Game.time,
-            isMaster: room.controller !== null && room.controller.my,
+            isMaster: room.controller && room.controller.my,
             masterRoom: undefined,
             slaveRooms: [],
-            controllerLevel: room.controller !== null ? room.controller.level : -1,
+            controllerLevel: room.controller ? room.controller.level : -1,
             needsPlanning: true,
             rescan: true,
             underAttack: false,
@@ -247,7 +247,10 @@ let loadRoomInfo = function(roomName){
             }
         };
     }
-    room.memory.info.lastSeen = Game.time;
+    room.memory.info.lastSeen = Game.time;    
+    if (room.controller.level > 1 && !room.isMaster){
+        removeSlaveStatus(room.name);
+    }
     //check attackers
     let enemys = room.find(FIND_HOSTILE_CREEPS, {
         filter: function (hc) { return Memory.globalSettings.allies.indexOf(hc.owner.username) === -1 }
@@ -281,6 +284,10 @@ let loadRoomInfo = function(roomName){
 let checkSlaveRooms = function () {
     for (let flagName in Game.flags) {
         let flag = Game.flags[flagName];
+        if (Memory.rooms[flag.pos.roomName].info.isMaster){
+            Memory.rooms[flag.pos.roomName].info.slaveRooms = [];
+            flag.remove();
+        }
         if (flag.color === COLOR_BROWN) {
             if (Memory.rooms[flag.pos.roomName] === undefined) {
                 Memory.rooms[flag.pos.roomName] = {
@@ -308,17 +315,21 @@ let checkSlaveRooms = function () {
                 Game.rooms[master].memory.info.slaveRooms.push(flag.pos.roomName);
             } else {
                 if (Game.rooms[flag.pos.roomName] !== undefined && flag.room.controller.level > 1) {
-                    flag.remove();
-                    Memory.rooms[flag.pos.roomName].info.underAttack = false;
-                    master = Memory.rooms[flag.pos.roomName].info.masterRoom;
-                    Memory.rooms[flag.pos.roomName].info.masterRoom = undefined;
-                    let index = Game.rooms[master].memory.slaveRooms.indexOf(flag.pos.roomName);
-                    if (index > -1) {
-                        Game.rooms[master].memory.slaveRooms.splice(index, 1);
-                    }
+                    removeSlaveStatus(flag.pos.roomName);
+                    flag.remove();                
                 }
             }
         }
+    }
+};
+let removeSlaveStatus = function (roomName) {
+    Memory.rooms[roomName].info.underAttack = false;
+    let master = Memory.rooms[roomName].info.masterRoom;
+    Memory.rooms[roomName].info.masterRoom = undefined;
+    Memory.rooms[roomName].info.isMaster = true;
+    let index = Game.rooms[master] ? (Game.rooms[master].memory.slaveRooms ? Game.rooms[master].memory.slaveRooms.indexOf(roomName) : -1) : -1;
+    if (index > -1) {
+        Game.rooms[master].memory.slaveRooms.splice(index, 1);
     }
 };
 

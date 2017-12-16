@@ -42,13 +42,12 @@ let getStructuresInRoom = function(room, noLinks) {
             if (structure.structureType === STRUCTURE_SPAWN && structure.energy < structure.energyCapacity) {
                 cache[room.name].priorityStorage.push(structure);
             }
-            if (structure.structureType === STRUCTURE_STORAGE) {
-                cache[room.name].storage.push(structure);
-            }
             if (structure.structureType === STRUCTURE_CONTAINER) {
                 cache[room.name].withdrawStorage.push(structure);
             }
         }
+        if (room.storage)
+            cache[room.name].storage.push(room.storage);
         cache[room.name].spawns = cache[room.name].storage.concat(room.find(FIND_MY_SPAWNS));
         if (!noLinks){
             for (let link of room.memory.structures.links){
