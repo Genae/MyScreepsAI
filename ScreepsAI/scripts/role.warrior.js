@@ -1,7 +1,14 @@
 let roleWarrior = function (creep) {
     let target;
-    let roomUnderAttack = creep.room.controller.pos.findClosestByRange(Memory.globalInfo.roomsUnderAttack);
-    if (roomUnderAttack !== null) {
+    let roomsUnderAttack = [];
+    for(let roomId in Memory.globalInfo.roomsUnderAttack){
+        let room = Memory.globalInfo.roomsUnderAttack[roomId];
+        roomsUnderAttack.push(new RoomPosition(room.x, room.y, room.roomName));
+    }
+    let roomUnderAttack = creep.pos.findClosestByRange(roomsUnderAttack);
+    if(roomUnderAttack === null && roomsUnderAttack.length > 0)
+        roomUnderAttack = roomsUnderAttack[0];
+    if (roomUnderAttack !== null && roomUnderAttack !== undefined) {
         if (creep.room.name !== roomUnderAttack.roomName) {
             creep.moveTo(roomUnderAttack);
         } else {

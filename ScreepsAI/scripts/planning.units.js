@@ -126,10 +126,12 @@ let getTargets = function (room, anyUnderAttack) {
     }
     let miningJobs = 0;
     for (let i = 0; i < room.memory.structures.mines.length; i++) {
-        if (level < 3)
+        if (level < 2)
             miningJobs += Math.min(4, room.memory.structures.mines[i].workingPlaces.length + 1);
-        else
+        else if (level < 3)
             miningJobs += Math.min(3, room.memory.structures.mines[i].workingPlaces.length + 1);
+        else if (level < 4)
+            miningJobs += Math.min(2, room.memory.structures.mines[i].workingPlaces.length + 1);
     }
     let attackFlags = [];
     let redattackFlags = [];
@@ -160,7 +162,7 @@ let getTargets = function (room, anyUnderAttack) {
     }
 
     let targets = [
-        { role: 'harvester', amount: 2, body: getWorkerBody(300, false, false) },
+        { role: 'harvester', amount: 1, body: getWorkerBody(300, false, false) },
         { role: 'upgrader', amount: 1, body: getWorkerBody(Math.min(400, room.energyCapacityAvailable), true, false) }
     ];
     if (anyUnderAttack) {
@@ -169,7 +171,7 @@ let getTargets = function (room, anyUnderAttack) {
     else {
         if (level > 1)
             targets.push({ role: 'distributor', amount: 1, body: getCarrierBody(200) });
-        targets.push({ role: 'harvester', amount: 4, body: getWorkerBody(Math.min(550, room.energyCapacityAvailable), false, false) });
+        targets.push({ role: 'harvester', amount: 2, body: getWorkerBody(Math.min(550, room.energyCapacityAvailable), false, false) });
         if (level > 2)
             targets.push({ role: 'upgrader', amount: 2, body: getWorkerBody(room.energyCapacityAvailable, true, false) });
         targets.push({ role: 'harvester', amount: miningJobs, body: getWorkerBody(room.energyCapacityAvailable, false, false) });
@@ -183,9 +185,9 @@ let getTargets = function (room, anyUnderAttack) {
         targets.push({ role: 'builder', amount: 1, body: getWorkerBody(room.energyCapacityAvailable, true, false)});
         if (level >= 5)
             targets.push({ role: 'miner', amount: 1, body: getWorkerBody(room.energyCapacityAvailable, false, false)});
-        targets.push({ role: 'claimer', amount: claimingJobs, body: getClaimingBody(room.energyCapacityAvailable, true, false) });
+        targets.push({ role: 'claimer', amount: claimingJobs, body: getClaimingBody(room.energyCapacityAvailable, 1) });
         targets.push({ role: 'outharvester', amount: miningFlags.length * 2, body: getWorkerBody(room.energyCapacityAvailable, true, false) });
-        targets.push({ role: 'reserver', amount: reservingJobs, body: getClaimingBody(room.energyCapacityAvailable, true, false) });
+        targets.push({ role: 'reserver', amount: reservingJobs, body: getClaimingBody(room.energyCapacityAvailable, 2) });
         targets.push({ role: 'builder', amount: Math.min(5, room.memory.structures.spawn.rechargeSpots.length - 2), body: getWorkerBody(room.energyCapacityAvailable, true, false)});
         targets.push({ role: 'upgrader', amount: 5, body: getWorkerBody(room.energyCapacityAvailable, true, false) });
     }
@@ -196,8 +198,8 @@ let getTargets = function (room, anyUnderAttack) {
 let getCarrierBody = function(availableEnergy) {
     return getBody(availableEnergy, [CARRY, CARRY, MOVE]);
 };
-let getClaimingBody = function(availableEnergy) {
-    return getBody(availableEnergy, [MOVE, CLAIM]);
+let getClaimingBody = function(availableEnergy, max) {
+    return getBody(Math.min(availableEnergy, getCost([MOVE, CLAIM])*max), [MOVE, CLAIM]);
 };
 let getWarriorBody = function(availableEnergy, noRoads, singleRanged){
     let rangedBuild = [];
@@ -205,9 +207,10 @@ let getWarriorBody = function(availableEnergy, noRoads, singleRanged){
         rangedBuild = noRoads ? [RANGED_ATTACK, MOVE] : [RANGED_ATTACK, MOVE, TOUGH];
         availableEnergy -= getCost(rangedBuild);
     }
+    let body;
     if (noRoads)
-        return getBody(availableEnergy, [ATTACK, TOUGH, MOVE, MOVE]).concat(rangedBuild);
-    return getBody(availableEnergy, [ATTACK, TOUGH, MOVE]).concat(rangedBuild);
+        body = getBody(availableEnergy, [ATTACK, TOUGH, MOVE, MOVE]).concat(rangedBuild);
+    body = getBody(availableEnergy, [ATTACK, TOUGH, MOVE]).concat(rangedBuild);
 };
 let getHealerBody = function(availableEnergy, noRoads) {
     return getBody(availableEnergy, [HEAL, TOUGH, MOVE, MOVE]);

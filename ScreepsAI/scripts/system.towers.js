@@ -1,6 +1,6 @@
 let controlTowers = function (room) {
     let towers = room.find(FIND_MY_STRUCTURES, { filter: function (structure) { return structure.structureType === STRUCTURE_TOWER; }});
-    if (room.memory.info.underAttack) {
+    if (room.memory.underAttack) {
         //shoot with towers
         for (let tower of towers) {
             let closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS, {

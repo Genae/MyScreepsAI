@@ -206,7 +206,7 @@ let improveSpawn = function (room) {
         return true;
     }
     //Tier 4
-    if (room.memory.structures.spawn.improvedTo < 4 && room.memory.structures.improveTo >= 4) {
+    if (room.memory.structures.spawn.improvedTo < 4 && room.memory.structures.improveTo >= 4 && (room.storage === null || room.storage === undefined)) {
         let center = room.memory.structures.spawn.storageCenter;
         for (let dx = -1; dx <= 1; dx++) {
             for (let dy = -1; dy <= 1; dy++) {

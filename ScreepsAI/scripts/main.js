@@ -205,9 +205,12 @@ let loadGlobalSettings = function() {
             autoMineExternal: false,
             autoExpand: false,
             autoAttack: false,
-            allies: ['Hosmagix', 'KHJGames']
         };
     }
+    if (Memory.flags === undefined){
+        Memory.flags = {};
+    }
+    Memory.globalSettings.allies = ['Hosmagix', 'KHJGames'];
     return Memory.globalSettings;
 };
 
@@ -248,7 +251,7 @@ let loadRoomInfo = function(roomName){
         };
     }
     room.memory.info.lastSeen = Game.time;    
-    if (room.controller.level > 1 && !room.isMaster){
+    if (room.controller && room.controller.level > 1 && !room.isMaster){
         removeSlaveStatus(room.name);
     }
     //check attackers
@@ -284,11 +287,11 @@ let loadRoomInfo = function(roomName){
 let checkSlaveRooms = function () {
     for (let flagName in Game.flags) {
         let flag = Game.flags[flagName];
-        if (Memory.rooms[flag.pos.roomName].info.isMaster){
-            Memory.rooms[flag.pos.roomName].info.slaveRooms = [];
-            flag.remove();
-        }
-        if (flag.color === COLOR_BROWN) {
+            if (flag.color === COLOR_BROWN) {
+            if (flag.memory === undefined)
+                flag.memory = {
+                    improvedTo: 0
+                };
             if (Memory.rooms[flag.pos.roomName] === undefined) {
                 Memory.rooms[flag.pos.roomName] = {
                     info: {
@@ -308,6 +311,10 @@ let checkSlaveRooms = function () {
                     }
                 };
             }
+            if (Memory.rooms[flag.pos.roomName].info.isMaster){
+                Memory.rooms[flag.pos.roomName].info.slaveRooms = [];
+                flag.remove();
+            }
             let master;
             if (Memory.rooms[flag.pos.roomName].info.masterRoom === undefined) {
                 master = findClosestRoom(flag.pos);
@@ -323,7 +330,7 @@ let checkSlaveRooms = function () {
     }
 };
 let removeSlaveStatus = function (roomName) {
-    Memory.rooms[roomName].info.underAttack = false;
+    Memory.rooms[roomName].underAttack = false;
     let master = Memory.rooms[roomName].info.masterRoom;
     Memory.rooms[roomName].info.masterRoom = undefined;
     Memory.rooms[roomName].info.isMaster = true;

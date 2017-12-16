@@ -11,6 +11,12 @@ let roleClaimer = function (creep) {
                 if (creep.claimController(c) === ERR_NOT_IN_RANGE) {
                     creep.moveTo(c);
                 }
+                else{
+                    if (Game.rooms[flag.pos.roomName] && Game.rooms[flag.pos.roomName].controller.level > 0){
+                        flag.remove();
+                        creep.memory.role = 'reserver';
+                    }
+                }
             }
         }
     }
