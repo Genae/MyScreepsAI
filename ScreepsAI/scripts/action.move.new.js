@@ -32,6 +32,10 @@ let continueMove = function (creep) {
         return false;
     }
     creep.memory.move.recalculate = dist < creep.memory.move.pathTargets.range + 5 || creep.memory.move.pathBlocked > 1;
+    if (creep.memory.move.pathBlocked > 10){
+        moveRandom(creep);
+        return true;
+    }
     let config = {
         reusePath: creep.memory.move.recalculate === true ? 1 : 30,
         visualizePathStyle: style,
@@ -47,6 +51,11 @@ let continueMove = function (creep) {
         creep.memory.move.lastPos = creep.pos;
     }
     return true;
+};
+
+let dirs = [TOP, TOP_RIGHT, RIGHT, BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT, LEFT, TOP_LEFT];
+let moveRandom = function(creep){
+    creep.move(dirs[Math.floor(Math.random() * dirs.length)])
 };
 
 let style = {

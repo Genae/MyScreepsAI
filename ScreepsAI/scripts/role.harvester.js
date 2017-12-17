@@ -32,8 +32,8 @@ let roleHarvester = function (creep) {
 
 
     if (creep.memory.state === 'mining') {
-        let energy = creep.pos.findInRange(FIND_DROPPED_RESOURCES, 30, {
-            filter: function (e) { return e.amount > 1000 }
+        let energy = creep.pos.findInRange(FIND_DROPPED_RESOURCES, 3, {
+            filter: function (e) { return e.amount > 100 }
         });
         if (energy.length > 0) {
             if (creep.pickup(energy[0]) === ERR_NOT_IN_RANGE) {

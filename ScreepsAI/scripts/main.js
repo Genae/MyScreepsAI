@@ -363,7 +363,7 @@ let checkSlaveRooms = function () {
                 Memory.rooms[flag.pos.roomName].info.slaveRooms = [];
                 flag.remove();
             }
-            let master;
+            let master = Memory.rooms[flag.pos.roomName].info.masterRoom;
             if (Memory.rooms[flag.pos.roomName].info.masterRoom === undefined) {
                 master = findClosestRoom(flag.pos);
                 Memory.rooms[flag.pos.roomName].info.masterRoom = master;
@@ -373,6 +373,9 @@ let checkSlaveRooms = function () {
                     removeSlaveStatus(flag.pos.roomName);
                     flag.remove();
                 }
+            }
+            if (flag.memory.improvedTo === 0 && Game.rooms[master] && Game.rooms[master].memory.structures.improveTo >= 3){
+                Game.rooms[master].memory.info.needsPlanning = true;
             }
         }
     }

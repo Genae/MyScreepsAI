@@ -4,7 +4,7 @@ let roomLevels = [300, 550, 800, 1300, 1800, 2300];
 let getLevel = function (room) {
     for(let i = 0; i < roomLevels.length; i++){
         if (room.energyCapacityAvailable <= roomLevels[i]){
-            return i;
+            return i + 1;
         }
     }
 };
@@ -183,7 +183,7 @@ let getTargets = function (room, anyUnderAttack) {
             targets.push({role: 'attacker', amount: attackFlags.length * 3 + redattackFlags, body: getWarriorBody(room.energyCapacityAvailable, true)});
         }
         targets.push({ role: 'builder', amount: 1, body: getWorkerBody(room.energyCapacityAvailable, true, false)});
-        if (level >= 5)
+        if (level > 5)
             targets.push({ role: 'miner', amount: 1, body: getWorkerBody(room.energyCapacityAvailable, false, false)});
         targets.push({ role: 'claimer', amount: claimingJobs, body: getClaimingBody(room.energyCapacityAvailable, 1) });
         targets.push({ role: 'outharvester', amount: miningFlags.length * 2, body: getWorkerBody(room.energyCapacityAvailable, true, false) });

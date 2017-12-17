@@ -81,7 +81,9 @@ let roleDistributor = function (creep) {
     }
 
     let myExt = creep.pos.findClosestByRange(extensions);
+    let isExt;
     if (myExt === undefined || myExt === null){
+        isExt = false;
         for (let i in spawns){
             let spawn = spawns[i];
             if (spawn.energy < spawn.energyCapacity){
@@ -124,7 +126,7 @@ let roleDistributor = function (creep) {
             }
 
             //I did not change state, so do whatever I have to do here
-            return doRefilling(creep, myStor);
+            return doRefilling(creep, myStor, isExt);
         }
         //+++++++++++ STATE INJECTING +++++++++++++++
         else if (creep.memory.state === STATE_INJECTING) {
@@ -190,7 +192,7 @@ let doEmptying = function (creep) {
     actionMove.moveToAny(creep, rechargeSpots.map(function (a) { return a.pos; }));
 };
 
-let doRefilling = function (creep, myStor) {
+let doRefilling = function (creep, myStor, isExt) {
     for (let l = 0; l < creep.room.memory.structures.links.length; l++) {
         if (creep.room.memory.structures.links[l].type === 'store') {
             let link = Game.getObjectById(creep.room.memory.structures.links[l].link.id);
@@ -205,7 +207,7 @@ let doRefilling = function (creep, myStor) {
         }
     }
     let spawn = Game.getObjectById(creep.room.memory.structures.spawn.obj.id);
-    if (myStor === null || (myStor !== null && myStor.store[RESOURCE_ENERGY] <= 500)) {
+    if (myStor === null || (myStor !== null && myStor.store[RESOURCE_ENERGY] <= 500) && isExt) {
         let rechargeSpots = creep.room.memory.structures.spawn.rechargeSpots;
         for (let rs = 0; rs < rechargeSpots.length; rs++) {
             if (rechargeSpots[rs].pos.x === creep.pos.x && rechargeSpots[rs].pos.y === creep.pos.y) {

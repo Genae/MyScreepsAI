@@ -139,10 +139,11 @@ let improveOuterMines = function (room) {
             if (flag.memory.improvedTo === undefined)
                 flag.memory.improvedTo = 0;
             if (flag.memory.improvedTo === 0 && room.memory.structures.improveTo >= 3) {
-                let p = pathfindingHelper.findPathUsingRoads(spawn.pos, { pos: flag.pos, range: 1 });
+                let p = pathfindingHelper.findPathUsingRoads(spawn.pos, { pos: flag.pos, range: 1 }, true);
                 if (p !== null) {
-                    improvePath(p.path);
-                    flag.memory.improvedTo = 1;
+                    if (improvePath(p.path)){
+                        flag.memory.improvedTo = 1;                        
+                    }
                     return true;
                 }
             }
@@ -357,10 +358,17 @@ let checkBrokenStuff = function (room) {
 };
 
 let improvePath = function (path, room) {
+    let complete = true;
     for (let i = 0; i < path.length; i++) {
-        let pos = new RoomPosition(path[i].x, path[i].y, (room === undefined ? path[i].roomName : room.name));
-        pos.createConstructionSite(STRUCTURE_ROAD);
+        if (Game.rooms[(room === undefined ? path[i].roomName : room.name)] !== undefined){
+            let pos = new RoomPosition(path[i].x, path[i].y, (room === undefined ? path[i].roomName : room.name));
+            pos.createConstructionSite(STRUCTURE_ROAD);
+        }
+        else {
+            complete = false;
+        }
     }
+    return complete;
 };
 
 module.exports = {
