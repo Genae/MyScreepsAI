@@ -68,7 +68,7 @@ let roleDistributor = function (creep) {
             return true;
         }
     }
-    let roomStructures = storageHelper.getStructuresInRoom(creep.room);
+    let roomStructures = storageHelper.getStructuresInRoom(creep.room, true, true);
     let extensions = roomStructures.priorityStorage;
     let storage = roomStructures.storage;
     let droppedEnergy = roomStructures.drops;

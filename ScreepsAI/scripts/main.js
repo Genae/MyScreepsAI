@@ -11,6 +11,7 @@ let systemLinks = require('system.links');
 let systemTowers = require('system.towers');
 let planningUnits = require('planning.units');
 let planningRoom = require('planning.room');
+let grafana = require('util.grafana');
 
 ////////////
 //INIT
@@ -190,6 +191,15 @@ let mainLoop = function (errors) {
         console.log("Error while controlling links: " + e);
         errors.push(e);
     }
+    
+    try{
+        if (((Game.time) % 10) === 0)
+            grafana.collectStats();
+    }
+    catch (e){
+        console.log("Error while getting game stats: " + e);
+        errors.push(e);
+    }
 
 };
 
@@ -250,7 +260,7 @@ let loadRoomInfo = function(roomName){
             }
         };
     }
-    room.memory.info.lastSeen = Game.time;    
+    room.memory.info.lastSeen = Game.time;
     if (room.controller && room.controller.level > 1 && !room.isMaster){
         removeSlaveStatus(room.name);
     }
@@ -287,7 +297,7 @@ let loadRoomInfo = function(roomName){
 let checkSlaveRooms = function () {
     for (let flagName in Game.flags) {
         let flag = Game.flags[flagName];
-            if (flag.color === COLOR_BROWN) {
+        if (flag.color === COLOR_BROWN) {
             if (flag.memory === undefined)
                 flag.memory = {
                     improvedTo: 0
@@ -323,7 +333,7 @@ let checkSlaveRooms = function () {
             } else {
                 if (Game.rooms[flag.pos.roomName] !== undefined && flag.room.controller.level > 1) {
                     removeSlaveStatus(flag.pos.roomName);
-                    flag.remove();                
+                    flag.remove();
                 }
             }
         }

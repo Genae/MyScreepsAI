@@ -169,6 +169,7 @@
     <Content Include="scripts\system.towers.js">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Content>
+    <Content Include="scripts\util.grafana.js" />
     <Content Include="scripts\util.pathfindingHelper.js" />
     <Content Include="scripts\util.storageHelper.js" />
     <Content Include="_references.js" />

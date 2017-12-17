@@ -135,14 +135,15 @@ let improveOuterMines = function (room) {
     let spawn = Game.getObjectById(room.memory.structures.spawn.obj.id);
     for (let flagName in Game.flags) {
         let flag = Game.flags[flagName];
-        if (flag.color === COLOR_BROWN && Memory.rooms[flag.pos.roomName].masterRoom === room.name) {
+        if (flag.color === COLOR_BROWN && Memory.rooms[flag.pos.roomName].info.masterRoom === room.name) {
             if (flag.memory.improvedTo === undefined)
                 flag.memory.improvedTo = 0;
             if (flag.memory.improvedTo === 0 && room.memory.structures.improveTo >= 3) {
-                let p = pathfindingHelper.findPathUsingRoads(spawn.pos, { pos: flag.pos, range: 0 });
+                let p = pathfindingHelper.findPathUsingRoads(spawn.pos, { pos: flag.pos, range: 1 });
                 if (p !== null) {
                     improvePath(p.path);
                     flag.memory.improvedTo = 1;
+                    return true;
                 }
             }
         }

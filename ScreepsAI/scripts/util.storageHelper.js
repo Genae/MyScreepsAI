@@ -21,7 +21,7 @@ let getStorageToFill = function (creep) {
 
 let cache = {};
 
-let getStructuresInRoom = function(room, noLinks) {
+let getStructuresInRoom = function(room, noLinks, noSpawn) {
     if (noLinks === undefined) noLinks = false;
     if (cache[room.name] === undefined){
         cache[room.name] = {
@@ -39,7 +39,7 @@ let getStructuresInRoom = function(room, noLinks) {
             if (structure.structureType === STRUCTURE_TOWER && structure.energy < structure.energyCapacity) {
                 cache[room.name].priorityStorage.push(structure);
             }
-            if (structure.structureType === STRUCTURE_SPAWN && structure.energy < structure.energyCapacity) {
+            if (!noSpawn && structure.structureType === STRUCTURE_SPAWN && structure.energy < structure.energyCapacity) {
                 cache[room.name].priorityStorage.push(structure);
             }
             if (structure.structureType === STRUCTURE_CONTAINER) {

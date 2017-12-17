@@ -31,11 +31,11 @@ let continueMove = function (creep) {
         creep.memory.move.moving = false;
         return false;
     }
-    creep.memory.move.recalculate = dist < creep.memory.move.pathTargets.range + 2 || creep.memory.move.pathBlocked > 1;
+    creep.memory.move.recalculate = dist < creep.memory.move.pathTargets.range + 5 || creep.memory.move.pathBlocked > 1;
     let config = {
         reusePath: creep.memory.move.recalculate === true ? 1 : 30,
         visualizePathStyle: style,
-        ignoreCreeps: creep.memory.move.pathBlocked <= 1 && dist > creep.memory.move.pathTargets.range + 2
+        ignoreCreeps: (creep.memory.move.pathBlocked <= 1 || creep.memory.move.pathBlocked > 10) && dist > creep.memory.move.pathTargets.range + 2
     };
     if (creep.memory.move.pathTargets.roomName === creep.pos.roomName){
         config.maxRooms = 1;

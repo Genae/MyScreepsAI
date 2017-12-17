@@ -22,7 +22,7 @@ let roleHarvester = function (creep) {
     if (creep.memory.state === undefined) { // this has no state if energy > 0 && energy < max, so start at mining
         creep.memory.state = 'mining';
     }
-    if (creep.carry.energy < creep.carryCapacity * 0.2) {
+    if (creep.carry.energy < creep.carryCapacity * 0.05) {
         creep.memory.state = 'mining';
     }
     let mysource = Game.getObjectById(mymine.obj.id);
