@@ -13,10 +13,33 @@ let planningUnits = require('planning.units');
 let planningRoom = require('planning.room');
 let grafana = require('util.grafana');
 
+let last = 0;
+let snapshot = { byRoom:{}, byRole: {}};
+
+
+let createSnapshot = function (role, room) {
+    let cpu = Game.cpu.getUsed();
+    if (last > cpu)
+        last = 0;
+    let change = cpu - last;
+    last = cpu;
+    if (snapshot.byRoom[room] === undefined)
+        snapshot.byRoom[room] = {cpu: 0, count: 0};
+    snapshot.byRoom[room].cpu += change;
+    snapshot.byRoom[room].count++;
+    if (snapshot.byRole[role] === undefined)
+        snapshot.byRole[role] = {cpu: 0, count: 0};
+    snapshot.byRole[role].cpu += change;
+    snapshot.byRole[role].count++;
+};
+
 ////////////
 //INIT
 ////////////
 module.exports.loop = function () {
+    last = 0;
+    snapshot = { byRoom:{}, byRole: {}};
+    createSnapshot('memory', 'global');
     let errors = [];
     try {
         mainLoop(errors);
@@ -40,6 +63,7 @@ let mainLoop = function (errors) {
     const settings = loadGlobalSettings();
     if (!settings.runScripts)
         return;
+    createSnapshot('loadSettings', 'global');
 
     //Global Planning
     let globalInfo;
@@ -49,6 +73,7 @@ let mainLoop = function (errors) {
             //TODO global planning
         }
         globalInfo.needsGlobalPlanning = false;
+        createSnapshot('globalPlanning', 'global');
     } catch (e) {
         console.log("Error while global Planning: " + e);
         errors.push(e);
@@ -59,6 +84,7 @@ let mainLoop = function (errors) {
     try {
         for (let name in Game.rooms) {
             roomInfo[name] = loadRoomInfo(name);
+            createSnapshot('loadRoomInfo', name);
         }
         //TODO other rooms for mining/expanding/attacking
         for (let roomName in Game.rooms){
@@ -67,6 +93,7 @@ let mainLoop = function (errors) {
                 globalInfo.roomsUnderAttack.push(room.controller.pos);
                 break;
             }
+            createSnapshot('loadRoomInfo', 'global');
         }
     } catch (e) {
         console.log("Error while getting room info: " + e);
@@ -80,6 +107,7 @@ let mainLoop = function (errors) {
     }
     try {
         checkSlaveRooms();
+        createSnapshot('checkSlaveRooms', 'global');
     } catch (e) {
         console.log("Error while checking for new slave rooms: " + e);
         errors.push(e);
@@ -95,6 +123,7 @@ let mainLoop = function (errors) {
 
     try {
         removeMissingDrops();
+        createSnapshot('cleanupMemory', 'global');
     } catch (e) {
         console.log("Error while removing missing drops: " + e);
         errors.push(e);
@@ -104,6 +133,7 @@ let mainLoop = function (errors) {
     try {
         for (let roomName in Game.rooms) {
             systemTowers.controlTowers(Game.rooms[roomName]);
+            createSnapshot('runTowers', roomName);
         }
     } catch (e) {
         console.log("Error while controlling towers: " + e);
@@ -149,6 +179,7 @@ let mainLoop = function (errors) {
             if (creep.memory.role === 'claimer') {
                 roleClaimer.roleClaimer(creep);
             }
+            createSnapshot('role_' + creep.memory.role, homeRoom.name);
         } catch (e) {
             console.log("error with " + creep.memory.role + " " + creep.name + ": " + e);
             errors.push(e);
@@ -159,6 +190,7 @@ let mainLoop = function (errors) {
         let homeRoom = Game.rooms[builders[b].memory.roomName];
         try {
             roleBuilder.roleBuilder(builders[b]);
+            createSnapshot('role_builder', homeRoom.name);
         } catch (e) {
             console.log("error with builder " + builders[b].name + ": " + e);
             errors.push(e);
@@ -178,6 +210,7 @@ let mainLoop = function (errors) {
             if (((Game.time + i + 1) % 2) === 0)
                 planningUnits.buildUnits(Game.rooms[roomName]);
             i+=2;
+            createSnapshot('roomPlanning', roomName);
         }
     } catch (e) {
         console.log("Error while planning rooms: " + e);
@@ -185,8 +218,10 @@ let mainLoop = function (errors) {
     }
 
     try {
-        for (const roomName in Game.rooms)
+        for (const roomName in Game.rooms){
             systemLinks.controlLinks(Game.rooms[roomName]);
+            createSnapshot('runLinks', roomName);
+        }
     } catch (e) {
         console.log("Error while controlling links: " + e);
         errors.push(e);
@@ -194,7 +229,7 @@ let mainLoop = function (errors) {
     
     try{
         if (((Game.time) % 10) === 0)
-            grafana.collectStats();
+            grafana.collectStats(snapshot, last);
     }
     catch (e){
         console.log("Error while getting game stats: " + e);

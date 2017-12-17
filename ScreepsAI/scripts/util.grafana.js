@@ -1,10 +1,10 @@
-let collectStats = function () {
+let collectStats = function (snapshot, last) {
 
-    let stats = {}
+    let stats = {};
+    
     stats['cpu.getUsed'] = Game.cpu.getUsed();
     stats['cpu.limit'] = Game.cpu.limit;
     stats['cpu.bucket'] = Game.cpu.bucket;
-
     stats.room = summarize_rooms().room;
     stats.gcl = Game.gcl;
     const memory_used = RawMemory.get().length;
@@ -13,8 +13,20 @@ let collectStats = function () {
         used: memory_used,
         // Other memory stats here?
     };
+    let cpu = Game.cpu.getUsed();
+    stats['cpu.getUsed'] = cpu;
+    stats['cpu.limit'] = Game.cpu.limit;
+    stats['cpu.bucket'] = Game.cpu.bucket;
 
-
+    snapshot.byRole['grafana'] = {};
+    snapshot.byRole['grafana'].cpu = cpu-last;
+    snapshot.byRole['grafana'].count = 1;
+    snapshot.byRoom['global'].cpu = cpu-last;
+    snapshot.byRoom['global'].count++;
+    for (let roleid in snapshot.byRole){
+        snapshot.byRole[roleid].avg = snapshot.byRole[roleid].cpu / snapshot.byRole[roleid].count;
+    }
+    stats.cpu_snapshot = snapshot;
     Memory.stats = stats;
 };
 
@@ -56,7 +68,7 @@ let summarize_room_internal = function (room) {
     const mineral_amount = mineral ? mineral.mineralAmount : 0;
     const extractors = room.find(FIND_STRUCTURES, { filter: s => s.structureType === STRUCTURE_EXTRACTOR });
     const num_extractors = extractors.length;
-    const creeps = _.filter(Game.creeps, c => c.pos.roomName === room.name && c.my);
+    const creeps = _.filter(Game.creeps, c => c.memory.roomName === room.name && c.my);
     const num_creeps = creeps ? creeps.length : 0;
     const enemy_creeps = room.find(FIND_HOSTILE_CREEPS);
     const creep_energy = _.sum(Game.creeps, c => c.pos.roomName === room.name ? c.carry.energy : 0);
@@ -157,7 +169,7 @@ let summarize_room_internal = function (room) {
         ground_resources: reduced_resources,
     };
 
-} // summarize_room
+}; // summarize_room
 let summarize_rooms = function() {
     const now = Game.time;
 

@@ -72,6 +72,7 @@ let roleDistributor = function (creep) {
     let extensions = roomStructures.priorityStorage;
     let storage = roomStructures.storage;
     let droppedEnergy = roomStructures.drops;
+    let spawns = roomStructures.spawns;
     for (let l = 0; l < creep.room.memory.structures.links.length; l++) {
         let sl = creep.room.memory.structures.links[l];
         let slObj = Game.getObjectById(sl.link.id);
@@ -80,6 +81,15 @@ let roleDistributor = function (creep) {
     }
 
     let myExt = creep.pos.findClosestByRange(extensions);
+    if (myExt === undefined || myExt === null){
+        for (let i in spawns){
+            let spawn = spawns[i];
+            if (spawn.energy < spawn.energyCapacity){
+                myExt = spawn;
+                break;
+            }
+        }
+    }
     let myStor = creep.pos.findClosestByRange(storage);
 
     while (it < 10) {

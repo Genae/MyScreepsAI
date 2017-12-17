@@ -171,7 +171,7 @@ let getTargets = function (room, anyUnderAttack) {
     }
     else {
         if (level > 1)
-            targets.push({ role: 'distributor', amount: 1, body: getCarrierBody(200) });
+            targets.push({ role: 'distributor', amount: 1, body: getCarrierBody(Math.min(400, room.energyCapacityAvailable/2)) });
         if (level > 2)
             targets.push({ role: 'upgrader', amount: 2, body: getWorkerBody(room.energyCapacityAvailable, true, false) });
         targets.push({ role: 'harvester', amount: miningJobs, body: getWorkerBody(room.energyCapacityAvailable, false, false) });
