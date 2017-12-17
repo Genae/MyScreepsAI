@@ -42,8 +42,7 @@ let summarize_room_internal = function (room) {
         return null;
     }
     const controller_level = room.controller.level;
-    const controller_progress = room.controller.progress;
-    const controller_needed = room.controller.progressTotal;
+    const controller_level_prog = room.controller.level + (room.controller.progress/room.controller.progressTotal);
     const controller_downgrade = room.controller.ticksToDowngrade;
     const controller_blocked = room.controller.upgradeBlocked;
     const controller_safemode = room.controller.safeMode ? room.controller.safeMode : 0;
@@ -131,9 +130,8 @@ let summarize_room_internal = function (room) {
     return {
         room_name: room.name, // In case this gets taken out of context
         controller_level,
+        controller_level_prog,
         building_level,
-        controller_progress,
-        controller_needed,
         controller_downgrade,
         controller_blocked,
         controller_safemode,

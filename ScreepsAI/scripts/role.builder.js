@@ -1,4 +1,4 @@
-let actionMove = require('action.move');
+let actionMove = require('action.move.new');
 let actionUpgrading = require('action.upgrading');
 let actionRefilling = require('action.refilling');
 
@@ -58,27 +58,14 @@ let roleBuilder = function (creep) {
         }
     }
 
-    let rechargeSpots = Game.rooms[creep.memory.roomName].memory.structures.spawn.rechargeSpots;
+    let spawn = Game.getObjectById(Game.rooms[creep.memory.roomName].memory.structures.spawn.obj.id);
     //run states
     if (creep.memory.state === 'refilling') {
         if (actionRefilling.doRefilling(creep, true) === 'nothingFound') {
-            //is this spot ok?
-            for (let rs = 0; rs < rechargeSpots.length; rs++) {
-                if (rechargeSpots[rs].pos.x === creep.pos.x && rechargeSpots[rs].pos.y === creep.pos.y) {
-                    if (Game.rooms[creep.memory.roomName].memory.info.energy.canBuild)
-                        creep.withdraw(Game.getObjectById(Game.rooms[creep.memory.roomName].memory.structures.spawn.obj.id), RESOURCE_ENERGY);
-                    return;
-                }
-            }
-            actionMove.moveToAny(creep, rechargeSpots.map(function (a) {
-                return a.pos;
-            }));
+            if (Game.rooms[creep.memory.roomName].memory.info.energy.canBuild && creep.withdraw(spawn, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE)
+                actionMove.moveTo(creep, spawn.pos, 1);                    
         }
         return;
-    }
-    else if (creep.memory.rechargeSpot !== undefined) {
-        rechargeSpots[creep.memory.rechargeSpot].reserved = false;
-        creep.memory.rechargeSpot = undefined;
     }
 
     let target;

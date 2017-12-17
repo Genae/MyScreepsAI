@@ -12,6 +12,7 @@ let systemTowers = require('system.towers');
 let planningUnits = require('planning.units');
 let planningRoom = require('planning.room');
 let grafana = require('util.grafana');
+let storageHelper = require('util.storageHelper');
 
 let last = 0;
 let snapshot = { byRoom:{}, byRole: {}};
@@ -39,6 +40,7 @@ let createSnapshot = function (role, room) {
 module.exports.loop = function () {
     last = 0;
     snapshot = { byRoom:{}, byRole: {}};
+    if (Memory.globalSettings){}
     createSnapshot('memory', 'global');
     let errors = [];
     try {
@@ -68,6 +70,7 @@ let mainLoop = function (errors) {
     //Global Planning
     let globalInfo;
     try {
+        storageHelper.cleanCache();
         globalInfo = loadGlobalInfo();
         if (globalInfo.needsGlobalPlanning) {
             //TODO global planning

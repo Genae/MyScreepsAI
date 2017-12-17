@@ -237,19 +237,6 @@ let doStoring = function (creep, myStor) {
             }
         }
         let needsMove = true;
-        let rechargeSpots = creep.room.memory.structures.spawn.rechargeSpots;
-        for (let rs = 0; rs < rechargeSpots.length; rs++) {
-            if (rechargeSpots[rs].pos.x === creep.pos.x && rechargeSpots[rs].pos.y === creep.pos.y) {
-                creep.withdraw(Game.getObjectById(creep.room.memory.structures.spawn.obj.id), RESOURCE_ENERGY);
-                needsMove = false;
-                if(creep.carry.energy === 0)
-                    return;
-            }
-        }
-        if (needsMove) {
-            actionMove.moveToAny(creep, rechargeSpots.map(function (a) { return a.pos; }));
-            return;
-        }
     }
     if (creep.carry.energy > 0) {
         if (creep.transfer(myStor, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {

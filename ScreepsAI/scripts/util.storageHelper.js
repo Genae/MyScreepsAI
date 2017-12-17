@@ -1,5 +1,4 @@
 let getStorageToWithdraw = function (creep, noSpawn) {
-    cache = {};
     let storagesInRoom = getStructuresInRoom(creep.room);
     let withdrawStorages = storagesInRoom.storage.concat(storagesInRoom.withdrawStorage).concat(storagesInRoom.drops);
     if (!noSpawn){
@@ -13,13 +12,16 @@ let getStorageToWithdraw = function (creep, noSpawn) {
 };
 
 let getStorageToFill = function (creep) {
-    cache = {};
     let storagesInRoom = getStructuresInRoom(creep.room);
     let fillStorages = storagesInRoom.storage.concat(storagesInRoom.priorityStorage);
     return creep.pos.findClosestByRange(fillStorages);
 };
 
 let cache = {};
+
+let cleanCache = function () {
+    cache = {};    
+};
 
 let getStructuresInRoom = function(room, noLinks, noSpawn) {
     if (noLinks === undefined) noLinks = false;
@@ -68,4 +70,4 @@ let getStructuresInRoom = function(room, noLinks, noSpawn) {
     }
     return cache[room.name];
 };
-module.exports = {getStorageToWithdraw: getStorageToWithdraw, getStorageToFill: getStorageToFill, getStructuresInRoom:getStructuresInRoom};
+module.exports = {getStorageToWithdraw: getStorageToWithdraw, getStorageToFill: getStorageToFill, getStructuresInRoom:getStructuresInRoom, cleanCache: cleanCache};
