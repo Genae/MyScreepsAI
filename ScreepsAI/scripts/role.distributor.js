@@ -207,7 +207,7 @@ let doRefilling = function (creep, myStor, isExt) {
         }
     }
     let spawn = Game.getObjectById(creep.room.memory.structures.spawn.obj.id);
-    if (myStor === null || (myStor !== null && myStor.store[RESOURCE_ENERGY] <= 500) && isExt) {
+    if ((myStor === null || (myStor !== null && myStor.store[RESOURCE_ENERGY] <= 500)) && isExt) {
         let rechargeSpots = creep.room.memory.structures.spawn.rechargeSpots;
         for (let rs = 0; rs < rechargeSpots.length; rs++) {
             if (rechargeSpots[rs].pos.x === creep.pos.x && rechargeSpots[rs].pos.y === creep.pos.y) {

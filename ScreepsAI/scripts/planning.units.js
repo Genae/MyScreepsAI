@@ -93,7 +93,7 @@ let buildUnits = function (room) {
 
 let createCreep  = function (body, role, spawn) {
     let name = generateName("[" + capitalizeFirstLetter(role) + "]");
-    return spawn.spawnCreep(body, name, {memory:{role:role}});
+    return spawn.spawnCreep(getBodyFromConfig(body), name, {memory:{role:role}});
 };
 
 function capitalizeFirstLetter(string) {
@@ -132,6 +132,8 @@ let getTargets = function (room, anyUnderAttack) {
             miningJobs += Math.min(3, room.memory.structures.mines[i].workingPlaces.length + 1);
         else if (level < 4)
             miningJobs += Math.min(2, room.memory.structures.mines[i].workingPlaces.length + 1);
+        else
+            miningJobs++;
     }
     let attackFlags = [];
     let redattackFlags = [];
@@ -161,40 +163,58 @@ let getTargets = function (room, anyUnderAttack) {
         }
     }
 
-    let targets = [
-        { role: 'harvester', amount: 1, body: getWorkerBody(300, false, false) },
-        { role: 'harvester', amount: 2, body: getWorkerBody(Math.min(550, room.energyCapacityAvailable), false, false) },
-        { role: 'upgrader', amount: 1, body: getWorkerBody(Math.min(400, room.energyCapacityAvailable), true, false) }
-    ];
+    let targets = [];
+    targets.push({ role: 'harvester', amount: 1, body: {type: 'worker', availableEnergy: 300, bigInventory: false, noRoads: false} });
+    if (level <= 4)
+        targets.push( { role: 'harvester', amount: 2, body: {type: 'worker', availableEnergy: Math.min(550, room.energyCapacityAvailable), bigInventory: false, noRoads: false} });
+    else
+        targets.push( { role: 'harvester', amount: 2, body: {type: 'worker', availableEnergy: room.energyCapacityAvailable, bigInventory: false, noRoads: false} });
+    
+    targets.push({ role: 'upgrader', amount: 1, body: {type: 'worker', availableEnergy: Math.min(400, room.energyCapacityAvailable), bigInventory: true, noRoads: false}});
     if (anyUnderAttack) {
-        targets.push({ role: 'attacker', amount: 5, body: getWarriorBody(room.energyCapacityAvailable, false, true) })
+        targets.push({ role: 'attacker', amount: 5, body: {type: 'warrior', availableEnergy: room.energyCapacityAvailable, noRoads: false, singleRanged: true} })
     }
     else {
         if (level > 1)
-            targets.push({ role: 'distributor', amount: 1, body: getCarrierBody(Math.min(400, room.energyCapacityAvailable/2)) });
-        if (level > 2)
-            targets.push({ role: 'upgrader', amount: 2, body: getWorkerBody(room.energyCapacityAvailable, true, false) });
-        targets.push({ role: 'harvester', amount: miningJobs, body: getWorkerBody(room.energyCapacityAvailable, false, false) });
+            targets.push({ role: 'distributor', amount: 1, body: {type: 'carrier', availableEnergy: Math.min(400, room.energyCapacityAvailable)} });
+        targets.push({ role: 'harvester', amount: miningJobs, body: {type: 'worker', availableEnergy: room.energyCapacityAvailable, bigInventory: false, noRoads: false} });
+        if (level > 3)
+            targets.push({ role: 'upgrader', amount: 2, body: {type: 'worker', availableEnergy: room.energyCapacityAvailable, bigInventory: true, noRoads: false} });
         if (level <= 4){
-            targets.push({ role: 'attacker', amount: attackFlags.length * 6 + redattackFlags, body: getWarriorBody(room.energyCapacityAvailable, true) });
+            targets.push({ role: 'attacker', amount: attackFlags.length * 6 + redattackFlags, body: {type: 'warrior', availableEnergy: room.energyCapacityAvailable, noRoads: true, singleRanged: false} });
         }
         else {
-            targets.push({role: 'healer', amount: attackFlags.length * 3, body: getHealerBody(room.energyCapacityAvailable, true)});
-            targets.push({role: 'attacker', amount: attackFlags.length * 3 + redattackFlags, body: getWarriorBody(room.energyCapacityAvailable, true)});
+            targets.push({role: 'healer', amount: attackFlags.length * 3, body: {type: 'healer', availableEnergy: room.energyCapacityAvailable, noRoads: true} });
+            targets.push({role: 'attacker', amount: attackFlags.length * 3 + redattackFlags, body: {type: 'warrior', availableEnergy: room.energyCapacityAvailable, noRoads: true}});
         }
-        targets.push({ role: 'builder', amount: 1, body: getWorkerBody(room.energyCapacityAvailable, true, false)});
+        targets.push({ role: 'builder', amount: 1, body: {type: 'worker', availableEnergy: room.energyCapacityAvailable, bigInventory: true, noRoads: false}});
         if (level > 5)
-            targets.push({ role: 'miner', amount: 1, body: getWorkerBody(room.energyCapacityAvailable, false, false)});
-        targets.push({ role: 'claimer', amount: claimingJobs, body: getClaimingBody(room.energyCapacityAvailable, 1) });
-        targets.push({ role: 'outharvester', amount: miningFlags.length * 2, body: getWorkerBody(room.energyCapacityAvailable, true, false) });
-        targets.push({ role: 'reserver', amount: reservingJobs, body: getClaimingBody(room.energyCapacityAvailable, 2) });
-        targets.push({ role: 'builder', amount: Math.min(5, room.memory.structures.spawn.rechargeSpots.length - 2), body: getWorkerBody(room.energyCapacityAvailable, true, false)});
-        targets.push({ role: 'upgrader', amount: 5, body: getWorkerBody(room.energyCapacityAvailable, true, false) });
+            targets.push({ role: 'miner', amount: 1, body: {type: 'worker', availableEnergy: room.energyCapacityAvailable, bigInventory: false, noRoads: false}});
+        targets.push({ role: 'claimer', amount: claimingJobs, body: {type: 'claiming', availableEnergy: room.energyCapacityAvailable, maxClaiming: 1 } });
+        targets.push({ role: 'reserver', amount: reservingJobs, body: {type: 'claiming', availableEnergy: room.energyCapacityAvailable, maxClaiming: 2 }});
+        targets.push({ role: 'outharvester', amount: miningFlags.length * 2, body: {type: 'worker', availableEnergy: room.energyCapacityAvailable, bigInventory: true, noRoads: false} });
+        targets.push({ role: 'builder', amount: Math.min(5, room.memory.structures.spawn.rechargeSpots.length - 2), body: {type: 'worker', availableEnergy: room.energyCapacityAvailable, bigInventory: true, noRoads: false}});
+        targets.push({ role: 'upgrader', amount: 5, body: {type: 'worker', availableEnergy: room.energyCapacityAvailable, bigInventory: true, noRoads: false} });
     }
     return targets;
 };
 
 //Body Configuration
+let getBodyFromConfig = function (bodyConfig) {
+    switch(bodyConfig.type){
+        case 'carrier':
+            return getCarrierBody(bodyConfig.availableEnergy);
+        case 'warrior':
+            return getWarriorBody(bodyConfig.availableEnergy, bodyConfig.noRoads, bodyConfig.singleRanged);
+        case 'claiming':
+            return getClaimingBody(bodyConfig.availableEnergy, bodyConfig.maxClaiming);
+        case 'healer':
+            return getHealerBody(bodyConfig.availableEnergy, bodyConfig.noRoads);
+        case 'worker':
+            return getWorkerBody(bodyConfig.availableEnergy, bodyConfig.bigInventory, bodyConfig.noRoads);
+    }
+};
+
 let getCarrierBody = function(availableEnergy) {
     return sort(getBody(availableEnergy, [CARRY, CARRY, MOVE]));
 };

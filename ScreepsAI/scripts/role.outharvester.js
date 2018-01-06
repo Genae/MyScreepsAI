@@ -82,6 +82,12 @@ let roleOutHarvester = function (creep) {
                 creep.moveTo(constructionSites[0]);
             }
             let repairSites = creep.pos.findInRange(FIND_STRUCTURES, 3, {
+                filter: function(s) {
+                    return (s.hits < 5000 && s.structureType === STRUCTURE_RAMPART)
+                }
+            });
+            if (repairSites.length === 0)
+                repairSites = creep.pos.findInRange(FIND_STRUCTURES, 3, {
                 filter: function (s) {
                     return (s.structureType !== STRUCTURE_RAMPART && s.structureType !== STRUCTURE_WALL  && s.hits <= s.hitsMax - 2000) ||
                         ((s.structureType === STRUCTURE_RAMPART || s.structureType === STRUCTURE_WALL) && (creep.room.memory.structures.wallHitpoints !== undefined && creep.room.memory.structures.wallHitpoints > s.hits));

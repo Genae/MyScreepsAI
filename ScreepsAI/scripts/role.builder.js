@@ -44,7 +44,7 @@ let roleBuilder = function (creep) {
     }
 
     if (creep.memory.state === 'refilling' && creep.carry.energy === creep.carryCapacity) {
-        if (creep.room.memory.structures.repair.length > 0) {
+        if (Game.rooms[creep.memory.roomName].memory.structures.repair.length > 0) {
             creep.memory.state = 'repairing';
         }
         else if (construnctionSite !== null) {

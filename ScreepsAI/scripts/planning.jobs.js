@@ -44,7 +44,7 @@ let findJob = function (creep) {
                 slaverooms[flag.pos.roomName] = 0;
             }
             slaverooms[flag.pos.roomName]++;
-            if (slaverooms[flag.pos.roomName] >= 2 && room.memory.lastJobs["reserve" + flag.pos.roomName] !== 1) {
+            if (slaverooms[flag.pos.roomName] >= 2 && room.memory.lastJobs["reserve" + flag.pos.roomName] !== 1 && (Memory.rooms[flag.pos.roomName].controllerTicks === undefined || Memory.rooms[flag.pos.roomName].controllerTicks <= 4000)) {
                 creep.memory.job = { roomName: flag.pos.roomName };
             }
         }
