@@ -94,7 +94,7 @@ let planRoomConstruction = function (room) {
         return;
     let oldHits = room.memory.structures.wallHitpoints;
     if (room.memory.structures.wallHitpoints < 1000000) {
-        room.memory.structures.wallHitpoints = Math.min(oldHits + 100000, RAMPART_HITS_MAX[room.controller.level]/10);
+        room.memory.structures.wallHitpoints = Math.min(oldHits + 25000, RAMPART_HITS_MAX[room.controller.level]/10);
     }
     room.memory.info.needsPlanning = room.memory.structures.wallHitpoints !== oldHits;
 };

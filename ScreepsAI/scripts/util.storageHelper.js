@@ -1,8 +1,8 @@
 let getStorageToWithdraw = function (creep, noSpawn) {
     let storagesInRoom = getStructuresInRoom(creep.room);
     let withdrawStorages = storagesInRoom.storage.concat(storagesInRoom.withdrawStorage).concat(storagesInRoom.drops);
-    if (!noSpawn){
-        withdrawStorages = withdrawStorages.concat(storagesInRoom.spawns)
+    if (!noSpawn) {
+        withdrawStorages = withdrawStorages.concat(storagesInRoom.spawns);
     }
     let closest = creep.pos.findClosestByRange(withdrawStorages);
     if (closest !== null && closest.resourceType !== undefined){
@@ -54,11 +54,12 @@ let getStructuresInRoom = function(room, noLinks, noSpawn) {
         if (!noLinks){
             for (let linkid in room.memory.structures.links){
                 let link = room.memory.structures.links[linkid];
-                if (link.type === 'empty')
+                let linkObj = Game.getObjectById(link.obj.id);
+                if (link.type === 'empty' && linkObj.energy < linkObj.energyCapacity)
                     cache[room.name].storage.push(Game.getObjectById(link.obj.id));
                 if (link.type === 'store')
                     cache[room.name].storage.push(Game.getObjectById(link.obj.id));
-                if (link.type === 'fill')
+                if (link.type === 'fill' && linkObj.energy > 0)
                     cache[room.name].withdrawStorage.push(Game.getObjectById(link.obj.id));
             }
         }

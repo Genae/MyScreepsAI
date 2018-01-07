@@ -20,7 +20,7 @@ let roleUpgrader = function (creep) {
 
     let contrConstr = creep.room.memory.structures.controller;
     if (creep.memory.state === 'refilling') {
-        if (actionRefilling.doRefilling(creep))
+        if (actionRefilling.doRefilling(creep, creep.room.storage !== null && creep.room.storage !== undefined))
             creep.memory.state = 'upgrading';
     }
     else if (creep.memory.state === 'upgrading') {

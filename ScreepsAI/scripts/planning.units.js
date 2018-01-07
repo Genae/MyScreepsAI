@@ -50,6 +50,7 @@ let buildUnits = function (room) {
 
     let myTargets = getTargets(room, Memory.globalInfo.roomsUnderAttack.length);
     let myUnits = {};
+    let myStarterUnits = {};
     for (let name in Game.creeps) {
         if (Game.creeps[name].ticksToLive < 90 || room.name !== Game.creeps[name].memory.roomName)
             continue;
@@ -58,6 +59,13 @@ let buildUnits = function (room) {
             myUnits[role] = 1;
         } else {
             myUnits[role]++;
+        }
+        if (Game.creeps[name].memory.isStarter) {
+            if (myStarterUnits[role] === undefined) {
+                myStarterUnits[role] = 1;
+            } else {
+                myStarterUnits[role]++;
+            }
         }
     }
 
@@ -68,11 +76,13 @@ let buildUnits = function (room) {
     for (let t = 0; t < myTargets.length; t++) {
         if (myUnits[myTargets[t].role] === undefined)
             myUnits[myTargets[t].role] = 0;
-        if (myUnits[myTargets[t].role] < myTargets[t].amount) {
+        if (myStarterUnits[myTargets[t].role] === undefined)
+            myStarterUnits[myTargets[t].role] = 0;
+        if (myUnits[myTargets[t].role] < myTargets[t].amount || (myTargets[t].isStarter !== true && myUnits[myTargets[t].role] - myStarterUnits[myTargets[t].role] < myTargets[t].amount)) {
             if (myTargets[t].role === 'builder' || myTargets[t].role === 'upgrader') {
                 room.memory.info.energy.canBuild = true;
                 if ((room.memory.info.energy.fullSpawn > 3 && getStoredEnergy(room) === -1) || getStoredEnergy(room) > myUnits[myTargets[t].role] * 50000 * Math.min(1, (room.controller.level - 4)) || (myUnits[myTargets[t].role] === 0 && myTargets[t].role === 'upgrader')) {
-                    if (createCreep(myTargets[t].body, myTargets[t].role, spawnReady) === ERR_NOT_ENOUGH_ENERGY && (myUnits[myTargets[t].role] === 0 && myTargets[t].role === 'upgrader')){
+                    if (createCreep(myTargets[t].body, myTargets[t].role, spawnReady, myTargets[t].isStarter) === ERR_NOT_ENOUGH_ENERGY && (myUnits[myTargets[t].role] === 0 && myTargets[t].role === 'upgrader')) {
                         room.memory.info.energy.canBuild = false;
                         return;
                     }
@@ -80,7 +90,7 @@ let buildUnits = function (room) {
                 break;
             }
             else {
-                if (createCreep(myTargets[t].body, myTargets[t].role, spawnReady) === ERR_NOT_ENOUGH_ENERGY) {
+                if (createCreep(myTargets[t].body, myTargets[t].role, spawnReady, myTargets[t].isStarter) === ERR_NOT_ENOUGH_ENERGY) {
                     room.memory.info.energy.canBuild = false;
                     return;
                 }
@@ -91,9 +101,12 @@ let buildUnits = function (room) {
     room.memory.info.energy.canBuild = true; // every unit built, build again.
 };
 
-let createCreep  = function (body, role, spawn) {
+let createCreep  = function (body, role, spawn, isStarter) {
     let name = generateName("[" + capitalizeFirstLetter(role) + "]");
-    return spawn.spawnCreep(getBodyFromConfig(body), name, {memory:{role:role}});
+    let params = { memory: { role: role } };
+    if (isStarter)
+        params.memory.isStarter = true;
+    return spawn.spawnCreep(getBodyFromConfig(body), name, params);
 };
 
 function capitalizeFirstLetter(string) {
@@ -126,9 +139,7 @@ let getTargets = function (room, anyUnderAttack) {
     }
     let miningJobs = 0;
     for (let i = 0; i < room.memory.structures.mines.length; i++) {
-        if (level < 2)
-            miningJobs += Math.min(4, room.memory.structures.mines[i].workingPlaces.length + 1);
-        else if (level < 3)
+        if (level < 3)
             miningJobs += Math.min(3, room.memory.structures.mines[i].workingPlaces.length + 1);
         else if (level < 4)
             miningJobs += Math.min(2, room.memory.structures.mines[i].workingPlaces.length + 1);
@@ -164,15 +175,11 @@ let getTargets = function (room, anyUnderAttack) {
     }
 
     let targets = [];
-    targets.push({ role: 'harvester', amount: 1, body: {type: 'worker', availableEnergy: 300, bigInventory: false, noRoads: false} });
-    if (level <= 4)
-        targets.push( { role: 'harvester', amount: 2, body: {type: 'worker', availableEnergy: Math.min(550, room.energyCapacityAvailable), bigInventory: false, noRoads: false} });
-    else
-        targets.push( { role: 'harvester', amount: 2, body: {type: 'worker', availableEnergy: room.energyCapacityAvailable, bigInventory: false, noRoads: false} });
+    targets.push({ role: 'harvester', amount: 2, isStarter: true, body: { type: 'worker', availableEnergy: 300, bigInventory: false, noRoads: false } });
     
-    targets.push({ role: 'upgrader', amount: 1, body: {type: 'worker', availableEnergy: Math.min(400, room.energyCapacityAvailable), bigInventory: true, noRoads: false}});
+    targets.push({ role: 'upgrader', amount: 1, isStarter: true, body: {type: 'worker', availableEnergy: 300, bigInventory: true, noRoads: false}});
     if (anyUnderAttack) {
-        targets.push({ role: 'attacker', amount: 5, body: {type: 'warrior', availableEnergy: room.energyCapacityAvailable, noRoads: false, singleRanged: true} })
+        targets.push({ role: 'attacker', amount: 5, body: { type: 'warrior', availableEnergy: room.energyCapacityAvailable, noRoads: false, singleRanged: true } });
     }
     else {
         if (level > 1)

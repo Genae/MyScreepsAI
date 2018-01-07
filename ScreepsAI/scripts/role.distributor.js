@@ -75,7 +75,7 @@ let roleDistributor = function (creep) {
     let spawns = roomStructures.spawns;
     for (let l = 0; l < creep.room.memory.structures.links.length; l++) {
         let sl = creep.room.memory.structures.links[l];
-        let slObj = Game.getObjectById(sl.link.id);
+        let slObj = Game.getObjectById(sl.obj.id);
         if (sl.type === 'store' && slObj.energy <= 200)
             extensions.push(slObj);
     }
@@ -195,12 +195,10 @@ let doEmptying = function (creep) {
 let doRefilling = function (creep, myStor, isExt) {
     for (let l = 0; l < creep.room.memory.structures.links.length; l++) {
         if (creep.room.memory.structures.links[l].type === 'store') {
-            let link = Game.getObjectById(creep.room.memory.structures.links[l].link.id);
+            let link = Game.getObjectById(creep.room.memory.structures.links[l].obj.id);
             if (link.energy > 500) {
-                if (creep.withdraw(link, RESOURCE_ENERGY, 100) === ERR_NOT_IN_RANGE) {
+                if (creep.withdraw(link, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
                     creep.moveTo(link);
-                } else if (creep.withdraw(link, RESOURCE_ENERGY, 100) === ERR_FULL) {
-                    creep.withdraw(link, RESOURCE_ENERGY);
                 }
                 return;
             }
@@ -224,22 +222,6 @@ let doRefilling = function (creep, myStor, isExt) {
 };
 
 let doStoring = function (creep, myStor) {
-    if (creep.carry.energy === 0) {
-        for (let l = 0; l < creep.room.memory.structures.links.length; l++) {
-            if (creep.room.memory.structures.links[l].type === 'store') {
-                let link = Game.getObjectById(creep.room.memory.structures.links[l].link.id);
-                if (link.energy > 500) {
-                    if (creep.withdraw(link, RESOURCE_ENERGY, 100) === ERR_NOT_IN_RANGE) {
-                        creep.moveTo(link);
-                    } else if (creep.withdraw(link, RESOURCE_ENERGY, 100) === ERR_FULL) {
-                        creep.withdraw(link, RESOURCE_ENERGY);
-                    }
-                    return;
-                }
-            }
-        }
-        let needsMove = true;
-    }
     if (creep.carry.energy > 0) {
         if (creep.transfer(myStor, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
             actionMove.moveTo(creep, myStor.pos, 1);
